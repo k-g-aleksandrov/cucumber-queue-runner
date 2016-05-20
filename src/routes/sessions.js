@@ -14,7 +14,7 @@ this.sessions = {};
  * start new session, return sessionId
  */
 router.get('/start', (req, res) => {
-  var tags = req.params.tags.split(',');
+  var tags = req.query.tags.split(',');
   var newSession = new Session(util.generateGUID(), tags);
   if (!this.sessions) {
     this.sessions = {};
