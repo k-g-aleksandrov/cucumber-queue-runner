@@ -1,0 +1,5 @@
+.idea/
+src/repo/
+node_modules/
+src/public/results/**
+build/

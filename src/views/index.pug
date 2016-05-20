@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    if repositories
+        each repo in repositories.length && repositories.length > 0 ? repositories : [ 'No repositories found in DB' ]
+            h1 #{repo.name}
+    h1 Add repository
+    form(method='post' action='/repositories')
+        span Repository URL:
+        input(type='text' name='repositoryUrl' value='https://github.com/readdle/fluix_automation.git')
+        br
+        span Username:
+        input(type='text' name='repositoryUsername' value='')
+        br
+        span Password:
+        input(type='text' name='repositoryPassword' value='')
+        br
+        button(type=submit) Add Repository
