@@ -13,7 +13,7 @@ this.sessions = {};
 /**
  * start new session, return sessionId
  */
-router.get('/start?tags=', (req, res) => {
+router.get('/start', (req, res) => {
   var tags = req.params.tags.split(',');
   var newSession = new Session(util.generateGUID(), tags);
   if (!this.sessions) {
