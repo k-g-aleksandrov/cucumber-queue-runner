@@ -6,7 +6,7 @@ var util = require('libs/util');
 var fs = require('fs');
 
 class Session {
-  constructor(sessionId) {
+  constructor(sessionId, tags) {
     this.TIMEOUT_SEC = 60;
     this.sessionId = sessionId;
     this.inProgressScenarios = {};
@@ -16,7 +16,7 @@ class Session {
     fs.mkdirSync('public/results/' + this.sessionId);
 
     log.info('Started new session ' + sessionId);
-    Scenario.find({tags: {$in: ['@api']}}, (err, scenarios) => {
+    Scenario.find({tags: {$in: tags}}, (err, scenarios) => {
       log.debug(sessionId + ': List of scenarios to be executed: ');
       for (let scenario of scenarios) {
         log.debug(sessionId + ':    ' + scenario.classpath + ':' + scenario.scenarioLine);

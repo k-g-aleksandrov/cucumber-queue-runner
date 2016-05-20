@@ -1,7 +1,6 @@
 'use strict';
 
 var fs = require('fs');
-var path = require('path');
 
 var gherkin = require('gherkin');
 var Repository = require('libs/mongoose').Repository;
@@ -52,23 +51,55 @@ router.post('/repositories', (req, res) => {
 });
 
 router.get('/features', (req, res) => {
-  util.scanRepository('/Users/kaleksandrov/fluix_automation', (err, results) => {
+  util.scanRepository('/Users/user/.jenkins/jobs/zzz_split_reporter/workspace', (err, results) => {
     if (err) throw err;
-    for (var i = 0; i < results.length; i++) {
-      var parser = new gherkin.Parser();
-      var buf = fs.readFileSync(results[i], 'utf8');
-      var classpath = results[i].split('src/test/resources/')
-        .pop();
-      var gherkinDocument = parser.parse(buf);
+    Scenario.remove({}, function(err) {
+      if (err)
+        log.error(err);
+      for (var i = 0; i < results.length; i++) {
+        var parser = new gherkin.Parser();
+        var buf = fs.readFileSync(results[i], 'utf8');
+        var classpath = results[i].split('src/test/resources/')
+          .pop();
+        var gherkinDocument = parser.parse(buf);
 //      console.log(gherkinDocument);
-      var feature = gherkinDocument.feature;
-      console.log(feature.name);
-      var children = feature.children;
-      for (var j = 0; j < children.length; j++) {
-        var child = children[j];
-        if (child.type === 'ScenarioOutline') {
-          var examples = child.examples[0];
-          for (var k = 0; k < examples.tableBody.length; k++) {
+        var feature = gherkinDocument.feature;
+        console.log(feature.name);
+        var children = feature.children;
+        for (var j = 0; j < children.length; j++) {
+          var child = children[j];
+          if (child.type === 'ScenarioOutline') {
+            var examples = child.examples[0];
+            for (var k = 0; k < examples.tableBody.length; k++) {
+              var tagsList = [];
+              if (child.tags) {
+                for (var tagI = 0; tagI < child.tags.length; tagI++) {
+                  tagsList.push(child.tags[tagI].name);
+                }
+              }
+              var scenario = new Scenario({
+                classpath: classpath,
+                featureName: feature.name,
+                scenarioName: child.name,
+                scenarioLine: examples.tableBody[k].location.line,
+                tags: tagsList
+              });
+              scenario.save(function(err, data) {
+                if (err) {
+                  if (err.message.indexOf('duplicate key') > -1) {
+                    log.debug('Scenario ' + child.name + ' already exists in DB, skipped');
+                  } else {
+                    res.statusCode = 500;
+                    log.error('Internal error(%d): %s', res.statusCode, err.message);
+                    return res.send({error: 'Server error'});
+                  }
+                } else {
+                  log.debug('Saved scenario to DB ' + data);
+                }
+              });
+            }
+
+          } else {
             var tagsList = [];
             if (child.tags) {
               for (var tagI = 0; tagI < child.tags.length; tagI++) {
@@ -79,7 +110,7 @@ router.get('/features', (req, res) => {
               classpath: classpath,
               featureName: feature.name,
               scenarioName: child.name,
-              scenarioLine: examples.tableBody[k].location.line,
+              scenarioLine: child.location.line,
               tags: tagsList
             });
             scenario.save(function(err, data) {
@@ -97,39 +128,12 @@ router.get('/features', (req, res) => {
             });
           }
 
-        } else {
-          var tagsList = [];
-          if (child.tags) {
-            for (var tagI = 0; tagI < child.tags.length; tagI++) {
-              tagsList.push(child.tags[tagI].name);
-            }
-          }
-          var scenario = new Scenario({
-            classpath: classpath,
-            featureName: feature.name,
-            scenarioName: child.name,
-            scenarioLine: child.location.line,
-            tags: tagsList
-          });
-          scenario.save(function(err, data) {
-            if (err) {
-              if (err.message.indexOf('duplicate key') > -1) {
-                log.debug('Scenario ' + child.name + ' already exists in DB, skipped');
-              } else {
-                res.statusCode = 500;
-                log.error('Internal error(%d): %s', res.statusCode, err.message);
-                return res.send({error: 'Server error'});
-              }
-            } else {
-              log.debug('Saved scenario to DB ' + data);
-            }
-          });
+
         }
-
-
       }
-    }
-    res.send(results);
+      res.send(results);
+    });
+
   });
 });
 
