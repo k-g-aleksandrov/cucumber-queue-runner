@@ -2,5 +2,5 @@ extends layout
 
 block content
     each session in sessions
-        a(href='/session/' + session.sessionId + '/info') Session #{session.sessionId}
+        a(href='/sessions/' + session.sessionId + '/info') Session #{session.sessionId}
         br
