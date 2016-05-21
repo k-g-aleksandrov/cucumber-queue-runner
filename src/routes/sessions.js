@@ -50,6 +50,9 @@ router.get('/:sessionId/next', (req, res) => {
   }
 });
 
+/**
+ * post executed scenario report to server
+ */
 router.post('/:sessionId/result', (req, res) => {
   var scenarioId = req.body.id;
   var scenarioReport = req.body.report;
@@ -70,6 +73,9 @@ function extendTimeout(req, res, next) {
   next();
 }
 
+/**
+ * either receive link for reports or get message that session is still in progress
+ */
 router.get('/:sessionId/state', extendTimeout, (req, res) => {
   if (!this.sessions[req.params.sessionId]) {
     res.send('/results/' + req.params.sessionId + '/reports.zip');
@@ -84,6 +90,9 @@ router.get('/:sessionId/state', extendTimeout, (req, res) => {
   }
 });
 
+/**
+ * list available sessions
+ */
 router.get('/list', (req, res) => {
   var responseObject = {};
   if (this.sessions) {
@@ -92,6 +101,9 @@ router.get('/list', (req, res) => {
   res.render('sessions', {sessions: this.sessions});
 });
 
+/**
+ * get current session information
+ */
 router.get('/:sessionId/info', (req, res) => {
   let status = this.sessions[req.params.sessionId].getStatus();
   res.render('session', {status: status});
