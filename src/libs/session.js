@@ -12,23 +12,27 @@ class Session {
     this.inProgressScenarios = {};
     this.doneScenarios = {};
     this.sessionState = Session.NOT_FOUND;
+    this.sessionPath = `public/results/${this.sessionId}`;
 
-    fs.mkdirSync('public/results/' + this.sessionId);
+    fs.mkdirSync(this.sessionPath);
 
     log.info('Started new session ' + sessionId);
     Scenario.find({tags: {$in: tags}}, (err, scenarios) => {
       log.debug(sessionId + ': List of scenarios to be executed: ');
       for (let scenario of scenarios) {
-        log.debug(sessionId + ':    ' + scenario.classpath + ':' + scenario.scenarioLine);
+        log.debug(sessionId + ':    ' + scenario.classpath + ':'
+          + scenario.scenarioLine);
       }
-      log.info(sessionId + ': Number of scenarios to be executed - ' + scenarios.length);
+      log.info(sessionId + ': Number of scenarios to be executed - '
+        + scenarios.length);
       this.scenarios = scenarios;
       this.sessionState = Session.OK;
     });
 
     this.inProgressTracking = setInterval(() => {
       if (!this.inProgressScenarios) {
-        log.debug(sessionId + ': There are no in progress scenarios at this moment');
+        log.debug(sessionId
+          + ': There are no in progress scenarios at this moment');
         return;
       }
       var inProgressScenariosIds = Object.keys(this.inProgressScenarios);
@@ -37,8 +41,8 @@ class Session {
         var inProgressScenario = this.inProgressScenarios[scenarioId];
         var requestDate = inProgressScenario.requestTime;
         if ((Date.now() - requestDate) / 1000 > this.TIMEOUT_SEC) {
-          log.error(sessionId + ': scenario execution were not finished in ' + this.TIMEOUT_SEC +
-            ' seconds. Moving it back to scenarios queue');
+          log.error(sessionId + ': scenario execution were not finished in '
+            + this.TIMEOUT_SEC + ' seconds. Moving it back to scenarios queue');
           this.scenarios.push(inProgressScenario);
           delete this.inProgressScenarios[scenarioId];
         }
@@ -46,10 +50,12 @@ class Session {
     }, 10000);
 
     this.trackSessionState = setInterval(() => {
-      if (this.getScenariosCount(Session.STATE_IN_PROGRESS) + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
+      if (this.getScenariosCount(Session.STATE_IN_PROGRESS)
+        + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
         clearInterval(this.inProgressTracking);
 
-        log.debug(this.sessionId + ': Tests execution done. Preparing reports...');
+        log.debug(this.sessionId
+          + ': Tests execution done. Preparing reports...');
 
         for (let key of Object.keys(this.doneScenarios)) {
           var combinedReport = null;
@@ -57,7 +63,8 @@ class Session {
           var featureReports = this.doneScenarios[key];
           for (let scenario of featureReports) {
             var report = scenario.report[0];
-            log.debug('Added report for scenario ' + report.elements[0].keyword + ': ' + report.elements[0].name);
+            log.debug('Added report for scenario ' + report.elements[0].keyword
+              + ': ' + report.elements[0].name);
             if (!combinedReport) {
               combinedReport = scenario.report;
             } else {
@@ -65,10 +72,10 @@ class Session {
             }
           }
           let filename = key.replace(/\W/g, '');
-          fs.writeFileSync('public/results/' + this.sessionId + '/' + filename +
-            '.json', JSON.stringify(combinedReport, null, 4));
+          fs.writeFileSync(this.sessionPath + '/' + filename
+            + '.json', JSON.stringify(combinedReport, null, 4));
         }
-        util.zipDirectory('public/results/' + this.sessionId, 'public/results/' + this.sessionId + '/reports.zip');
+        util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
         this.sessionState = Session.NOT_FOUND;
         clearInterval(this.trackSessionState);
       }
@@ -80,8 +87,9 @@ class Session {
   }
 
   getStatistics() {
-    return 'In queue - ' + this.getScenariosCount(Session.STATE_IN_QUEUE) + ', in progress - ' +
-      this.getScenariosCount(Session.STATE_IN_PROGRESS) + ', done - ' + this.getScenariosCount(Session.STATE_DONE);
+    return 'In queue - ' + this.getScenariosCount(Session.STATE_IN_QUEUE)
+      + ', in progress - ' + this.getScenariosCount(Session.STATE_IN_PROGRESS)
+      + ', done - ' + this.getScenariosCount(Session.STATE_DONE);
   }
 
   getScenariosCount(state) {
@@ -96,8 +104,9 @@ class Session {
       }
       return doneCount;
     } else {
-      return this.getScenariosCount(Session.STATE_IN_QUEUE) + this.getScenariosCount(Session.STATE_IN_PROGRESS) +
-        this.getScenariosCount(Session.STATE_DONE);
+      return this.getScenariosCount(Session.STATE_IN_QUEUE)
+        + this.getScenariosCount(Session.STATE_IN_PROGRESS)
+        + this.getScenariosCount(Session.STATE_DONE);
     }
   }
 
@@ -134,7 +143,8 @@ class Session {
   getStatus() {
     var status = {queue: [], inProgress: [], done: []};
     for (let queueScenario of this.scenarios) {
-      status.queue.push(queueScenario.classpath + ':' + queueScenario.scenarioLine);
+      status.queue.push(queueScenario.classpath + ':'
+        + queueScenario.scenarioLine);
     }
     return status;
   }
@@ -148,4 +158,5 @@ Session.OK = 'OK';
 Session.NOT_FOUND = 'NOT_FOUND';
 Session.IN_PROGRESS = 'IN_PROGRESS';
 Session.FINALIZATION = 'FINALIZATION';
+
 module.exports = Session;

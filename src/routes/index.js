@@ -87,7 +87,8 @@ router.get('/features', (req, res) => {
               scenario.save(function(err, data) {
                 if (err) {
                   if (err.message.indexOf('duplicate key') > -1) {
-                    log.debug('Scenario ' + child.name + ' already exists in DB, skipped');
+                    log.debug('Scenario ' + child.name
+                      + ' already exists in DB, skipped');
                   } else {
                     res.statusCode = 500;
                     log.error('Internal error(%d): %s', res.statusCode, err.message);
@@ -116,7 +117,8 @@ router.get('/features', (req, res) => {
             scenario.save(function(err, data) {
               if (err) {
                 if (err.message.indexOf('duplicate key') > -1) {
-                  log.debug('Scenario ' + child.name + ' already exists in DB, skipped');
+                  log.debug('Scenario ' + child.name
+                    + ' already exists in DB, skipped');
                 } else {
                   res.statusCode = 500;
                   log.error('Internal error(%d): %s', res.statusCode, err.message);

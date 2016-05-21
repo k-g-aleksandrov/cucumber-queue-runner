@@ -15,7 +15,8 @@ module.exports.generateGUID = function generateGUID() {
       .substring(1);
   }
 
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4()
+    + s4();
 };
 
 module.exports.scanRepository = function scanRepository(dir, done) {

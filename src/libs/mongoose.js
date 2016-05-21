@@ -9,7 +9,8 @@ var dockerAddr = (process.env.MONGO_PORT_27017_TCP_ADDR)
 var dockerPort = (process.env.MONGO_PORT_27017_TCP_PORT)
   ? process.env.MONGO_PORT_27017_TCP_PORT
   : '27017';
-mongoose.connect('mongodb://' + dockerAddr + ':' + dockerPort + '/cucumber-queue-db');
+mongoose.connect('mongodb://' + dockerAddr + ':' + dockerPort
+  + '/cucumber-queue-db');
 var db = mongoose.connection;
 
 db.on('error', (err) => {
