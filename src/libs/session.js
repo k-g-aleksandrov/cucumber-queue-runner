@@ -7,7 +7,7 @@ var fs = require('fs');
 
 class Session {
   constructor(sessionId, tags) {
-    this.TIMEOUT_SEC = 60;
+    this.TIMEOUT_SEC = 600;
     this.sessionId = sessionId;
     this.inProgressScenarios = {};
     this.doneScenarios = {};
