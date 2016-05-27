@@ -68,7 +68,7 @@ class Session {
             if (!combinedReport) {
               combinedReport = scenario.report;
             } else {
-              combinedReport[0].elements.push(report.elements[0]);
+              combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
             }
           }
           let filename = key.replace(/\W/g, '');
