@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 /**
  * Module dependencies.
  */
@@ -8,12 +10,14 @@ var app = require('../app');
 var debug = require('debug')('cucumber-queue-runner:server');
 var http = require('http');
 var log = require('libs/log')(module);
+let config = require('config');
+
 /**
  * Get port from environment and store in Express.
  */
 
-const PORT = 8080;
-app.set('port', PORT);
+let PORT = config.get('port');
+app.set('port', config.get('port'));
 
 log.debug('App will be started on port ' + PORT + ', mode: ' + app.get('env'));
 /**

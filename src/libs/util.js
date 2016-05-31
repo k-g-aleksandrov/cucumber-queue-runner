@@ -2,6 +2,9 @@
 
 var fs = require('fs');
 var log = require('libs/log')(module);
+var Repository = require('libs/mongoose').Repository;
+var gh = require('parse-github-url');
+var Git = require('nodegit');
 
 module.exports.isGitUrl = function isGitUrl(str) {
   var re = /(?:git|ssh|https?|git@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+\.git(?:\/?|\#[\d\w\.\-_]+?)$/;
@@ -18,6 +21,15 @@ module.exports.generateGUID = function generateGUID() {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4()
     + s4();
 };
+
+module.exports.cloneRepository = function cloneRepository(repositoryUrl) {
+  Repository.find({url: repositoryUrl}, (err, repositories) => {
+    for (let repo of repositories) {
+      Git.Clone(repo.url, 'public/repositories/' + gh(repo.url).name)
+        .catch( (err) => { log.error(err); } );
+    }
+  });
+}
 
 module.exports.scanRepository = function scanRepository(dir, done) {
   var results = [];

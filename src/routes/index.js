@@ -12,7 +12,7 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', (req, res) => {
-  Repository.find({}, function(err, repositories) {
+  Repository.find({}, function (err, repositories) {
     if (err) {
       res.statusCode = 500;
       log.error('Internal error(%d): %s', res.statusCode, err.message);
@@ -28,63 +28,71 @@ router.get('/', (req, res) => {
 });
 
 router.post('/repositories', (req, res) => {
-  if (util.isGitUrl(req.body.repositoryUrl)) {
-    var repo = new Repository({
-      url: req.body.repositoryUrl,
-      username: req.body.repositoryUsername,
-      password: req.body.repositoryPassword
-    });
+  Repository.remove({}, (err) => {
+    if (err) log.error(err);
+    if (util.isGitUrl(req.body.repositoryUrl)) {
+      var repo = new Repository({
+        url: req.body.repositoryUrl,
+        username: req.body.repositoryUsername,
+        password: req.body.repositoryPassword
+      });
 
-    repo.save(function(err, data) {
-      if (err) {
-        res.statusCode = 500;
-        log.error('Internal error(%d): %s', res.statusCode, err.message);
-        return res.send({error: 'Server error'});
-      } else {
-        log.debug('Saved repository to DB ' + data);
-        res.redirect('/');
-      }
-    });
-  } else {
-    res.redirect('/');
-  }
+      repo.save(function (err, data) {
+        if (err) {
+          res.statusCode = 500;
+          log.error('Internal error(%d): %s', res.statusCode, err.message);
+          return res.send({error: 'Server error'});
+        } else {
+          log.debug('Saved repository to DB ' + data);
+          util.cloneRepository(req.body.repositoryUrl);
+          res.redirect('/');
+        }
+      });
+    } else {
+      res.redirect('/');
+    }
+  });
 });
 
+
+function saveScenario(classpath, featureName, scenarioName, scenarioLine, tags, callback) {
+  let tagsList = [];
+  if (tags) {
+    for (let tag of tags) {
+      tagsList.push(tag.name);
+    }
+  }
+
+  var scenario = new Scenario({
+    classpath: classpath,
+    featureName: featureName,
+    scenarioName: scenarioName,
+    scenarioLine: scenarioLine,
+    tags: tagsList
+  });
+
+  scenario.save(callback);
+}
+
 router.get('/features', (req, res) => {
-  util.scanRepository('/Users/user/.jenkins/jobs/zzz_split_reporter/workspace', (err, results) => {
+  util.scanRepository('/Users/kaleksandrov/fluix_automation', (err, results) => {
     if (err) throw err;
-    Scenario.remove({}, function(err) {
+
+    Scenario.remove({}, function (err) {
       if (err)
         log.error(err);
-      for (var i = 0; i < results.length; i++) {
+      for (let result of results) {
         var parser = new gherkin.Parser();
-        var buf = fs.readFileSync(results[i], 'utf8');
-        var classpath = results[i].split('src/test/resources/')
-          .pop();
+        var buf = fs.readFileSync(result, 'utf8');
+        var classpath = result.split('src/test/resources/').pop();
         var gherkinDocument = parser.parse(buf);
-//      console.log(gherkinDocument);
         var feature = gherkinDocument.feature;
-        console.log(feature.name);
-        var children = feature.children;
-        for (var j = 0; j < children.length; j++) {
-          var child = children[j];
+        log.info(`Parsing feature ${feature.name}`);
+        for (let child of feature.children) {
           if (child.type === 'ScenarioOutline') {
             var examples = child.examples[0];
-            for (var k = 0; k < examples.tableBody.length; k++) {
-              var tagsList = [];
-              if (child.tags) {
-                for (var tagI = 0; tagI < child.tags.length; tagI++) {
-                  tagsList.push(child.tags[tagI].name);
-                }
-              }
-              var scenario = new Scenario({
-                classpath: classpath,
-                featureName: feature.name,
-                scenarioName: child.name,
-                scenarioLine: examples.tableBody[k].location.line,
-                tags: tagsList
-              });
-              scenario.save(function(err, data) {
+            for (let example of examples.tableBody) {
+              saveScenario(classpath, feature.name, child.name, example.location.line, child.tags, (err, data) => {
                 if (err) {
                   if (err.message.indexOf('duplicate key') > -1) {
                     log.debug('Scenario ' + child.name
@@ -99,22 +107,8 @@ router.get('/features', (req, res) => {
                 }
               });
             }
-
           } else {
-            var tagsList = [];
-            if (child.tags) {
-              for (var tagI = 0; tagI < child.tags.length; tagI++) {
-                tagsList.push(child.tags[tagI].name);
-              }
-            }
-            var scenario = new Scenario({
-              classpath: classpath,
-              featureName: feature.name,
-              scenarioName: child.name,
-              scenarioLine: child.location.line,
-              tags: tagsList
-            });
-            scenario.save(function(err, data) {
+            saveScenario(classpath, feature.name, child.name, child.location.line, child.tags, (err, data) => {
               if (err) {
                 if (err.message.indexOf('duplicate key') > -1) {
                   log.debug('Scenario ' + child.name
@@ -129,13 +123,10 @@ router.get('/features', (req, res) => {
               }
             });
           }
-
-
         }
       }
       res.send(results);
     });
-
   });
 });
 
