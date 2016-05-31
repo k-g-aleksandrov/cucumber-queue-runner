@@ -143,8 +143,17 @@ class Session {
   getStatus() {
     var status = {queue: [], inProgress: [], done: []};
     for (let queueScenario of this.scenarios) {
-      status.queue.push(queueScenario.classpath + ':'
-        + queueScenario.scenarioLine);
+      status.queue.push(`${queueScenario.classpath}:${queueScenario.scenarioLine} (${queueScenario.scenarioName})`);
+    }
+
+    for (let inProgressScenarioId of Object.keys(this.inProgressScenarios)) {
+      let inProgressScenario = this.inProgressScenarios[inProgressScenarioId];
+      status.inProgress.push(`${inProgressScenario.classpath}:${inProgressScenario.scenarioLine} (${inProgressScenario.scenarioName})`);
+    }
+
+    for (let doneScenarioId of Object.keys(this.doneScenarios)) {
+      let doneScenario = this.doneScenarios[doneScenarioId];
+      status.done.push(`${doneScenario.classpath}:${doneScenario.scenarioLine} (${doneScenario.scenarioName})<br/>${doneScenario.report}`);
     }
     return status;
   }

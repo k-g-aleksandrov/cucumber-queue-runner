@@ -75,7 +75,7 @@ function saveScenario(classpath, featureName, scenarioName, scenarioLine, tags, 
 }
 
 router.get('/features', (req, res) => {
-  util.scanRepository('/Users/kaleksandrov/fluix_automation', (err, results) => {
+  util.scanRepository('/Users/user/.jenkins/jobs/zzz_split_reporter/workspace', (err, results) => {
     if (err) throw err;
 
     Scenario.remove({}, function (err) {

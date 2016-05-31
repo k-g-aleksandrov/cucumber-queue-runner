@@ -44,6 +44,10 @@ var FeatureSchema = new Schema({
   scenarios: [{type: Schema.Types.ObjectId, ref: 'Scenario'}]
 });
 
+var MutedTagsSchema = new Schema({
+  tag: String
+});
+
 var ScenarioSchema = new Schema({
   _feature: {type: Number, ref: 'Feature'},
   classpath: String,
@@ -52,6 +56,7 @@ var ScenarioSchema = new Schema({
   scenarioLine: Number,
   tags: Array
 });
+
 ScenarioSchema.index({
   featureName: 1,
   scenarioName: 1,
@@ -62,8 +67,10 @@ var Scenario = mongoose.model('Scenario', ScenarioSchema);
 var Feature = mongoose.model('Feature', FeatureSchema);
 var Project = mongoose.model('Project', ProjectSchema);
 var Repository = mongoose.model('Repository', RepositorySchema);
+var MutedTags = mongoose.model('MutedTags', MutedTagsSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Feature = Feature;
 module.exports.Project = Project;
 module.exports.Repository = Repository;
+module.exports.MutedTags = MutedTags;
