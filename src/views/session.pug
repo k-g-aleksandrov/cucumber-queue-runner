@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    each queue in status.queue
+        p In queue: #{queue}
+    each inProgress in status.inProgress
+        p In progress: #{inProgress}
+    each done in status.done
+        p Done: #{done}

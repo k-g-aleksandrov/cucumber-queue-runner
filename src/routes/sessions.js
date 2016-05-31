@@ -106,7 +106,7 @@ router.get('/list', (req, res) => {
  */
 router.get('/:sessionId/info', (req, res) => {
   let status = this.sessions[req.params.sessionId].getStatus();
-  res.render('sessions', {status: status});
+  res.render('session', {status: status});
 });
 
 module.exports = router;
