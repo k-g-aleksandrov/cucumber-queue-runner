@@ -8,6 +8,8 @@ var Scenario = require('libs/mongoose').Scenario;
 var log = require('libs/log')(module);
 var util = require('libs/util');
 
+let config = require('config');
+
 var express = require('express');
 var router = express.Router();
 
@@ -75,7 +77,7 @@ function saveScenario(classpath, featureName, scenarioName, scenarioLine, tags, 
 }
 
 router.get('/features', (req, res) => {
-  util.scanRepository('/Users/user/.jenkins/jobs/zzz_split_reporter/workspace', (err, results) => {
+  util.scanRepository(config.get('repositoryPath'), (err, results) => {
     if (err) throw err;
 
     Scenario.remove({}, function (err) {
