@@ -44,8 +44,14 @@ var FeatureSchema = new Schema({
   scenarios: [{type: Schema.Types.ObjectId, ref: 'Scenario'}]
 });
 
-var MutedTagsSchema = new Schema({
-  tag: String
+var TagExecutionResultSchema = new Schema({
+  tag: { type: String, unique: true },
+  executions: [
+    {
+      result: String,
+      time : { type : Date, default: Date.now }
+    }
+  ]
 });
 
 var ScenarioSchema = new Schema({
@@ -67,10 +73,10 @@ var Scenario = mongoose.model('Scenario', ScenarioSchema);
 var Feature = mongoose.model('Feature', FeatureSchema);
 var Project = mongoose.model('Project', ProjectSchema);
 var Repository = mongoose.model('Repository', RepositorySchema);
-var MutedTags = mongoose.model('MutedTags', MutedTagsSchema);
+var TagExecutionResult = mongoose.model('TagExecutionResult', TagExecutionResultSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Feature = Feature;
 module.exports.Project = Project;
 module.exports.Repository = Repository;
-module.exports.MutedTags = MutedTags;
+module.exports.TagExecutionResult = TagExecutionResult;

@@ -5,6 +5,8 @@ var log = require('libs/log')(module);
 var util = require('libs/util');
 var fs = require('fs');
 
+var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
+
 class Session {
   constructor(sessionId, tags) {
     this.TIMEOUT_SEC = 600;
@@ -136,6 +138,20 @@ class Session {
     return result;
   }
 
+  writeTagsExecutionResultToDb(scenarioTags, result) {
+    for (let tag of scenarioTags) {
+      TagExecutionResult.update(
+        {tag: tag},
+        {$push: {'executions': {result: result}}},
+        {safe: true, upsert: true},
+        (err) => {
+          if (err) throw err;
+          log.info('Successfully added execution for tag ' + tag);
+        }
+      );
+    }
+  }
+
   saveScenarioResult(scenarioId, scenarioReport, cb) {
     log.debug('Saving scenario ' + scenarioId + ' result');
     if (this.inProgressScenarios[scenarioId] == null) {
@@ -148,6 +164,7 @@ class Session {
       var sc = this.inProgressScenarios[scenarioId];
       sc.report = scenarioReport;
       sc.result = this.getScenarioState(scenarioReport);
+      this.writeTagsExecutionResultToDb(sc.tags, sc.result);
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
       delete this.inProgressScenarios[scenarioId];
       cb();
