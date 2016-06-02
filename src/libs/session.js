@@ -119,6 +119,23 @@ class Session {
     return next;
   }
 
+  getScenarioState(report) {
+    let result = 'passed';
+    for (let reportEntry of report) {
+      for (let element of reportEntry.elements) {
+        for (let step of element.steps) {
+          if (step.result.status === 'failed') {
+            result = 'failed';
+            break;
+          } else if (step.result.status === 'undefined') {
+            result = 'undefined';
+          }
+        }
+      }
+    }
+    return result;
+  }
+
   saveScenarioResult(scenarioId, scenarioReport, cb) {
     log.debug('Saving scenario ' + scenarioId + ' result');
     if (this.inProgressScenarios[scenarioId] == null) {
@@ -130,6 +147,7 @@ class Session {
       }
       var sc = this.inProgressScenarios[scenarioId];
       sc.report = scenarioReport;
+      sc.result = this.getScenarioState(scenarioReport);
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
       delete this.inProgressScenarios[scenarioId];
       cb();
@@ -152,8 +170,10 @@ class Session {
     }
 
     for (let doneScenarioId of Object.keys(this.doneScenarios)) {
-      let doneScenario = this.doneScenarios[doneScenarioId];
-      status.done.push(`${doneScenario.classpath}:${doneScenario.scenarioLine} (${doneScenario.scenarioName})<br/>${doneScenario.report}`);
+      let feature = this.doneScenarios[doneScenarioId];
+      for (let scenario of feature) {
+        status.done.push(`${scenario.classpath}:${scenario.scenarioLine} (${scenario.scenarioName})<br/>${scenario.result}`);
+      }
     }
     return status;
   }
