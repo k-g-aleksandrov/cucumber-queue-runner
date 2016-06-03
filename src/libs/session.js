@@ -8,7 +8,7 @@ var fs = require('fs');
 var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 
 class Session {
-  constructor(sessionId, tags) {
+  constructor(sessionId, tags, mode) {
     this.TIMEOUT_SEC = 600;
     this.sessionId = sessionId;
     this.inProgressScenarios = {};
@@ -18,18 +18,52 @@ class Session {
 
     fs.mkdirSync(this.sessionPath);
 
-    log.info('Started new session ' + sessionId);
-    Scenario.find({tags: {$in: tags}}, (err, scenarios) => {
-      log.debug(sessionId + ': List of scenarios to be executed: ');
-      for (let scenario of scenarios) {
-        log.debug(sessionId + ':    ' + scenario.classpath + ':'
-          + scenario.scenarioLine);
-      }
-      log.info(sessionId + ': Number of scenarios to be executed - '
-        + scenarios.length);
-      this.scenarios = scenarios;
-      this.sessionState = Session.OK;
-    });
+    let filter = {tags: {$in: tags}};
+    if (mode === Session.MODE_FAILED) {
+      TagExecutionResult.find({}, (err, foundTags) => {
+        if (err) throw err;
+        let failedTags = [];
+        for (let tag of foundTags) {
+          if (!tag.tag.startsWith('@id')) continue;
+          if (!tag.reviewed) continue;
+          let execution = tag.executions[tag.executions.length - 1];
+          if (execution.result === 'failed') {
+            failedTags.push(tag.tag);
+          }
+        }
+        filter = {tags: {$in: failedTags}};
+        this.startSessionCallback(this.sessionId, filter);
+      });
+    } else if (mode === Session.MODE_DAILY) {
+      TagExecutionResult.find({}, (err, foundTags) => {
+        if (err) throw err;
+        let passedTags = [];
+        for (let tag of foundTags) {
+          if (!tag.tag.startsWith('@id')) continue;
+          if (!tag.reviewed) continue;
+          let execution = tag.executions[tag.executions.length - 1];
+          if (execution.result === 'passed') {
+            passedTags.push(tag.tag);
+          }
+        }
+        filter = {tags: {$in: passedTags}};
+        this.startSessionCallback(this.sessionId, filter);
+      });
+    } else if (mode === Session.MODE_DEVELOPMENT) {
+      TagExecutionResult.find({}, (err, foundTags) => {
+        if (err) throw err;
+        let noRunTags = [];
+        for (let tag of foundTags) {
+          if (!tag.tag.startsWith('@id')) continue;
+          if (!tag.reviewed) continue;
+          noRunTags.push(tag.tag);
+        }
+        filter = {tags: {$nin : noRunTags, $in : tags }};
+        this.startSessionCallback(this.sessionId, filter);
+      });
+    } else {
+      this.startSessionCallback(this.sessionId, filter);
+    }
 
     this.inProgressTracking = setInterval(() => {
       if (!this.inProgressScenarios) {
@@ -52,6 +86,13 @@ class Session {
     }, 10000);
 
     this.trackSessionState = setInterval(() => {
+      if (this.getScenariosCount(Session.STATE_IN_PROGRESS) +
+        this.getScenariosCount(Session.STATE_IN_QUEUE) +
+      this.getScenariosCount(Session.STATE_DONE) == 0) {
+        clearInterval(this.inProgressTracking);
+        return;
+      }
+
       if (this.getScenariosCount(Session.STATE_IN_PROGRESS)
         + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
         clearInterval(this.inProgressTracking);
@@ -84,6 +125,21 @@ class Session {
     }, 10000);
   }
 
+  startSessionCallback(sessionId, filter) {
+    log.info('Started new session ' + sessionId);
+    Scenario.find(filter, (err, scenarios) => {
+      log.debug(sessionId + ': List of scenarios to be executed: ');
+      for (let scenario of scenarios) {
+        log.debug(sessionId + ':    ' + scenario.classpath + ':'
+          + scenario.scenarioLine);
+      }
+      log.info(sessionId + ': Number of scenarios to be executed - '
+        + scenarios.length);
+      this.scenarios = scenarios;
+      this.sessionState = Session.OK;
+    });
+  }
+
   getSessionId() {
     return this.sessionId;
   }
@@ -96,7 +152,11 @@ class Session {
 
   getScenariosCount(state) {
     if (Session.STATE_IN_QUEUE === state) {
-      return this.scenarios.length;
+      if (this.scenarios) {
+        return this.scenarios.length;
+      } else {
+        return 0;
+      }
     } else if (Session.STATE_IN_PROGRESS === state) {
       return Object.keys(this.inProgressScenarios).length;
     } else if (Session.STATE_DONE === state) {
@@ -147,9 +207,43 @@ class Session {
         (err) => {
           if (err) throw err;
           log.info('Successfully added execution for tag ' + tag);
+          this.updateTagDevelopmentStatus(tag);
         }
       );
     }
+  }
+
+  updateTagDevelopmentStatus(tag) {
+    log.debug('Checking current state for tag ' + tag);
+    TagExecutionResult.find({tag: tag}, (err, tags) => {
+      for (let t of tags) {
+        if (t.reviewed) continue;
+        let maxPassedSequence = 0;
+        let currentPassedSequence = 0;
+        for (let execution of t.executions) {
+          if (execution.result === 'passed') {
+            currentPassedSequence++;
+          } else {
+            maxPassedSequence = (maxPassedSequence < currentPassedSequence) ? currentPassedSequence : maxPassedSequence;
+            currentPassedSequence = 0;
+          }
+        }
+        maxPassedSequence = (maxPassedSequence < currentPassedSequence) ? currentPassedSequence : maxPassedSequence;
+        if (maxPassedSequence >= 5) {
+          log.debug('Updating tag state to reviewed ' + tag);
+          TagExecutionResult.update(
+            {tag: tag},
+            {$set: {reviewed: true}},
+            {upsert: true},
+            (err) => {
+              if (err) throw err;
+            }
+          );
+        } else {
+          log.debug('Tag still in development mode ' + tag);
+        }
+      }
+    });
   }
 
   saveScenarioResult(scenarioId, scenarioReport, cb) {
@@ -204,5 +298,10 @@ Session.OK = 'OK';
 Session.NOT_FOUND = 'NOT_FOUND';
 Session.IN_PROGRESS = 'IN_PROGRESS';
 Session.FINALIZATION = 'FINALIZATION';
+
+Session.MODE_FULL_RUN = 'full';
+Session.MODE_DEVELOPMENT = 'dev';
+Session.MODE_FAILED = 'failed';
+Session.MODE_DAILY = 'daily';
 
 module.exports = Session;

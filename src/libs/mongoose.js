@@ -51,7 +51,8 @@ var TagExecutionResultSchema = new Schema({
       result: String,
       time : { type : Date, default: Date.now }
     }
-  ]
+  ],
+  reviewed: { type : Boolean, 'default': false }
 });
 
 var ScenarioSchema = new Schema({
