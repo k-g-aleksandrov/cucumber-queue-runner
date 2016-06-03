@@ -1,9 +1,140 @@
-extends layout
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script.
+            window.onload = function () {
+                CanvasJS.addColorSet("resultsColorSet",
+                        [
+                            "#8AF",
+                            "#F5F28F",
+                            "#92DD96",
+                            "#F2928C"
+                        ]);
+                var chart = new CanvasJS.Chart("chartContainer",
+                        {
+                            colorSet: "resultsColorSet",
+                            title: {
+                                text: "Execution State",
+                                fontFamily: "Impact",
+                                fontWeight: "normal"
+                            },
 
-block content
-    each queue in status.queue
-        p In queue: #{queue}
-    each inProgress in status.inProgress
-        p In progress: #{inProgress}
-    each done in status.done
-        p Done: #{done}
+                            legend: {
+                                verticalAlign: "bottom",
+                                horizontalAlign: "center"
+                            },
+                            data: [
+                                {
+                                    //startAngle: 45,
+                                    indexLabelFontSize: 20,
+                                    indexLabelFontFamily: "Garamond",
+                                    indexLabelFontColor: "darkgrey",
+                                    indexLabelLineColor: "darkgrey",
+                                    indexLabelPlacement: "outside",
+                                    type: "doughnut",
+                                    showInLegend: true,
+                                    dataPoints: [
+                                        {y: #{status.queue.length}, legendText: "In Queue #{status.queue.length}", indexLabel: "In Queue #{status.queue.length}"},
+                                        {y: #{status.inProgress.length}, legendText: "In Progress #{status.inProgress.length}", indexLabel: "In Progress #{status.inProgress.length}"},
+                                        {y: #{status.passed.length}, legendText: "Passed #{status.passed.length}", indexLabel: "Passed #{status.passed.length}"},
+                                        {y: #{status.failed.length}, legendText: "Failed #{status.failed.length}", indexLabel: "Failed #{status.failed.length}"}
+                                    ]
+                                }
+                            ]
+                        });
+
+                chart.render();
+            }
+        script(src='/javascripts/canvasjs.min.js')
+        script.
+            function openSelectedTab(evt, cityName) {
+                // Declare all variables
+                var i, tabcontent, tablinks;
+
+                // Get all elements with class="tabcontent" and hide them
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+
+                // Get all elements with class="tablinks" and remove the class "active"
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+
+                // Show the current tab, and add an "active" class to the link that opened the tab
+                document.getElementById(cityName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+        style.
+            /* Style the list */
+            ul.tab {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                border: 1px solid #ccc;
+                background-color: #f1f1f1;
+            }
+
+            /* Float the list items side by side */
+            ul.tab li {
+                float: left;
+            }
+
+            /* Style the links inside the list items */
+            ul.tab li a {
+                display: inline-block;
+                color: black;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+                transition: 0.3s;
+                font-size: 17px;
+            }
+
+            /* Change background color of links on hover */
+            ul.tab li a:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            ul.tab li a:focus, .active {
+                background-color: #ccc;
+            }
+
+            /* Style the tab content */
+            .tabcontent {
+                display: none;
+                padding: 6px 12px;
+                border: 1px solid #ccc;
+                border-top: none;
+            }
+            .result-passed {
+                background-color: #92DD96;
+            }
+            .result-failed {
+                background-color: #F2928C;
+            }
+    body
+        div#chartContainer(style='height: 300px; width: 100%')
+        br
+        ul.tab
+            li
+                a.tablinks(href='#' onclick="openSelectedTab(event, 'in_queue')") In Queue
+                a.tablinks(href='#' onclick="openSelectedTab(event, 'in_progress')") In Progress
+                a.tablinks(href='#' onclick="openSelectedTab(event, 'done')") Done
+
+        div.tabcontent#in_queue
+            each queue in status.queue
+                p #{queue.scenarioName} (#{queue.classpath}:#{queue.scenarioLine})
+        div.tabcontent#in_progress
+            each inProgress in status.inProgress
+                p #{inProgress.scenarioName} (#{inProgress.classpath}:#{inProgress.scenarioLine})
+        div.tabcontent#done
+            each done in status.done
+                p(class='result-'+done.result) #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+

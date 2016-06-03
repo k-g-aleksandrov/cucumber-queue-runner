@@ -202,7 +202,14 @@ class Session {
     for (let tag of scenarioTags) {
       TagExecutionResult.update(
         {tag: tag},
-        {$push: {'executions': {result: result}}},
+        {
+          $push: {
+            'executions': {
+              $each: [{result: result}],
+              $slice: -10
+            }
+          }
+        },
         {safe: true, upsert: true},
         (err) => {
           if (err) throw err;
@@ -270,20 +277,48 @@ class Session {
   }
 
   getStatus() {
-    var status = {queue: [], inProgress: [], done: []};
+    var status = {queue: [], inProgress: [], done: [], passed: [], failed: []};
     for (let queueScenario of this.scenarios) {
-      status.queue.push(`${queueScenario.classpath}:${queueScenario.scenarioLine} (${queueScenario.scenarioName})`);
+      status.queue.push({
+        classpath: queueScenario.classpath,
+        scenarioLine: queueScenario.scenarioLine,
+        scenarioName: queueScenario.scenarioName
+      });
     }
 
     for (let inProgressScenarioId of Object.keys(this.inProgressScenarios)) {
       let inProgressScenario = this.inProgressScenarios[inProgressScenarioId];
-      status.inProgress.push(`${inProgressScenario.classpath}:${inProgressScenario.scenarioLine} (${inProgressScenario.scenarioName})`);
+      status.inProgress.push({
+        classpath: inProgressScenario.classpath,
+        scenarioLine: inProgressScenario.scenarioLine,
+        scenarioName: inProgressScenario.scenarioName
+      });
     }
 
     for (let doneScenarioId of Object.keys(this.doneScenarios)) {
       let feature = this.doneScenarios[doneScenarioId];
       for (let scenario of feature) {
-        status.done.push(`${scenario.classpath}:${scenario.scenarioLine} (${scenario.scenarioName})<br/>${scenario.result}`);
+        status.done.push({
+          classpath: scenario.classpath,
+          scenarioLine: scenario.scenarioLine,
+          scenarioName: scenario.scenarioName,
+          result: scenario.result
+        });
+        if (scenario.result === 'failed') {
+          status.failed.push({
+            classpath: scenario.classpath,
+            scenarioLine: scenario.scenarioLine,
+            scenarioName: scenario.scenarioName,
+            result: scenario.result
+          });
+        } else {
+          status.passed.push({
+            classpath: scenario.classpath,
+            scenarioLine: scenario.scenarioLine,
+            scenarioName: scenario.scenarioName,
+            result: scenario.result
+          });
+        }
       }
     }
     return status;
