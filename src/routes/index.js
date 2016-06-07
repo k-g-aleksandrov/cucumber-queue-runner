@@ -5,6 +5,7 @@ var fs = require('fs');
 var gherkin = require('gherkin');
 var Repository = require('libs/mongoose').Repository;
 var Scenario = require('libs/mongoose').Scenario;
+var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 var log = require('libs/log')(module);
 var util = require('libs/util');
 
@@ -132,4 +133,23 @@ router.get('/features', (req, res) => {
   });
 });
 
+router.get('/tags', (req, res) => {
+  TagExecutionResult.find({}, (err, tags) => {
+    let responseObject = {development: [], daily: [], muted: []};
+    for (let tagEntry of tags) {
+      let nextTag = {tag: tagEntry.tag, executions: [], scenarios: []};
+      for (let exec of tagEntry.executions) {
+        nextTag.executions.push(exec.result);
+      }
+      if (!tagEntry.reviewed) {
+        responseObject.development.push(nextTag);
+      } else if (nextTag.executions[nextTag.executions.length - 1] === 'failed') {
+        responseObject.muted.push(nextTag);
+      } else {
+        responseObject.daily.push(nextTag);
+      }
+    }
+    res.send(responseObject);
+  });
+});
 module.exports = router;
