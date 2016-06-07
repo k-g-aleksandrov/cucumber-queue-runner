@@ -69,7 +69,7 @@ router.post('/:sessionId/result', (req, res) => {
 });
 
 function extendTimeout(req, res, next) {
-  res.setTimeout(480000, function() { /* Handle timeout */
+  res.setTimeout(480000, function () { /* Handle timeout */
   });
   next();
 }

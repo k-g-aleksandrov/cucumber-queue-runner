@@ -24,10 +24,8 @@ db.once('open', () => {
 var Schema = mongoose.Schema;
 
 var RepositorySchema = new Schema({
-  url: {type: String, index: {unique: true}},
+  url: {type: String, unique: true },
   name: String,
-  username: String,
-  password: String,
   projects: [{type: Schema.Types.ObjectId, ref: 'Project'}]
 });
 
@@ -45,14 +43,14 @@ var FeatureSchema = new Schema({
 });
 
 var TagExecutionResultSchema = new Schema({
-  tag: { type: String, unique: true },
+  tag: {type: String, unique: true},
   executions: [
     {
       result: String,
-      time : { type : Date, default: Date.now }
+      time: {type: Date, default: Date.now}
     }
   ],
-  reviewed: { type : Boolean, 'default': false }
+  reviewed: {type: Boolean, 'default': false}
 });
 
 var ScenarioSchema = new Schema({

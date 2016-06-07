@@ -22,27 +22,45 @@ module.exports.generateGUID = function generateGUID() {
     + s4();
 };
 
-module.exports.cloneRepository = function cloneRepository(repositoryUrl) {
+module.exports.cloneRepository = function cloneRepository(repositoryUrl, user, pass) {
   Repository.find({url: repositoryUrl}, (err, repositories) => {
     for (let repo of repositories) {
-      Git.Clone(repo.url, 'public/repositories/' + gh(repo.url).name)
-        .catch( (err) => { log.error(err); } );
+      let cloneOptions = {};
+      cloneOptions.fetchOpts = {
+        callbacks: {
+          certificateCheck: function () {
+            return 1;
+          },
+          credentials: function () {
+            return Git.Cred.userpassPlaintextNew(user, pass);
+          }
+        }
+      };
+      let localPath = 'public/repositories/' + gh(repo.url).name;
+      let cloneRepository = Git.Clone(repo.url, localPath, cloneOptions);
+      let errorAndAttemptOpen = function () {
+        return Git.Repository.open(localPath);
+      };
+      cloneRepository.catch(errorAndAttemptOpen)
+        .then((repository) => {
+          log.info('is the repository bare? %s', Boolean(repository.isBare()));
+        });
     }
   });
-}
+};
 
 module.exports.scanRepository = function scanRepository(dir, done) {
   var results = [];
-  fs.readdir(dir, function(err, list) {
+  fs.readdir(dir, function (err, list) {
     if (err) return done(err);
     var i = 0;
     (function next() {
       var file = list[i++];
       if (!file) return done(null, results);
       file = dir + '/' + file;
-      fs.stat(file, function(err, stat) {
+      fs.stat(file, function (err, stat) {
         if (stat && stat.isDirectory()) {
-          scanRepository(file, function(err, res) {
+          scanRepository(file, function (err, res) {
             results = results.concat(res);
             next();
           });
@@ -57,7 +75,7 @@ module.exports.scanRepository = function scanRepository(dir, done) {
     })();
   });
 };
-module.exports.removeDirectory = function(dirPath, removeSelf) {
+module.exports.removeDirectory = function (dirPath, removeSelf) {
   if (removeSelf === undefined)
     removeSelf = true;
   try {
@@ -79,7 +97,7 @@ module.exports.removeDirectory = function(dirPath, removeSelf) {
     fs.rmdirSync(dirPath);
 };
 
-module.exports.zipDirectory = function(dir, name) {
+module.exports.zipDirectory = function (dir, name) {
   var execFileSync = require('child_process').execFileSync;
 
   execFileSync('zip', ['-r', '-j', name, dir]);

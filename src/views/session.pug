@@ -36,10 +36,26 @@ html
                                     type: "doughnut",
                                     showInLegend: true,
                                     dataPoints: [
-                                        {y: #{status.queue.length}, legendText: "In Queue #{status.queue.length}", indexLabel: "In Queue #{status.queue.length}"},
-                                        {y: #{status.inProgress.length}, legendText: "In Progress #{status.inProgress.length}", indexLabel: "In Progress #{status.inProgress.length}"},
-                                        {y: #{status.passed.length}, legendText: "Passed #{status.passed.length}", indexLabel: "Passed #{status.passed.length}"},
-                                        {y: #{status.failed.length}, legendText: "Failed #{status.failed.length}", indexLabel: "Failed #{status.failed.length}"}
+                                        {
+                                            y: #{status.queue.length},
+                                            legendText: "In Queue #{status.queue.length}",
+                                            indexLabel: "In Queue #{status.queue.length}"
+                                        },
+                                        {
+                                            y: #{status.inProgress.length},
+                                            legendText: "In Progress #{status.inProgress.length}",
+                                            indexLabel: "In Progress #{status.inProgress.length}"
+                                        },
+                                        {
+                                            y: #{status.passed.length},
+                                            legendText: "Passed #{status.passed.length}",
+                                            indexLabel: "Passed #{status.passed.length}"
+                                        },
+                                        {
+                                            y: #{status.failed.length},
+                                            legendText: "Failed #{status.failed.length}",
+                                            indexLabel: "Failed #{status.failed.length}"
+                                        }
                                     ]
                                 }
                             ]
@@ -113,13 +129,16 @@ html
                 border: 1px solid #ccc;
                 border-top: none;
             }
+
             p {
                 padding: 5px;
                 margin: 0;
             }
+
             .result-passed {
                 background-color: #92DD96;
             }
+
             .result-failed {
                 background-color: #F2928C;
             }
@@ -140,5 +159,5 @@ html
                 p #{inProgress.scenarioName} (#{inProgress.classpath}:#{inProgress.scenarioLine})
         div.tabcontent#done
             each done in status.done
-                p(class='result-'+done.result) #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+                p(class='result-' + done.result) #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
 

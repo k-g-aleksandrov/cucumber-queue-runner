@@ -58,7 +58,7 @@ class Session {
           if (!tag.reviewed) continue;
           noRunTags.push(tag.tag);
         }
-        filter = {tags: {$nin : noRunTags, $in : tags }};
+        filter = {tags: {$nin: noRunTags, $in: tags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else {
@@ -88,7 +88,7 @@ class Session {
     this.trackSessionState = setInterval(() => {
       if (this.getScenariosCount(Session.STATE_IN_PROGRESS) +
         this.getScenariosCount(Session.STATE_IN_QUEUE) +
-      this.getScenariosCount(Session.STATE_DONE) == 0) {
+        this.getScenariosCount(Session.STATE_DONE) == 0) {
         clearInterval(this.inProgressTracking);
         return;
       }

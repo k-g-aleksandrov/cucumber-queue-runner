@@ -30,16 +30,24 @@ router.get('/', (req, res) => {
   });
 });
 
+router.get('/repositories', (req, res) => {
+  Repository.find({}, (err, repositories) => {
+    if (err) log.error(err);
+    let result = [];
+    for (let repo of repositories) {
+      result.push(repo.url);
+    }
+    res.render('repositories', {repositories: result});
+  });
+});
+
 router.post('/repositories', (req, res) => {
   Repository.remove({}, (err) => {
     if (err) log.error(err);
     if (util.isGitUrl(req.body.repositoryUrl)) {
       var repo = new Repository({
-        url: req.body.repositoryUrl,
-        username: req.body.repositoryUsername,
-        password: req.body.repositoryPassword
+        url: req.body.repositoryUrl
       });
-
       repo.save(function (err, data) {
         if (err) {
           res.statusCode = 500;
@@ -47,7 +55,7 @@ router.post('/repositories', (req, res) => {
           return res.send({error: 'Server error'});
         } else {
           log.debug('Saved repository to DB ' + data);
-          util.cloneRepository(req.body.repositoryUrl);
+          util.cloneRepository(req.body.repositoryUrl, req.body.repositoryUsername, req.body.repositoryPassword);
           res.redirect('/');
         }
       });
