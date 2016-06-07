@@ -35,14 +35,19 @@ class Session {
         this.startSessionCallback(this.sessionId, filter);
       });
     } else if (mode === Session.MODE_DAILY) {
+      log.debug('Daily mode starting');
       TagExecutionResult.find({}, (err, foundTags) => {
         if (err) throw err;
         let passedTags = [];
         for (let tag of foundTags) {
           if (!tag.tag.startsWith('@id')) continue;
-          if (!tag.reviewed) continue;
+          if (!tag.reviewed) {
+            log.debug('Tag ' + tag.tag + ' is in development. Skipped');
+            continue;
+          }
           let execution = tag.executions[tag.executions.length - 1];
           if (execution.result === 'passed') {
+            log.debug('Found tag ' + tag.tag + ', adding it to scope');
             passedTags.push(tag.tag);
           }
         }

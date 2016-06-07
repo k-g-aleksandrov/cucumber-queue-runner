@@ -113,8 +113,6 @@ router.get('/features', (req, res) => {
                     log.error('Internal error(%d): %s', res.statusCode, err.message);
                     return res.send({error: 'Server error'});
                   }
-                } else {
-                  log.debug('Saved scenario to DB ' + data);
                 }
               });
             }
@@ -129,8 +127,6 @@ router.get('/features', (req, res) => {
                   log.error('Internal error(%d): %s', res.statusCode, err.message);
                   return res.send({error: 'Server error'});
                 }
-              } else {
-                log.debug('Saved scenario to DB ' + data);
               }
             });
           }
