@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    h1 In Development
+    each dev in development
+        span #{dev.tag}&nbsp;&nbsp;&nbsp;
+            each run in dev.executions
+                if run == 'passed'
+                    span(style='color: green;') &#x25cf;
+                else
+                    span(style='color: red;') &#x25cf;
+        br
+    h1 Daily
+    each day in daily
+        span #{day.tag}&nbsp;&nbsp;&nbsp;
+            each run in day.executions
+                if run == 'passed'
+                    span(style='color: green;') &#x25cf;
+                else
+                    span(style='color: red;') &#x25cf;
+        br
+    h1 Muted
+    each mute in muted
+        span #{mute.tag}&nbsp;&nbsp;&nbsp;
+            each run in mute.executions
+                if run == 'passed'
+                    span(style='color: green;') &#x25cf;
+                else
+                    span(style='color: red;') &#x25cf;
+        br

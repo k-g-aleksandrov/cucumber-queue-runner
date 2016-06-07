@@ -137,6 +137,7 @@ router.get('/tags', (req, res) => {
   TagExecutionResult.find({}, (err, tags) => {
     let responseObject = {development: [], daily: [], muted: []};
     for (let tagEntry of tags) {
+      if (!tagEntry.tag.startsWith('@id')) continue;
       let nextTag = {tag: tagEntry.tag, executions: [], scenarios: []};
       for (let exec of tagEntry.executions) {
         nextTag.executions.push(exec.result);
@@ -149,7 +150,7 @@ router.get('/tags', (req, res) => {
         responseObject.daily.push(nextTag);
       }
     }
-    res.send(responseObject);
+    res.render('tags', responseObject);
   });
 });
 module.exports = router;
