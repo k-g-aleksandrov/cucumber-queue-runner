@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    h2 In Development
+    h2 In Development (#{development.length})
     div.container-fluid
         each dev in development
             div.row
@@ -12,7 +12,7 @@ block content
                             span(style='color: green;') &#x25cf;
                         else
                             span(style='color: red;') &#x25cf;
-    h2 Daily
+    h2 Daily (#{daily.length})
     div.container-fluid
         each day in daily
             div.row
@@ -23,7 +23,7 @@ block content
                             span(style='color: green;') &#x25cf;
                         else
                             span(style='color: red;') &#x25cf;
-    h2 Muted
+    h2 Muted (#{muted.length})
     div.container-fluid
         each mute in muted
             div.row
