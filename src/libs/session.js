@@ -95,6 +95,9 @@ class Session {
         this.getScenariosCount(Session.STATE_IN_QUEUE) +
         this.getScenariosCount(Session.STATE_DONE) == 0) {
         clearInterval(this.inProgressTracking);
+        fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
+        util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
+        this.sessionState = Session.NOT_FOUND;
         return;
       }
 
