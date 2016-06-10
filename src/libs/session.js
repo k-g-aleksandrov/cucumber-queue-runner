@@ -9,7 +9,7 @@ var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 
 class Session {
   constructor(sessionId, tags, mode) {
-    this.TIMEOUT_SEC = 600;
+    this.TIMEOUT_SEC = 1800;
     this.sessionId = sessionId;
     this.inProgressScenarios = {};
     this.doneScenarios = {};
