@@ -12,6 +12,7 @@ block content
                             span(style='color: green;') &#x25cf;
                         else
                             span(style='color: red;') &#x25cf;
+                div.col-md-9 #{dev.scenarios}
     h2 Daily (#{daily.length})
     div.container-fluid
         each day in daily
@@ -23,6 +24,7 @@ block content
                             span(style='color: green;') &#x25cf;
                         else
                             span(style='color: red;') &#x25cf;
+                div.col-md-9 #{day.scenarios}
     h2 Muted (#{muted.length})
     div.container-fluid
         each mute in muted
@@ -34,3 +36,4 @@ block content
                             span(style='color: green;') &#x25cf;
                         else
                             span(style='color: red;') &#x25cf;
+                div.col-md-9 #{mute.scenarios}
