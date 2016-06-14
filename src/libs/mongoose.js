@@ -55,6 +55,7 @@ var TagExecutionResultSchema = new Schema({
 
 var ScenarioSchema = new Schema({
   _feature: {type: Number, ref: 'Feature'},
+  project: String,
   classpath: String,
   featureName: String,
   scenarioName: String,

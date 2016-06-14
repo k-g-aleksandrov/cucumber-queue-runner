@@ -66,7 +66,7 @@ router.post('/repositories', (req, res) => {
 });
 
 
-function saveScenario(classpath, featureName, scenarioName, scenarioLine, tags, callback) {
+function saveScenario(project, classpath, featureName, scenarioName, scenarioLine, tags, callback) {
   let tagsList = [];
   if (tags) {
     for (let tag of tags) {
@@ -75,6 +75,7 @@ function saveScenario(classpath, featureName, scenarioName, scenarioLine, tags, 
   }
 
   var scenario = new Scenario({
+    project: project,
     classpath: classpath,
     featureName: featureName,
     scenarioName: scenarioName,
@@ -95,7 +96,10 @@ router.get('/features', (req, res) => {
       for (let result of results) {
         var parser = new gherkin.Parser();
         var buf = fs.readFileSync(result, 'utf8');
-        var classpath = result.split('src/test/resources/').pop();
+        let parts = result.split('src/test/resources/');
+        var classpath = parts.pop();
+        var fullProjectPath = parts.pop();
+        let project = fullProjectPath.split('/')[fullProjectPath.split('/').length-2];
         var gherkinDocument = parser.parse(buf);
         var feature = gherkinDocument.feature;
         log.info(`Parsing feature ${feature.name}`);
@@ -103,7 +107,7 @@ router.get('/features', (req, res) => {
           if (child.type === 'ScenarioOutline') {
             var examples = child.examples[0];
             for (let example of examples.tableBody) {
-              saveScenario(classpath, feature.name, child.name, example.location.line, child.tags, (err, data) => {
+              saveScenario(project, classpath, feature.name, child.name, example.location.line, child.tags, (err, data) => {
                 if (err) {
                   if (err.message.indexOf('duplicate key') > -1) {
                     log.debug('Scenario ' + child.name
@@ -117,7 +121,7 @@ router.get('/features', (req, res) => {
               });
             }
           } else {
-            saveScenario(classpath, feature.name, child.name, child.location.line, child.tags, (err, data) => {
+            saveScenario(project, classpath, feature.name, child.name, child.location.line, child.tags, (err, data) => {
               if (err) {
                 if (err.message.indexOf('duplicate key') > -1) {
                   log.debug('Scenario ' + child.name
@@ -144,9 +148,6 @@ router.get('/tags', (req, res) => {
     for (let tagEntry of tags) {
       if (!tagEntry.tag.startsWith('@id')) continue;
       idTags.push(tagEntry);
-    }
-    for (let idTag of idTags) {
-      log.info(idTag.tag);
     }
     let promises = idTags.map((idTag) => {
       return new Promise((resolve, reject) => {
@@ -177,4 +178,68 @@ router.get('/tags', (req, res) => {
     Promise.all(promises).then(() => { res.render('tags', responseObject); }).catch(log.error);
   });
 });
+
+router.get('/scopes', (req, res) => {
+  let project = req.query.project;
+  Scenario.find({project: project}, (err, scenarios) => {
+    let responseObject = {development: [], daily: [], muted: []};
+    if (err) log.error(err);
+    let scenarioPromises = scenarios.map((sc) => {
+      return new Promise((scResolve, scReject) => {
+        let scenarioObject = {};
+        let executions = [];
+        let idTags = [];
+        let scenarioState = null;
+        for (let tag of sc.tags) {
+          if (tag.startsWith('@id')) {
+            idTags.push(tag);
+          }
+        }
+        let tagPromises = idTags.map((idTag) => {
+          return new Promise((tagResolve, tagReject) => {
+            TagExecutionResult.find({tag: idTag}, (err, result) => {
+              if (err) return tagReject(err);
+              if (!result || result.length === 0) {
+                log.info('Skipped results for tag ' + idTag);
+              } else {
+                if (!result[0].reviewed) {
+                  scenarioState = 'development';
+                } else if (result[0].executions[result[0].executions.length - 1] === 'failed') {
+                  if (scenarioState !== 'development') {
+                    scenarioState = 'failed';
+                  }
+                } else {
+                  if (scenarioState !== 'development' && scenarioState !== 'failed') {
+                    scenarioState = 'passed';
+                  }
+                }
+                let execs = [];
+                for (let exec of result[0].executions) {
+                  execs.push(exec.result);
+                }
+                executions.push({tag: idTag, executions: execs});
+              }
+              tagResolve();
+            });
+          });
+        });
+        Promise.all(tagPromises).then(() => {
+          scenarioObject = {scenarioName: sc.scenarioName, tags: executions};
+          if (scenarioState === 'development' || scenarioState === null) {
+            responseObject.development.push(scenarioObject);
+          } else if (scenarioState === 'failed') {
+            responseObject.muted.push(scenarioObject);
+          } else if (scenarioState === 'passed') {
+            responseObject.daily.push(scenarioObject);
+          }
+          scResolve();
+        }).catch(log.error);
+      });
+    });
+    Promise.all(scenarioPromises).then(() => {
+      res.render('scopes', responseObject);
+    }).catch(log.error);
+  });
+});
+
 module.exports = router;
