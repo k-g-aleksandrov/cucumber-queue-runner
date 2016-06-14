@@ -1,48 +1,52 @@
 extends layout
 
 block content
-  h2 In Development (#{development.length})
-  div.container-fluid
-    each dev in development
-      div.row
-        div.col-md-6 #{dev.scenarioName}
-        div.col-md-3
-          each tag in dev.tags
-              div.row
-                div.col-md-6 #{tag.tag}
-                div.col-md-2
-                  each run in tag.executions
-                    if run == 'passed'
-                      span(style='color: green;') &#x25cf;
-                    else
-                      span(style='color: red;') &#x25cf;
-  h2 Daily (#{daily.length})
-  div.container-fluid
-    each day in daily
-      div.row
-          div.col-md-6 #{day.scenarioName}
-          div.col-md-3
-              each tag in day.tags
-                  div.row
-                      div.col-md-6 #{tag.tag}
-                      div.col-md-2
-                          each run in tag.executions
-                              if run == 'passed'
-                                  span(style='color: green;') &#x25cf;
-                              else
-                                  span(style='color: red;') &#x25cf;
-  h2 Muted (#{muted.length})
-  div.container-fluid
-    each mute in muted
-      div.row
-        div.col-md-6 #{mute.scenarioName}
-        div.col-md-3
-            each tag in mute.tags
-                div.row
-                    div.col-md-6 #{tag.tag}
-                    div.col-md-2
-                        each run in tag.executions
-                            if run == 'passed'
-                                span(style='color: green;') &#x25cf;
-                            else
-                                span(style='color: red;') &#x25cf;
+    table.table-striped
+        th(colspan='2')
+            h1 In Development (#{development.length})
+        each dev in development
+            tr
+                td #{dev.scenarioName}
+                td
+                    table
+                        each tag in dev.tags
+                            tr
+                                td #{tag.tag}
+                                td
+                                    each run in tag.executions
+                                        if run == 'passed'
+                                            span(style='color: green;') &#x25cf;
+                                        else
+                                            span(style='color: red;') &#x25cf;
+        th(colspan='2')
+            h1 Daily (#{daily.length})
+        each day in daily
+            tr
+                td #{dev.scenarioName}
+                td
+                    table
+                        each tag in day.tags
+                            tr
+                                td #{tag.tag}
+                                td
+                                    each run in tag.executions
+                                        if run == 'passed'
+                                            span(style='color: green;') &#x25cf;
+                                        else
+                                            span(style='color: red;') &#x25cf;
+    th(colspan='2')
+        h1 Muted (#{muted.length})
+        each mute in muted
+            tr
+                td #{mute.scenarioName}
+                td
+                    table
+                        each tag in mute.tags
+                            tr
+                                td #{tag.tag}
+                                td
+                                    each run in tag.executions
+                                        if run == 'passed'
+                                            span(style='color: green;') &#x25cf;
+                                        else
+                                            span(style='color: red;') &#x25cf;
