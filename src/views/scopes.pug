@@ -22,7 +22,7 @@ block content
             h1 Daily (#{daily.length})
         each day in daily
             tr
-                td #{dev.scenarioName}
+                td #{day.scenarioName}
                 td
                     table
                         each tag in day.tags
@@ -34,8 +34,8 @@ block content
                                             span(style='color: green;') &#x25cf;
                                         else
                                             span(style='color: red;') &#x25cf;
-    th(colspan='2')
-        h1 Muted (#{muted.length})
+        th(colspan='2')
+            h1 Muted (#{muted.length})
         each mute in muted
             tr
                 td #{mute.scenarioName}

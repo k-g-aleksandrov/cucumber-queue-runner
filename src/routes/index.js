@@ -204,7 +204,7 @@ router.get('/scopes', (req, res) => {
               } else {
                 if (!result[0].reviewed) {
                   scenarioState = 'development';
-                } else if (result[0].executions[result[0].executions.length - 1] === 'failed') {
+                } else if (result[0].executions[result[0].executions.length - 1].result === 'failed') {
                   if (scenarioState !== 'development') {
                     scenarioState = 'failed';
                   }
