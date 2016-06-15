@@ -87,7 +87,7 @@ function saveScenario(project, classpath, featureName, scenarioName, scenarioLin
 }
 
 router.get('/features', (req, res) => {
-  util.scanRepository(config.get('repositoryPath'), (err, results) => {
+  util.scanRepository(req.query.repository, (err, results) => {
     if (err) throw err;
 
     Scenario.remove({}, function (err) {
