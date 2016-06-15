@@ -8,7 +8,7 @@ var fs = require('fs');
 var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 
 class Session {
-  constructor(sessionId, tags, mode) {
+  constructor(sessionId, tags, mode, repositoryPath) {
     this.TIMEOUT_SEC = 1800;
     this.sessionId = sessionId;
     this.inProgressScenarios = {};
@@ -18,7 +18,7 @@ class Session {
 
     fs.mkdirSync(this.sessionPath);
 
-    let filter = {tags: {$in: tags}};
+    let filter = {repositoryPath: repositoryPath, tags: {$in: tags}};
     if (mode === Session.MODE_FAILED) {
       TagExecutionResult.find({}, (err, foundTags) => {
         if (err) throw err;

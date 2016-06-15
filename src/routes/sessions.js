@@ -16,7 +16,8 @@ this.sessions = {};
 router.get('/start', (req, res) => {
   var tags = req.query.tags.split(',');
   let mode = req.query.mode;
-  var newSession = new Session(util.generateGUID(), tags, mode);
+  let repositoryPath = req.query.repositoryPath;
+  var newSession = new Session(util.generateGUID(), tags, mode, repositoryPath);
   if (!this.sessions) {
     this.sessions = {};
   }

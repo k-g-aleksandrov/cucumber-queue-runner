@@ -66,7 +66,7 @@ router.post('/repositories', (req, res) => {
 });
 
 
-function saveScenario(project, classpath, featureName, scenarioName, scenarioLine, tags, callback) {
+function saveScenario(repositoryPath, project, classpath, featureName, scenarioName, scenarioLine, tags, callback) {
   let tagsList = [];
   if (tags) {
     for (let tag of tags) {
@@ -75,6 +75,7 @@ function saveScenario(project, classpath, featureName, scenarioName, scenarioLin
   }
 
   var scenario = new Scenario({
+    repositoryPath: repositoryPath,
     project: project,
     classpath: classpath,
     featureName: featureName,
@@ -87,10 +88,11 @@ function saveScenario(project, classpath, featureName, scenarioName, scenarioLin
 }
 
 router.get('/features', (req, res) => {
-  util.scanRepository(req.query.repository, (err, results) => {
+  let repositoryPath = req.query.repository;
+  util.scanRepository(repositoryPath, (err, results) => {
     if (err) throw err;
 
-    Scenario.remove({}, function (err) {
+    Scenario.remove({repositoryPath: repositoryPath}, function (err) {
       if (err)
         log.error(err);
       for (let result of results) {
@@ -107,7 +109,7 @@ router.get('/features', (req, res) => {
           if (child.type === 'ScenarioOutline') {
             var examples = child.examples[0];
             for (let example of examples.tableBody) {
-              saveScenario(project, classpath, feature.name, child.name, example.location.line, child.tags, (err, data) => {
+              saveScenario(repositoryPath, project, classpath, feature.name, child.name, example.location.line, child.tags, (err, data) => {
                 if (err) {
                   if (err.message.indexOf('duplicate key') > -1) {
                     log.debug('Scenario ' + child.name
@@ -121,7 +123,7 @@ router.get('/features', (req, res) => {
               });
             }
           } else {
-            saveScenario(project, classpath, feature.name, child.name, child.location.line, child.tags, (err, data) => {
+            saveScenario(repositoryPath, project, classpath, feature.name, child.name, child.location.line, child.tags, (err, data) => {
               if (err) {
                 if (err.message.indexOf('duplicate key') > -1) {
                   log.debug('Scenario ' + child.name
