@@ -2,12 +2,14 @@ extends layout
 
 block content
     table.table.table-striped.table-bordered
-        th(colspan='3')
-            h2 In Development (#{development.length})
-        each dev in development
+        tr
+            th(colspan='4')
+                h2 In Development (#{development.length})
+        each dev, index in development
             if (dev.scenarioName)
                 tr
-                    td #{dev.scenarioName}
+                    td.col-md-1= index+1
+                    td= dev.scenarioName
                     td
                         each tag in dev.tags
                             span #{tag.tag}
@@ -20,12 +22,14 @@ block content
                                 else
                                     span(style='color: red;') &#x25cf;
                             br
-        th(colspan='3')
-            h2 Daily (#{daily.length})
-        each day in daily
+        tr
+            th(colspan='4')
+                h2 Daily (#{daily.length})
+        each day,index in daily
             if (day.scenarioName)
                 tr
-                    td #{day.scenarioName}
+                    td.col-md-1= index+1
+                    td= day.scenarioName
                     td
                         each tag in day.tags
                             span #{tag.tag}
@@ -38,11 +42,13 @@ block content
                                 else
                                     span(style='color: red;') &#x25cf;
                             br
-        th(colspan='3')
-            h2 Muted (#{muted.length})
-        each mute in muted
+        tr
+            th(colspan='4')
+                h2 Muted (#{muted.length})
+        each mute, index in muted
             if (mute.scenarioName)
                 tr
+                    td.col-md-1= index+1
                     td #{mute.scenarioName}
                     td
                         each tag in mute.tags

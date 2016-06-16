@@ -3,6 +3,7 @@ html
     head
         title= title
         link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/bootstrap/js/bootstrap.min.js')
         script.
             window.onload = function () {
                 CanvasJS.addColorSet("resultsColorSet",
@@ -134,14 +135,6 @@ html
                 padding: 5px;
                 margin: 0;
             }
-
-            .result-passed {
-                background-color: #92DD96;
-            }
-
-            .result-failed {
-                background-color: #F2928C;
-            }
     body
         div#chartContainer(style='height: 300px; width: 100%')
         br
@@ -159,5 +152,9 @@ html
                 p #{inProgress.scenarioName} (#{inProgress.classpath}:#{inProgress.scenarioLine})
         div.tabcontent#done
             each done in status.done
-                p(class='result-' + done.result) #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+                if (done.result == 'passed')
+                    p.success #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+                else
+                    p.danger #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+
 
