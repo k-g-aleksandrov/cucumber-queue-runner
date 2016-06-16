@@ -226,7 +226,10 @@ router.get('/scopes', (req, res) => {
           });
         });
         Promise.all(tagPromises).then(() => {
-          if (!sc.scenarioName) scReject();
+          if (!sc.scenarioName.trim()) {
+            log.warn('Skipping scenario with empty name');
+            return scReject();
+          }
           scenarioObject = {scenarioName: sc.scenarioName, tags: executions};
           if (scenarioState === 'development' || scenarioState === null) {
             responseObject.development.push(scenarioObject);
