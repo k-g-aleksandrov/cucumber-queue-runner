@@ -1,52 +1,58 @@
 extends layout
 
 block content
-    table.table-striped
-        th(colspan='2')
-            h1 In Development (#{development.length})
+    table.table.table-striped.table-bordered
+        th(colspan='3')
+            h2 In Development (#{development.length})
         each dev in development
-            tr
-                td #{dev.scenarioName}
-                td
-                    table
+            if (dev.scenarioName)
+                tr
+                    td #{dev.scenarioName}
+                    td
                         each tag in dev.tags
-                            tr
-                                td #{tag.tag}
-                                td
-                                    each run in tag.executions
-                                        if run == 'passed'
-                                            span(style='color: green;') &#x25cf;
-                                        else
-                                            span(style='color: red;') &#x25cf;
-        th(colspan='2')
-            h1 Daily (#{daily.length})
+                            span #{tag.tag}
+                            br
+                    td
+                        each tag in dev.tags
+                            each run in tag.executions
+                                if run == 'passed'
+                                    span(style='color: green;') &#x25cf;
+                                else
+                                    span(style='color: red;') &#x25cf;
+                            br
+        th(colspan='3')
+            h2 Daily (#{daily.length})
         each day in daily
-            tr
-                td #{day.scenarioName}
-                td
-                    table
+            if (day.scenarioName)
+                tr
+                    td #{day.scenarioName}
+                    td
                         each tag in day.tags
-                            tr
-                                td #{tag.tag}
-                                td
-                                    each run in tag.executions
-                                        if run == 'passed'
-                                            span(style='color: green;') &#x25cf;
-                                        else
-                                            span(style='color: red;') &#x25cf;
-        th(colspan='2')
-            h1 Muted (#{muted.length})
+                            span #{tag.tag}
+                            br
+                    td
+                        each tag in day.tags
+                            each run in tag.executions
+                                if run == 'passed'
+                                    span(style='color: green;') &#x25cf;
+                                else
+                                    span(style='color: red;') &#x25cf;
+                            br
+        th(colspan='3')
+            h2 Muted (#{muted.length})
         each mute in muted
-            tr
-                td #{mute.scenarioName}
-                td
-                    table
+            if (mute.scenarioName)
+                tr
+                    td #{mute.scenarioName}
+                    td
                         each tag in mute.tags
-                            tr
-                                td #{tag.tag}
-                                td
-                                    each run in tag.executions
-                                        if run == 'passed'
-                                            span(style='color: green;') &#x25cf;
-                                        else
-                                            span(style='color: red;') &#x25cf;
+                            span #{tag.tag}
+                            br
+                    td
+                        each tag in mute.tags
+                            each run in tag.executions
+                                if run == 'passed'
+                                    span(style='color: green;') &#x25cf;
+                                else
+                                    span(style='color: red;') &#x25cf;
+                            br
