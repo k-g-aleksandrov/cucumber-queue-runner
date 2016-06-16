@@ -133,6 +133,25 @@ class Session {
     }, 10000);
   }
 
+  shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
   startSessionCallback(sessionId, filter) {
     log.info('Started new session ' + sessionId);
     Scenario.find(filter, (err, scenarios) => {
@@ -143,7 +162,7 @@ class Session {
       }
       log.info(sessionId + ': Number of scenarios to be executed - '
         + scenarios.length);
-      this.scenarios = scenarios;
+      this.scenarios = this.shuffle(scenarios);
       this.sessionState = Session.OK;
     });
   }
