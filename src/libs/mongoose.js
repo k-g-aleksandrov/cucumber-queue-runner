@@ -9,13 +9,21 @@ var dockerAddr = (process.env.MONGO_PORT_27017_TCP_ADDR)
 var dockerPort = (process.env.MONGO_PORT_27017_TCP_PORT)
   ? process.env.MONGO_PORT_27017_TCP_PORT
   : '27017';
-mongoose.connect('mongodb://' + dockerAddr + ':' + dockerPort
-  + '/cucumber-queue-db');
-var db = mongoose.connection;
 
-db.on('error', (err) => {
-  log.error('connection error:', err.message);
-});
+var connectWithRetry = function() {
+  let mongoUrl = 'mongodb://' + dockerAddr + ':' + dockerPort + '/cucumber-queue-db';
+
+  return mongoose.connect(mongoUrl, function(err) {
+    if (err) {
+      log.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
+      setTimeout(connectWithRetry, 5000);
+    }
+  });
+};
+
+connectWithRetry();
+
+var db = mongoose.connection;
 
 db.once('open', () => {
   log.info('Connected to DB!');
