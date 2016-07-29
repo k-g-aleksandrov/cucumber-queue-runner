@@ -31,7 +31,7 @@ class Session {
             failedTags.push(tag.tag);
           }
         }
-        filter.tags = {$in: failedTags};
+        filter = {tags: {$in: failedTags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else if (mode === Session.MODE_DAILY) {
@@ -51,7 +51,7 @@ class Session {
             passedTags.push(tag.tag);
           }
         }
-        filter.tags = {$in: passedTags};
+        filter = {tags: {$in: passedTags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else if (mode === Session.MODE_DEVELOPMENT) {
@@ -63,7 +63,7 @@ class Session {
           if (!tag.reviewed) continue;
           noRunTags.push(tag.tag);
         }
-        filter.tags = {$nin: noRunTags, $in: tags};
+        filter = {tags: {$nin: noRunTags, $in: tags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else {
