@@ -218,6 +218,8 @@ class Session {
             break;
           } else if (step.result.status === 'undefined') {
             result = 'undefined';
+          } else if (step.result.status === 'skipped' && result === 'passed') {
+            result = 'skipped';
           }
         }
       }
@@ -292,7 +294,9 @@ class Session {
       var sc = this.inProgressScenarios[scenarioId];
       sc.report = scenarioReport;
       sc.result = this.getScenarioState(scenarioReport);
-      this.writeTagsExecutionResultToDb(sc.tags, sc.result);
+      if (sc.result !== 'skipped') {
+        this.writeTagsExecutionResultToDb(sc.tags, sc.result);
+      }
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
       delete this.inProgressScenarios[scenarioId];
       cb();
