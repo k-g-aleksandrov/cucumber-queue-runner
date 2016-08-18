@@ -10,11 +10,13 @@ var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 class Session {
   constructor(sessionId, tags, mode, repositoryPath) {
     this.TIMEOUT_SEC = 1800;
+    this.startDate = new Date();
     this.sessionId = sessionId;
     this.inProgressScenarios = {};
     this.doneScenarios = {};
     this.sessionState = Session.NOT_FOUND;
     this.sessionPath = `public/results/${this.sessionId}`;
+    this.project = repositoryPath.split('/').pop();
 
     fs.mkdirSync(this.sessionPath);
 

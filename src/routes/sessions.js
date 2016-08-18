@@ -100,15 +100,20 @@ router.get('/list', (req, res) => {
   if (this.sessions) {
     responseObject.availableSessions = Object.keys(this.sessions);
   }
-  res.render('sessions', {sessions: this.sessions});
+  res.render('sessions', {sessions: this.sessions, error: {state: req.query.state, info: req.query.session}});
 });
 
 /**
  * get current session information
  */
 router.get('/:sessionId/info', (req, res) => {
-  let status = this.sessions[req.params.sessionId].getStatus();
-  res.render('session', {status: status});
+  let session = this.sessions[req.params.sessionId];
+  if (session) {
+    let status = this.sessions[req.params.sessionId].getStatus();
+    res.render('session', {status: status});
+  } else {
+    res.redirect('/sessions/list?state=sessionlost&session='+req.params.sessionId);
+  }
 });
 
 module.exports = router;

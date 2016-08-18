@@ -1,6 +1,25 @@
 extends layout
 
 block content
-    each session in sessions
-        a(href='/sessions/' + session.sessionId + '/info') Session #{session.sessionId}
-        br
+    if error.state === 'sessionlost'
+        div.alert.alert-danger <b>Error:</b> session with id <b>#{error.info}</b> were finished or does not exist
+    if Object.keys(sessions).length
+        table.table.table-striped.table-bordered
+            tr
+                th Session ID
+                th Start Date
+                th Project
+                th In Queue
+                th In Progress
+                th Done
+            each session in sessions
+                tr
+                    td
+                        a(href='/sessions/' + session.sessionId + '/info') #{session.sessionId}
+                    td= session.startDate
+                    td= session.project
+                    td= session.getScenariosCount('in queue')
+                    td= session.getScenariosCount('in progress')
+                    td= session.getScenariosCount('done')
+    else
+        div.alert.alert-info No running sessions
