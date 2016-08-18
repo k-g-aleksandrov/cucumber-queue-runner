@@ -116,4 +116,9 @@ router.get('/:sessionId/info', (req, res) => {
   }
 });
 
+router.get('/:sessionId/remove', (req, res) => {
+  delete this.sessions[req.params.sessionId];
+  res.redirect('/sessions/list');
+});
+
 module.exports = router;

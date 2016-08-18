@@ -12,6 +12,7 @@ block content
                 th In Queue
                 th In Progress
                 th Done
+                th &nbsp;
             each session in sessions
                 tr
                     td
@@ -21,5 +22,7 @@ block content
                     td= session.getScenariosCount('in queue')
                     td= session.getScenariosCount('in progress')
                     td= session.getScenariosCount('done')
+                    td
+                        button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' + session.sessionId + '/remove"') Remove
     else
         div.alert.alert-info No running sessions
