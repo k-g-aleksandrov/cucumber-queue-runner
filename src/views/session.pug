@@ -93,6 +93,7 @@ block pagehead
         chart.render();
         openSelectedTab();
     }
+  script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js')
   script(src='/javascripts/canvasjs.min.js')
   style.
     /* Style the list */
@@ -162,11 +163,17 @@ block content
             a.tabheader#head_done(href='#done' onclick="openSelectedTab('done');") Done
 
     div.tabcontent#list_queue(style='display: block;')
-        each queue in status.queue
+        each queue,index in status.queue
             p #{queue.scenarioName} (#{queue.classpath}:#{queue.scenarioLine})
     div.tabcontent#list_progress
         each inProgress in status.inProgress
             p #{inProgress.scenarioName} (#{inProgress.classpath}:#{inProgress.scenarioLine})
     div.tabcontent#list_done
-        each done in status.done
-            p(class='result-' + done.result) #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+        each done,index in status.done
+            div
+                p(class='result-' + done.result onclick="toggle(" + index + ",'" + done.scenarioId + "')") #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
+                div(id='screp' + index style='display: none;')
+    script.
+        function toggle(index, scenarioId) {
+           $('#screp' + index).load('/sessions/#{sessionId}/reports/'+scenarioId).toggle();
+        }

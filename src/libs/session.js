@@ -313,6 +313,7 @@ class Session {
     var status = {queue: [], inProgress: [], done: [], passed: [], failed: []};
     for (let queueScenario of this.scenarios) {
       status.queue.push({
+        scenarioId: queueScenario._id,
         classpath: queueScenario.classpath,
         scenarioLine: queueScenario.scenarioLine,
         scenarioName: queueScenario.scenarioName
@@ -322,6 +323,7 @@ class Session {
     for (let inProgressScenarioId of Object.keys(this.inProgressScenarios)) {
       let inProgressScenario = this.inProgressScenarios[inProgressScenarioId];
       status.inProgress.push({
+        scenarioId: inProgressScenario._id,
         classpath: inProgressScenario.classpath,
         scenarioLine: inProgressScenario.scenarioLine,
         scenarioName: inProgressScenario.scenarioName
@@ -332,6 +334,7 @@ class Session {
       let feature = this.doneScenarios[doneScenarioId];
       for (let scenario of feature) {
         status.done.push({
+          scenarioId: scenario._id,
           classpath: scenario.classpath,
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
@@ -339,6 +342,7 @@ class Session {
         });
         if (scenario.result === 'failed') {
           status.failed.push({
+            scenarioId: scenario._id,
             classpath: scenario.classpath,
             scenarioLine: scenario.scenarioLine,
             scenarioName: scenario.scenarioName,
@@ -346,6 +350,7 @@ class Session {
           });
         } else {
           status.passed.push({
+            scenarioId: scenario._id,
             classpath: scenario.classpath,
             scenarioLine: scenario.scenarioLine,
             scenarioName: scenario.scenarioName,

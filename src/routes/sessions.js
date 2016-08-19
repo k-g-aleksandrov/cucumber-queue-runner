@@ -110,10 +110,25 @@ router.get('/:sessionId/info', (req, res) => {
   let session = this.sessions[req.params.sessionId];
   if (session) {
     let status = this.sessions[req.params.sessionId].getStatus();
-    res.render('session', {status: status});
+    res.render('session', {sessionId: req.params.sessionId, status: status});
   } else {
     res.redirect('/sessions/list?state=sessionlost&session=' + req.params.sessionId);
   }
+});
+
+router.get('/:sessionId/reports/:scenarioId', (req, res) => {
+  let session = this.sessions[req.params.sessionId];
+  if (!session) {
+    return res.redirect('/sessions/list?state=sessionlost&session=' + req.params.sessionId);
+  }
+  for (let feature of Object.keys(session.doneScenarios)) {
+    for (let scenario of session.doneScenarios[feature]) {
+      if (req.params.scenarioId === scenario._id.toString()) {
+        return res.render('report', {report:scenario.report});
+      }
+    }
+  }
+  res.send({error: 'Scenario ' + req.params.scenarioId + ' does not exist or not yet finished.'});
 });
 
 router.get('/:sessionId/remove', (req, res) => {

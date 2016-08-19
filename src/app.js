@@ -10,6 +10,8 @@ var sessionsRoutes = require('./routes/sessions');
 
 var app = express();
 
+app.locals.moment = require('moment');
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // view engine setup

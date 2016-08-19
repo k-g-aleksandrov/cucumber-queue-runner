@@ -1,0 +1,46 @@
+mixin stepLine(step,type)
+    - var formattedDuration = ''; if (step.result.duration) { formattedDuration = moment.utc(step.result.duration/1000000).format('HH:mm:ss.SSS'); }
+    div(class='row result-' + step.result.status)
+        div.col-md-10
+            if type==='before'
+                b Before&nbsp;
+                span #{step.match.location}
+            if type==='after'
+                b After&nbsp;
+                span #{step.match.location}
+            else
+                b #{step.keyword}
+                span #{step.name}
+        div.col-md-2= formattedDuration
+doctype html
+html
+    head
+        link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+        style.
+            .result-passed {
+                background-color: #92DD96;
+            }
+            .result-failed {
+                background-color: #F2928C;
+            }
+            .result-skipped {
+                background-color: #8AF;
+            }
+body
+        each rep in report
+            if rep.elements[0].type==='background'
+                - var scenarioElementsIdx=1;
+                - var haveBackground=true;
+            else
+                - var scenarioElementsIdx=0;
+                - var haveBackground=false;
+            div.container-fluid
+                each before in rep.elements[scenarioElementsIdx].before
+                    +stepLine(before,'before')
+                if haveBackground
+                    each step in rep.elements[0].steps
+                        +stepLine(step,'step')
+                each step in rep.elements[scenarioElementsIdx].steps
+                    +stepLine(step,'step')
+                each after in rep.elements[scenarioElementsIdx].after
+                    +stepLine(after,'after')
