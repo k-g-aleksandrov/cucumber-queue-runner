@@ -112,7 +112,7 @@ router.get('/:sessionId/info', (req, res) => {
     let status = this.sessions[req.params.sessionId].getStatus();
     res.render('session', {status: status});
   } else {
-    res.redirect('/sessions/list?state=sessionlost&session='+req.params.sessionId);
+    res.redirect('/sessions/list?state=sessionlost&session=' + req.params.sessionId);
   }
 });
 

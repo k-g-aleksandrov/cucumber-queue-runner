@@ -1,5 +1,6 @@
 extends layout
-
+block navigationbar
+    - var active = 'sessions'
 block content
     if error.state === 'sessionlost'
         div.alert.alert-danger <b>Error:</b> session with id <b>#{error.info}</b> were finished or does not exist
@@ -23,6 +24,7 @@ block content
                     td= session.getScenariosCount('in progress')
                     td= session.getScenariosCount('done')
                     td
-                        button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' + session.sessionId + '/remove"') Remove
+                        button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' +
+                        session.sessionId + '/remove"') Remove
     else
         div.alert.alert-info No running sessions

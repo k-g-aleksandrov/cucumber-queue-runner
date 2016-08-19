@@ -10,10 +10,10 @@ var dockerPort = (process.env.MONGO_PORT_27017_TCP_PORT)
   ? process.env.MONGO_PORT_27017_TCP_PORT
   : '27017';
 
-var connectWithRetry = function() {
+var connectWithRetry = function () {
   let mongoUrl = 'mongodb://' + dockerAddr + ':' + dockerPort + '/cucumber-queue-db';
 
-  return mongoose.connect(mongoUrl, function(err) {
+  return mongoose.connect(mongoUrl, function (err) {
     if (err) {
       log.error('Failed to connect to mongo on startup - retrying in 5 sec', err);
       setTimeout(connectWithRetry, 5000);
@@ -32,7 +32,7 @@ db.once('open', () => {
 var Schema = mongoose.Schema;
 
 var RepositorySchema = new Schema({
-  url: {type: String, unique: true },
+  url: {type: String, unique: true},
   name: String,
   projects: [{type: Schema.Types.ObjectId, ref: 'Project'}]
 });

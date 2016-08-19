@@ -5,4 +5,21 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
         link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
     body
+        block navigationbar
+        nav.navbar.navbar-inverse.navbar-static-top
+            div.navbar-inner
+                div.collapse.navbar-collapse
+                    ul.nav.navbar-nav
+                        if active === 'sessions'
+                            li.active
+                                a(href='/sessions/list') Sessions
+                        else
+                            li
+                                a(href='/sessions/list') Sessions
+                        if active === 'scopes'
+                            li.active
+                                a(href='/scopes') Scopes
+                        else
+                            li
+                                a(href='/scopes') Scopes
         block content

@@ -14,22 +14,6 @@ let config = require('config');
 var express = require('express');
 var router = express.Router();
 
-router.get('/', (req, res) => {
-  Repository.find({}, function (err, repositories) {
-    if (err) {
-      res.statusCode = 500;
-      log.error('Internal error(%d): %s', res.statusCode, err.message);
-      return res.send({error: 'Server error'});
-    } else {
-      if (repositories.length > 0) {
-        res.render('index', {repositories: repositories});
-      } else {
-        res.render('index');
-      }
-    }
-  });
-});
-
 router.get('/repositories', (req, res) => {
   Repository.find({}, (err, repositories) => {
     if (err) log.error(err);
@@ -89,8 +73,16 @@ function saveScenario(repositoryPath, project, classpath, featureName, scenarioN
 
 router.get('/features', (req, res) => {
   let repositoryPath = req.query.repository;
+  if (!repositoryPath) {
+    res.statusCode = 400;
+    return res.send({error: 'Repository path should be specified to scan feature files'});
+  }
   util.scanRepository(repositoryPath, (err, results) => {
-    if (err) throw err;
+    if (err) {
+      res.statusCode = 400;
+      log.error(err);
+      return res.send({error: 'Path not found: ' + repositoryPath});
+    }
 
     Scenario.remove({repositoryPath: repositoryPath}, function (err) {
       if (err)
@@ -101,7 +93,7 @@ router.get('/features', (req, res) => {
         let parts = result.split('src/test/resources/');
         var classpath = parts.pop();
         var fullProjectPath = parts.pop();
-        let project = fullProjectPath.split('/')[fullProjectPath.split('/').length-2];
+        let project = fullProjectPath.split('/')[fullProjectPath.split('/').length - 2];
         var gherkinDocument = parser.parse(buf);
         var feature = gherkinDocument.feature;
         log.info(`Parsing feature ${feature.name}`);
@@ -154,7 +146,9 @@ router.get('/tags', (req, res) => {
     let promises = idTags.map((idTag) => {
       return new Promise((resolve, reject) => {
         Scenario.find({tags: {$in: [idTag.tag]}}, (err, scenarios) => {
-          if (err) { return reject(err); }
+          if (err) {
+            return reject(err);
+          }
           let nextTag = {tag: idTag.tag, executions: [], scenarios: []};
           if (scenarios) {
             for (let sc of scenarios) {
@@ -177,12 +171,21 @@ router.get('/tags', (req, res) => {
       });
     });
 
-    Promise.all(promises).then(() => { res.render('tags', responseObject); }).catch(log.error);
+    Promise.all(promises).then(() => {
+      res.render('tags', responseObject);
+    }).catch(log.error);
   });
 });
 
 router.get('/scopes', (req, res) => {
-  let project = req.query.project;
+  Scenario.find().distinct('project', (err, projects) => {
+    log.info(projects);
+    res.render('scopes', {projects: projects});
+  });
+});
+
+router.get('/scopes/:project', (req, res) => {
+  let project = req.params.project;
   Scenario.find({project: project}, (err, scenarios) => {
     let responseObject = {development: [], daily: [], muted: []};
     if (err) log.error(err);
@@ -243,8 +246,20 @@ router.get('/scopes', (req, res) => {
       });
     });
     Promise.all(scenarioPromises).then(() => {
-      res.render('scopes', responseObject);
+      res.render('scope', responseObject);
     }).catch(log.error);
+  });
+});
+
+router.get('/*', (req, res) => {
+  Repository.find({}, function (err, repositories) {
+    if (err) {
+      res.statusCode = 500;
+      log.error('Internal error(%d): %s', res.statusCode, err.message);
+      return res.send({error: 'Server error'});
+    } else {
+      res.redirect('/sessions/list');
+    }
   });
 });
 
