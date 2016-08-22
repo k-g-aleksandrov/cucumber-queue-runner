@@ -18,7 +18,8 @@ block content
                 tr
                     td
                         a(href='/sessions/' + session.sessionId + '/info') #{session.sessionId}
-                    td= session.startDate
+                    - var formattedDate = moment(session.startDate).format('DD.MM.YYYY HH:mm:ss');
+                    td= formattedDate
                     td= session.project
                     td
                         a(href='/sessions/' + session.sessionId + '/info#queue')= session.getScenariosCount('in queue')
