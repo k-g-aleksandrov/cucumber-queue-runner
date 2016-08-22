@@ -28,7 +28,7 @@ block content
                         '/info#progress')= session.getScenariosCount('in progress')
                     td
                         a(href='/sessions/' + session.sessionId + '/info#done')= session.getScenariosCount('done')
-                    td
+                    td(style='text-align:center;')
                         button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' +
                         session.sessionId + '/remove"') Remove
     else

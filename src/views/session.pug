@@ -153,21 +153,21 @@ block content
             a.tabheader#head_done(href='#done' onclick="openSelectedTab('done');") Done
 
     div.tabcontent#list_queue(style='display: block;')
-        table.table.table-bordered
+        table.table.table-bordered(style='margin-bottom:0px;')
             each queue in status.queue
                 tr
                     td
                         b #{queue.featureName}:&nbsp;
                         span #{queue.scenarioName} (:#{queue.scenarioLine})
     div.tabcontent#list_progress
-        table.table.table-bordered
+        table.table.table-bordered(style='margin-bottom:0px;')
             each inProgress in status.inProgress
                 tr.active
                     td
                         b #{inProgress.featureName}:&nbsp;
                         span #{inProgress.scenarioName} (:#{inProgress.scenarioLine})
     div.tabcontent#list_done
-        table.table.table-bordered
+        table.table.table-bordered(style='margin-bottom:0px;')
             each scenarios,feature in status.done
                 tr
                     th Feature: #{feature}
@@ -176,11 +176,10 @@ block content
                             - var scenarioClass = 'success'
                         else if done.result === 'failed'
                             - var scenarioClass = 'danger'
-                        tr(class=scenarioClass)
-                            td(style='padding-left: 20px;')
-                                p(onclick="toggle('" + done.scenarioId +
-                                "')") #{done.scenarioName} (:#{done.scenarioLine})
-                                div(id='sc' + done.scenarioId style='display: none;padding-left: 40px;')
+                        tr(class=scenarioClass onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;')
+                            td
+                                p #{done.scenarioName} (:#{done.scenarioLine})
+                                div(id='sc' + done.scenarioId onclick='event.stopPropagation();' style='display:none;cursor:text;')
     script.
         function toggle(scenarioId) {
             $('#sc' + scenarioId).load('/sessions/#{sessionId}/reports/' + scenarioId).toggle();
