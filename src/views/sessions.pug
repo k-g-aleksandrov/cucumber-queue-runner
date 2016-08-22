@@ -23,7 +23,8 @@ block content
                     td
                         a(href='/sessions/' + session.sessionId + '/info#queue')= session.getScenariosCount('in queue')
                     td
-                        a(href='/sessions/' + session.sessionId + '/info#progress')= session.getScenariosCount('in progress')
+                        a(href='/sessions/' + session.sessionId +
+                        '/info#progress')= session.getScenariosCount('in progress')
                     td
                         a(href='/sessions/' + session.sessionId + '/info#done')= session.getScenariosCount('done')
                     td

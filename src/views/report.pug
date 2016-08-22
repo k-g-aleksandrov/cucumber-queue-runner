@@ -1,46 +1,52 @@
-mixin stepLine(step,type)
+mixin stepLine(hashString,step,type)
     - var formattedDuration = ''; if (step.result.duration) { formattedDuration = moment.utc(step.result.duration/1000000).format('HH:mm:ss.SSS'); }
-    div(class='row result-' + step.result.status)
+    - var stepHash = hashString.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+    if step.result.status === 'passed'
+        - var stepClass = 'bg-success'
+    else if step.result.status === 'failed'
+        - var stepClass = 'bg-danger'
+    else if step.result.status === 'skipped'
+        - var stepClass = 'bg-info'
+    else
+        - var stepClass = 'bg-active'
+    div.row(class=stepClass style='margin:0;')
         div.col-md-10
-            if type==='before'
+            if type === 'before'
                 b Before&nbsp;
                 span #{step.match.location}
-            if type==='after'
+            if type === 'after'
                 b After&nbsp;
                 span #{step.match.location}
             else
                 b #{step.keyword}
                 span #{step.name}
+            if step.result.error_message
+                span &nbsp;
+                    a(onclick="toggleErrorMessage('" + stepHash +
+                    "'); event.preventDefault();" href='#') (error message)
         div.col-md-2= formattedDuration
-doctype html
-html
-    head
-        link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
-        style.
-            .result-passed {
-                background-color: #92DD96;
-            }
-            .result-failed {
-                background-color: #F2928C;
-            }
-            .result-skipped {
-                background-color: #8AF;
-            }
-body
-        each rep in report
-            if rep.elements[0].type==='background'
-                - var scenarioElementsIdx=1;
-                - var haveBackground=true;
-            else
-                - var scenarioElementsIdx=0;
-                - var haveBackground=false;
-            div.container-fluid
-                each before in rep.elements[scenarioElementsIdx].before
-                    +stepLine(before,'before')
-                if haveBackground
-                    each step in rep.elements[0].steps
-                        +stepLine(step,'step')
-                each step in rep.elements[scenarioElementsIdx].steps
-                    +stepLine(step,'step')
-                each after in rep.elements[scenarioElementsIdx].after
-                    +stepLine(after,'after')
+    if step.result.error_message
+        pre.container-fluid(id='error' +
+        stepHash style='display: none; background-color: #eee; padding:0; border: 1px solid #ccc;')= step.result.error_message
+
+each rep in report
+    if rep.elements[0].type === 'background'
+        - var scenarioElementsIdx=1;
+        - var haveBackground=true;
+    else
+        - var scenarioElementsIdx=0;
+        - var haveBackground=false;
+    div.container-fluid(style="background-color: #eee; padding:0; border: 1px solid #ccc")
+        each before in rep.elements[scenarioElementsIdx].before
+            +stepLine(rep.name + rep.elements[scenarioElementsIdx].line + rep.elements[scenarioElementsIdx].id +
+            before.match.location,before,'before')
+        if haveBackground
+            each step in rep.elements[0].steps
+                +stepLine(rep.name + rep.elements[scenarioElementsIdx].line + rep.elements[scenarioElementsIdx].id +
+                step.name,step,'step')
+        each step in rep.elements[scenarioElementsIdx].steps
+            +stepLine(rep.name + rep.elements[scenarioElementsIdx].line + rep.elements[scenarioElementsIdx].id +
+            step.name,step,'step')
+        each after in rep.elements[scenarioElementsIdx].after
+            +stepLine(rep.name + rep.elements[scenarioElementsIdx].line + rep.elements[scenarioElementsIdx].id +
+            after.match.location,after,'after')

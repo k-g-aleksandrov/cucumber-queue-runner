@@ -59,6 +59,10 @@ router.post('/:sessionId/result', (req, res) => {
   var scenarioId = req.body.id;
   var scenarioReport = req.body.report;
 
+  if (!this.sessions[req.params.sessionId]) {
+    res.statusCode = 404;
+    return res.send('Session ' + req.params.sessionId + ' does not exist');
+  }
   this.sessions[req.params.sessionId].saveScenarioResult(scenarioId, scenarioReport, (err) => {
     if (err) {
       log.error(err);
@@ -124,7 +128,7 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   for (let feature of Object.keys(session.doneScenarios)) {
     for (let scenario of session.doneScenarios[feature]) {
       if (req.params.scenarioId === scenario._id.toString()) {
-        return res.render('report', {report:scenario.report});
+        return res.render('report', {report: scenario.report});
       }
     }
   }

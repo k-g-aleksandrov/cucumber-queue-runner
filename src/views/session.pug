@@ -1,158 +1,148 @@
 extends layout
 
 block pagehead
-  title= title
-  link(rel='stylesheet', href='/stylesheets/style.css')
-  script.
-    function openSelectedTab(selectedTab) {
-        if (!selectedTab && !window.location.hash) {
-            selectedTab = 'queue';
-            window.location.hash = '#queue';
-        } else if (!selectedTab && window.location.hash) {
-            selectedTab = window.location.hash.substring(1);
+    script.
+        function openSelectedTab(selectedTab) {
+            if (!selectedTab && !window.location.hash) {
+                selectedTab = 'queue';
+                window.location.hash = '#queue';
+            } else if (!selectedTab && window.location.hash) {
+                selectedTab = window.location.hash.substring(1);
+            }
+
+            console.log(selectedTab);
+            // Declare all variables
+            var i, tabcontent, tabheaders;
+
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName('tabcontent');
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = 'none';
+            }
+
+            // Get all elements with class="tablinks" and remove the class "active"
+            tabheaders = document.getElementsByClassName('tabheader');
+            for (i = 0; i < tabheaders.length; i++) {
+                tabheaders[i].className = tabheaders[i].className.replace(' active', '');
+            }
+
+            // Show the current tab, and add an "active" class to the link that opened the tab
+            document.getElementById('list_' + selectedTab).style.display = 'block';
+            document.getElementById('head_' + selectedTab).className += ' active';
+        }
+    script.
+        window.onload = function () {
+            CanvasJS.addColorSet("resultsColorSet",
+                    [
+                        "#8AF",
+                        "#F5F28F",
+                        "#92DD96",
+                        "#F2928C"
+                    ]);
+            var chart = new CanvasJS.Chart("chartContainer",
+                    {
+                        colorSet: "resultsColorSet",
+                        title: {
+                            text: "Execution State",
+                            fontFamily: "Impact",
+                            fontWeight: "normal"
+                        },
+
+                        legend: {
+                            verticalAlign: "bottom",
+                            horizontalAlign: "center"
+                        },
+                        data: [
+                            {
+                                //startAngle: 45,
+                                indexLabelFontSize: 20,
+                                indexLabelFontFamily: "Garamond",
+                                indexLabelFontColor: "darkgrey",
+                                indexLabelLineColor: "darkgrey",
+                                indexLabelPlacement: "outside",
+                                type: "doughnut",
+                                showInLegend: true,
+                                dataPoints: [
+                                    {
+                                        y: #{status.queue.length},
+                                        legendText: "In Queue #{status.queue.length}",
+                                        indexLabel: "In Queue #{status.queue.length}"
+                                    },
+                                    {
+                                        y: #{status.inProgress.length},
+                                        legendText: "In Progress #{status.inProgress.length}",
+                                        indexLabel: "In Progress #{status.inProgress.length}"
+                                    },
+                                    {
+                                        y: #{status.passed.length},
+                                        legendText: "Passed #{status.passed.length}",
+                                        indexLabel: "Passed #{status.passed.length}"
+                                    },
+                                    {
+                                        y: #{status.failed.length},
+                                        legendText: "Failed #{status.failed.length}",
+                                        indexLabel: "Failed #{status.failed.length}"
+                                    }
+                                ]
+                            }
+                        ]
+                    });
+
+            chart.render();
+            openSelectedTab();
+        }
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js')
+    script(src='/javascripts/canvasjs.min.js')
+    style.
+        /* Style the list */
+        ul.tab {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
         }
 
-        console.log(selectedTab);
-        // Declare all variables
-        var i, tabcontent, tabheaders;
-
-        // Get all elements with class="tabcontent" and hide them
-        tabcontent = document.getElementsByClassName('tabcontent');
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = 'none';
+        /* Float the list items side by side */
+        ul.tab li {
+            float: left;
         }
 
-        // Get all elements with class="tablinks" and remove the class "active"
-        tabheaders = document.getElementsByClassName('tabheader');
-        for (i = 0; i < tabheaders.length; i++) {
-            tabheaders[i].className = tabheaders[i].className.replace(' active', '');
+        /* Style the links inside the list items */
+        ul.tab li a {
+            display: inline-block;
+            color: black;
+            text-align: center;
+            padding: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 18px;
         }
 
-        // Show the current tab, and add an "active" class to the link that opened the tab
-        document.getElementById('list_' + selectedTab).style.display = 'block';
-        document.getElementById('head_' + selectedTab).className += ' active';
-    }
-  script.
-    window.onload = function () {
-        CanvasJS.addColorSet("resultsColorSet",
-                [
-                    "#8AF",
-                    "#F5F28F",
-                    "#92DD96",
-                    "#F2928C"
-                ]);
-        var chart = new CanvasJS.Chart("chartContainer",
-                {
-                    colorSet: "resultsColorSet",
-                    title: {
-                        text: "Execution State",
-                        fontFamily: "Impact",
-                        fontWeight: "normal"
-                    },
+        /* Change background color of links on hover */
+        ul.tab li a:hover {
+            background-color: #ddd;
+        }
 
-                    legend: {
-                        verticalAlign: "bottom",
-                        horizontalAlign: "center"
-                    },
-                    data: [
-                        {
-                            //startAngle: 45,
-                            indexLabelFontSize: 20,
-                            indexLabelFontFamily: "Garamond",
-                            indexLabelFontColor: "darkgrey",
-                            indexLabelLineColor: "darkgrey",
-                            indexLabelPlacement: "outside",
-                            type: "doughnut",
-                            showInLegend: true,
-                            dataPoints: [
-                                {
-                                    y: #{status.queue.length},
-                                    legendText: "In Queue #{status.queue.length}",
-                                    indexLabel: "In Queue #{status.queue.length}"
-                                },
-                                {
-                                    y: #{status.inProgress.length},
-                                    legendText: "In Progress #{status.inProgress.length}",
-                                    indexLabel: "In Progress #{status.inProgress.length}"
-                                },
-                                {
-                                    y: #{status.passed.length},
-                                    legendText: "Passed #{status.passed.length}",
-                                    indexLabel: "Passed #{status.passed.length}"
-                                },
-                                {
-                                    y: #{status.failed.length},
-                                    legendText: "Failed #{status.failed.length}",
-                                    indexLabel: "Failed #{status.failed.length}"
-                                }
-                            ]
-                        }
-                    ]
-                });
+        /* Create an active/current tablink class */
+        ul.tab li a:focus, .active {
+            background-color: #ccc;
+        }
 
-        chart.render();
-        openSelectedTab();
-    }
-  script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js')
-  script(src='/javascripts/canvasjs.min.js')
-  style.
-    /* Style the list */
-    ul.tab {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-    }
+        /* Style the tab content */
+        .tabcontent {
+            width: 100%;
+            display: none;
+            padding: 8px 8px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
 
-    /* Float the list items side by side */
-    ul.tab li {
-        float: left;
-    }
-
-    /* Style the links inside the list items */
-    ul.tab li a {
-        display: inline-block;
-        color: black;
-        text-align: center;
-        padding: 14px 16px;
-        text-decoration: none;
-        transition: 0.3s;
-        font-size: 17px;
-    }
-
-    /* Change background color of links on hover */
-    ul.tab li a:hover {
-        background-color: #ddd;
-    }
-
-    /* Create an active/current tablink class */
-    ul.tab li a:focus, .active {
-        background-color: #ccc;
-    }
-
-    /* Style the tab content */
-    .tabcontent {
-        display: none;
-        padding: 6px 12px;
-        border: 1px solid #ccc;
-        border-top: none;
-    }
-
-    p {
-        padding: 5px;
-        margin: 0;
-    }
-
-    .result-passed {
-        background-color: #92DD96;
-    }
-
-    .result-failed {
-        background-color: #F2928C;
-    }
-
+        p {
+            padding: 5px;
+            margin: 0;
+        }
 block content
     div#chartContainer(style='height: 300px; width: 100%')
     br
@@ -163,17 +153,38 @@ block content
             a.tabheader#head_done(href='#done' onclick="openSelectedTab('done');") Done
 
     div.tabcontent#list_queue(style='display: block;')
-        each queue,index in status.queue
-            p #{queue.scenarioName} (#{queue.classpath}:#{queue.scenarioLine})
+        table.table.table-bordered
+            each queue in status.queue
+                tr
+                    td
+                        b #{queue.featureName}:&nbsp;
+                        span #{queue.scenarioName} (:#{queue.scenarioLine})
     div.tabcontent#list_progress
-        each inProgress in status.inProgress
-            p #{inProgress.scenarioName} (#{inProgress.classpath}:#{inProgress.scenarioLine})
+        table.table.table-bordered
+            each inProgress in status.inProgress
+                tr.active
+                    td
+                        b #{inProgress.featureName}:&nbsp;
+                        span #{inProgress.scenarioName} (:#{inProgress.scenarioLine})
     div.tabcontent#list_done
-        each done,index in status.done
-            div
-                p(class='result-' + done.result onclick="toggle(" + index + ",'" + done.scenarioId + "')") #{done.scenarioName} (#{done.classpath}:#{done.scenarioLine})
-                div(id='screp' + index style='display: none;')
+        table.table.table-bordered
+            each scenarios,feature in status.done
+                tr
+                    th Feature: #{feature}
+                    each done in scenarios
+                        if done.result === 'passed'
+                            - var scenarioClass = 'success'
+                        else if done.result === 'failed'
+                            - var scenarioClass = 'danger'
+                        tr(class=scenarioClass)
+                            td(style='padding-left: 20px;')
+                                p(onclick="toggle('" + done.scenarioId +
+                                "')") #{done.scenarioName} (:#{done.scenarioLine})
+                                div(id='sc' + done.scenarioId style='display: none;padding-left: 40px;')
     script.
-        function toggle(index, scenarioId) {
-           $('#screp' + index).load('/sessions/#{sessionId}/reports/'+scenarioId).toggle();
+        function toggle(scenarioId) {
+            $('#sc' + scenarioId).load('/sessions/#{sessionId}/reports/' + scenarioId).toggle();
+        }
+        function toggleErrorMessage(stepname) {
+            $('#error' + stepname).toggle();
         }
