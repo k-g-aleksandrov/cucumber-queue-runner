@@ -3,3 +3,5 @@ src/repo/
 node_modules/
 src/public/results/**
 build/
+coverage/
+npm-debug.log
