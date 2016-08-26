@@ -1,66 +1,33 @@
 extends layout
 
+mixin scopeTable(scope,list)
+    tr
+        th(colspan='4')
+            h2 #{scope} (#{list.length})
+    each sc, index in list
+        if (sc.scenarioName)
+            tr
+                td.col-md-1= index + 1
+                td
+                    b #{sc.featureName}:&nbsp;
+                    span #{sc.scenarioName} (:#{sc.scenarioLine})
+                td
+                    each tag in sc.tags
+                        span #{tag.tag}
+                        br
+                td
+                    each tag in sc.tags
+                        each run in tag.executions
+                            if run == 'passed'
+                                span(style='color: green;') &#x25cf;
+                            else
+                                span(style='color: red;') &#x25cf;
+                        br
+
 block navigationbar
     - var active = 'scopes'
 block content
     table.table.table-striped.table-bordered
-        tr
-            th(colspan='4')
-                h2 In Development (#{development.length})
-        each dev, index in development
-            if (dev.scenarioName)
-                tr
-                    td.col-md-1= index + 1
-                    td= dev.scenarioName
-                    td
-                        each tag in dev.tags
-                            span #{tag.tag}
-                            br
-                    td
-                        each tag in dev.tags
-                            each run in tag.executions
-                                if run == 'passed'
-                                    span(style='color: green;') &#x25cf;
-                                else
-                                    span(style='color: red;') &#x25cf;
-                            br
-        tr
-            th(colspan='4')
-                h2 Daily (#{daily.length})
-        each day,index in daily
-            if (day.scenarioName)
-                tr
-                    td.col-md-1= index + 1
-                    td= day.scenarioName
-                    td
-                        each tag in day.tags
-                            span #{tag.tag}
-                            br
-                    td
-                        each tag in day.tags
-                            each run in tag.executions
-                                if run == 'passed'
-                                    span(style='color: green;') &#x25cf;
-                                else
-                                    span(style='color: red;') &#x25cf;
-                            br
-        tr
-            th(colspan='4')
-                h2 Muted (#{muted.length})
-        each mute, index in muted
-            if (mute.scenarioName)
-                tr
-                    td.col-md-1= index + 1
-                    td #{mute.scenarioName}
-                    td
-                        each tag in mute.tags
-                            span #{tag.tag}
-                            br
-                    td
-                        each tag in mute.tags
-                            each run in tag.executions
-                                if run == 'passed'
-                                    span(style='color: green;') &#x25cf;
-                                else
-                                    span(style='color: red;') &#x25cf;
-                            br
+        +scopeTable('In Development', development)
+        +scopeTable('Daily', daily)
+        +scopeTable('Muted', muted)

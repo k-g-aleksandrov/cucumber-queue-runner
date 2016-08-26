@@ -233,7 +233,7 @@ router.get('/scopes/:project', (req, res) => {
             log.warn('Skipping scenario with empty name');
             return scResolve();
           }
-          scenarioObject = {scenarioName: sc.scenarioName, tags: executions};
+          scenarioObject = {featureName: sc.featureName, scenarioName: sc.scenarioName, scenarioLine: sc.scenarioLine, tags: executions};
           if (scenarioState === 'development' || scenarioState === null) {
             responseObject.development.push(scenarioObject);
           } else if (scenarioState === 'failed') {
