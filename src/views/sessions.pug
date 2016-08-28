@@ -1,4 +1,18 @@
 extends layout
+block pagehead
+    style.
+        .progress-chart {
+            width: 100%;
+        }
+
+        .progress-chart div {
+            height: 15px;
+            float: left;
+        }
+        .progress-chart:after {
+            clear: both;
+        }
+
 block navigationbar
     - var active = 'sessions'
 block content
@@ -10,26 +24,43 @@ block content
                 th Session ID
                 th Start Date
                 th Project
-                th In Queue
-                th In Progress
-                th Done
+                th(style='text-align: center;') In Queue
+                th(style='text-align: center;') In Progress
+                th(style='text-align: center;') Done
+                th Pass Rate
                 th &nbsp;
             each session in sessions
+                - var queueCount = session.getScenariosCount('in queue')
+                - var progressCount = session.getScenariosCount('in progress')
+                - var passedCount = session.getScenariosCount('passed')
+                - var failedCount = session.getScenariosCount('failed')
+                - var doneCount = passedCount + failedCount
+                - var totalCount = session.getScenariosCount()
                 tr
-                    td
+                    td(style='vertical-align: center;' rowspan='2')
                         a(href='/sessions/' + session.sessionId + '/info') #{session.sessionId}
                     - var formattedDate = moment(session.startDate).format('DD.MM.YYYY HH:mm:ss');
-                    td= formattedDate
-                    td= session.project
-                    td
-                        a(href='/sessions/' + session.sessionId + '/info#queue')= session.getScenariosCount('in queue')
-                    td
+                    td(style='vertical-align: center;' rowspan='2')= formattedDate
+                    td(style='vertical-align: center;' rowspan='2')= session.project
+                    td(style='text-align: center;')
+                        a(href='/sessions/' + session.sessionId + '/info#queue')= queueCount
+                    td(style='text-align: center;')
                         a(href='/sessions/' + session.sessionId +
-                        '/info#progress')= session.getScenariosCount('in progress')
-                    td
-                        a(href='/sessions/' + session.sessionId + '/info#done')= session.getScenariosCount('done')
-                    td(style='text-align:center;')
+                        '/info#progress')= progressCount
+                    td(style='text-align: center;')
+                        a(href='/sessions/' + session.sessionId + '/info#done')= passedCount + failedCount
+                    td(style='text-align: center;')
+                        span= doneCount>0?((passedCount/doneCount)*100).toFixed(2):'-'
+                        span &nbsp(<font color="green">#{passedCount}</font>:<font color="red">#{failedCount}</font>)
+                    td(rowspan='2' style='text-align:center; vertical-align:center;')
                         button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' +
                         session.sessionId + '/remove"') Remove
+                tr
+                    td(colspan='4' style='height:15px;padding: 0')
+                        div.progress-chart
+                            div(style='background-color:#92DD96;width:' + (passedCount * 100) / totalCount + '%')
+                            div(style='background-color:#F2928C;width:' + (failedCount * 100) / totalCount + '%')
+                            div(style='background-color:#F5F28F;width:' + (progressCount * 100) / totalCount + '%')
+                            div(style='background-color:lightgray;width:' + (queueCount*100)/totalCount + '%')
     else
         div.alert.alert-info No running sessions

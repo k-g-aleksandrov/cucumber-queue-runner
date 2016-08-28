@@ -194,6 +194,26 @@ class Session {
         doneCount += this.doneScenarios[doneFeature].length;
       }
       return doneCount;
+    } else if (Session.STATE_PASSED === state) {
+      var passedCount = 0;
+      for (let doneFeature of Object.keys(this.doneScenarios)) {
+        for (let scenario of this.doneScenarios[doneFeature]) {
+          if ('passed' === scenario.result) {
+            passedCount++;
+          }
+        }
+      }
+      return passedCount;
+    } else if (Session.STATE_FAILED === state) {
+      var failedCount = 0;
+      for (let doneFeature of Object.keys(this.doneScenarios)) {
+        for (let scenario of this.doneScenarios[doneFeature]) {
+          if ('failed' === scenario.result) {
+            failedCount++;
+          }
+        }
+      }
+      return failedCount;
     } else {
       return this.getScenariosCount(Session.STATE_IN_QUEUE)
         + this.getScenariosCount(Session.STATE_IN_PROGRESS)
@@ -371,6 +391,8 @@ class Session {
 Session.STATE_IN_QUEUE = 'in queue';
 Session.STATE_IN_PROGRESS = 'in progress';
 Session.STATE_DONE = 'done';
+Session.STATE_PASSED = 'passed';
+Session.STATE_FAILED = 'failed';
 
 Session.OK = 'OK';
 Session.NOT_FOUND = 'NOT_FOUND';

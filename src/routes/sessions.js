@@ -14,6 +14,18 @@ this.sessions = {};
  * start new session, return sessionId
  */
 router.get('/start', (req, res) => {
+  if (!req.query.tags) {
+    res.statusCode = 400;
+    res.send({error: 'Tags are not specified for run'});
+  }
+  if (!req.query.mode) {
+    res.statusCode = 400;
+    res.send({error: 'Filter is not specified for run'});
+  }
+  if (!req.query.repositoryPath) {
+    res.statusCode = 400;
+    res.send({error: 'Repository path is not specified for run'});
+  }
   var tags = req.query.tags.split(',');
   let mode = req.query.mode;
   let repositoryPath = req.query.repositoryPath;
