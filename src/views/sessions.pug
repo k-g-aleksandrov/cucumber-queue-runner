@@ -50,7 +50,7 @@ block content
                     td(style='text-align: center;')
                         a(href='/sessions/' + session.sessionId + '/info#done')= passedCount + failedCount
                     td(style='text-align: center;')
-                        span= doneCount>0?((passedCount/doneCount)*100).toFixed(2):'-'
+                        span= doneCount>0?((passedCount/doneCount)*100).toFixed(2) + '%':'-'
                         span &nbsp(<font color="green">#{passedCount}</font>:<font color="red">#{failedCount}</font>)
                     td(rowspan='2' style='text-align:center; vertical-align:center;')
                         button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' +
