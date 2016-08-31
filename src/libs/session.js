@@ -6,9 +6,10 @@ var util = require('libs/util');
 var fs = require('fs');
 
 var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
+var Execution = require('libs/mongoose').Execution;
 
 class Session {
-  constructor(sessionId, tags, mode, repositoryPath) {
+  constructor(sessionId, tags, mode, project) {
     this.TIMEOUT_SEC = 1800;
     this.startDate = new Date();
     this.sessionId = sessionId;
@@ -16,11 +17,11 @@ class Session {
     this.doneScenarios = {};
     this.sessionState = Session.NOT_FOUND;
     this.sessionPath = `public/results/${this.sessionId}`;
-    this.project = repositoryPath.split('/').pop();
+    this.project = project;
 
     fs.mkdirSync(this.sessionPath);
 
-    let filter = {repositoryPath: repositoryPath, tags: {$in: tags}};
+    let filter = {project: project, tags: {$in: tags}};
     if (mode === Session.MODE_FAILED) {
       TagExecutionResult.find({}, (err, foundTags) => {
         if (err) throw err;
@@ -33,7 +34,7 @@ class Session {
             failedTags.push(tag.tag);
           }
         }
-        filter = {repositoryPath: repositoryPath, tags: {$in: failedTags}};
+        filter = {project: project, tags: {$in: failedTags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else if (mode === Session.MODE_DAILY) {
@@ -53,7 +54,7 @@ class Session {
             passedTags.push(tag.tag);
           }
         }
-        filter = {repositoryPath: repositoryPath, tags: {$in: passedTags}};
+        filter = {project: project, tags: {$in: passedTags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else if (mode === Session.MODE_DEVELOPMENT) {
@@ -65,7 +66,7 @@ class Session {
           if (!tag.reviewed) continue;
           noRunTags.push(tag.tag);
         }
-        filter = {repositoryPath: repositoryPath, tags: {$nin: noRunTags, $in: tags}};
+        filter = {project: project, tags: {$nin: noRunTags, $in: tags}};
         this.startSessionCallback(this.sessionId, filter);
       });
     } else {
@@ -135,25 +136,6 @@ class Session {
     }, 10000);
   }
 
-  shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-  }
-
   startSessionCallback(sessionId, filter) {
     log.info('Started new session ' + sessionId);
     Scenario.find(filter, (err, scenarios) => {
@@ -164,7 +146,7 @@ class Session {
       }
       log.info(sessionId + ': Number of scenarios to be executed - '
         + scenarios.length);
-      this.scenarios = this.shuffle(scenarios);
+      this.scenarios = util.shuffleArray(scenarios);
       this.sessionState = Session.OK;
     });
   }
@@ -271,6 +253,25 @@ class Session {
     }
   }
 
+  storeExecutionResult(scenarioId, result) {
+    Execution.update(
+      {scenarioId: scenarioId},
+      {
+        $push: {
+          'executions': {
+            $each: [{result: result}],
+            $slice: -100
+          }
+        }
+      },
+      {safe: true, upsert: true},
+      (err) => {
+        if (err) throw err;
+        log.info('Successfully stored execution result for scenario ' + scenarioId);
+      }
+    );
+  }
+
   updateTagDevelopmentStatus(tag) {
     log.debug('Checking current state for tag ' + tag);
     TagExecutionResult.find({tag: tag}, (err, tags) => {
@@ -318,6 +319,7 @@ class Session {
       sc.result = this.getScenarioState(scenarioReport);
       if (sc.result !== 'skipped') {
         this.writeTagsExecutionResultToDb(sc.tags, sc.result);
+        this.storeExecutionResult(sc.getScenarioId(), sc.result);
       }
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
       delete this.inProgressScenarios[scenarioId];

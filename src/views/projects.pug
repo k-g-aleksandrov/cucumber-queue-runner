@@ -1,0 +1,49 @@
+extends layout
+
+block navigationbar
+    - var active = 'projects'
+block content
+    if projects.length
+        table.table.table-striped.table-bordered
+            tr
+                th(colspan='2') Available Projects
+            each project in projects
+                tr
+                    td
+                        a(href='/projects/' + project.projectId) #{project.name}
+                    td
+                        span #{project.description}
+    else
+        div.alert.alert-info Create at least one project
+    button.btn.btn-info(id='add-project-button' data-toggle='modal' data-target='#add-project-form') Add Project
+    div.modal.fade#add-project-form(role='dialog')
+        div.modal-dialog
+            div.modal-content
+                div.modal-header.bg-info
+                    button.close(type='button' data-dismiss='modal') &times;
+                    h4 Add Project
+                div.modal-body
+                    form(role='form' action='/projects/add' method='post')
+                        div.form-group
+                            label(for='project-id') Project ID
+                            input.form-control#project-id(name='id' type='text' placeholder='Enter project ID')
+                        div.form-group
+                            label(for='project-display-name') Display Name
+                            input.form-control#project-display-name(name='name' type='text' placeholder='Enter project ID')
+                        div.form-group
+                            label(for='working-copy-path') Working Copy Path
+                            input.form-control#working-copy-path(name='wcpath' type='text' placeholder='Enter working copy path')
+                        div.form-group
+                            label(for='features-root-path') Features Root Path
+                            input.form-control#features-root-path(name='frpath' type='text' placeholder='Enter features root path (e.g. src/test/resources/)')
+                        div.form-group
+                            label(for='project-tag') Project Tag
+                            input.form-control#project-tag(name='tag' type='text' placeholder='Only scenarios marked by specified tag are related to project')
+                        div.form-group
+                            label(for='project-description') Description
+                            input.form-control#project-description(name='description' type='textarea' placeholder='Enter description')
+                        button.btn.btn-default.btn-success.btn-block(type='submit') Create
+                div.modal-footer
+                    button.btn.btn-default.pull-left(type='submit' data-dismiss='modal')
+                        span.glyphicon.glyphicon-remove
+                        span &nbsp;Cancel

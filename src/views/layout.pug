@@ -4,8 +4,10 @@ html
         title= title
         link(rel='stylesheet', href='/stylesheets/style.css')
         link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+        script(src='https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js')
+        script(src='/bootstrap/js/bootstrap.min.js')
         block pagehead
-    body
+    body(style='padding:0')
         block navigationbar
         nav.navbar.navbar-inverse.navbar-static-top
             div.navbar-inner
@@ -17,10 +19,11 @@ html
                         else
                             li
                                 a(href='/sessions/list') Sessions
-                        if active === 'scopes'
+                        if active === 'projects'
                             li.active
-                                a(href='/scopes') Projects
+                                a(href='/projects') Projects
                         else
                             li
-                                a(href='/scopes') Projects
-        block content
+                                a(href='/projects') Projects
+        div.container-fluid
+            block content

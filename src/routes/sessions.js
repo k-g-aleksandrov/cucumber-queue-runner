@@ -22,14 +22,14 @@ router.get('/start', (req, res) => {
     res.statusCode = 400;
     res.send({error: 'Filter is not specified for run'});
   }
-  if (!req.query.repositoryPath) {
+  if (!req.query.project) {
     res.statusCode = 400;
-    res.send({error: 'Repository path is not specified for run'});
+    res.send({error: 'Project is not specified for run'});
   }
   var tags = req.query.tags.split(',');
   let mode = req.query.mode;
-  let repositoryPath = req.query.repositoryPath;
-  var newSession = new Session(util.generateGUID(), tags, mode, repositoryPath);
+  let project = req.query.project;
+  var newSession = new Session(util.generateGUID(), tags, mode, project);
   if (!this.sessions) {
     this.sessions = {};
   }

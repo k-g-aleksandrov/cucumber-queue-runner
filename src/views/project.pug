@@ -1,0 +1,42 @@
+extends layout
+
+mixin scopeTable(project,list)
+    if list && list.length
+        tr
+            th(colspan='4')
+                h4 #{project} (#{list.length})
+        each sc, index in list
+            if (sc.scenarioName)
+                tr
+                    td.col-md-1= index + 1
+                    td
+                        b #{sc.featureName}:&nbsp;
+                        span #{sc.scenarioName} (:#{sc.scenarioLine})
+                    td
+                        each tag in sc.tags
+                            span #{tag.tag}
+                            br
+                    td
+                        each tag in sc.tags
+                            if tag.executions
+                                each run in tag.executions
+                                    if run == 'passed'
+                                        span(style='color: green;') &#x25cf;
+                                    else
+                                        span(style='color: red;') &#x25cf;
+                                br
+    else
+        tr
+            th(colspan='4')
+                h4 No scenarios found by filter '#{project}'
+
+block navigationbar
+    - var active = 'projects'
+block content
+    div
+        h2 #{name}
+        em= description
+    table.table.table-striped.table-bordered
+        +scopeTable('Development', development)
+        +scopeTable('Daily', daily)
+        +scopeTable('Muted', muted)

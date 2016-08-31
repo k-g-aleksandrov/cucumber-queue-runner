@@ -31,23 +31,18 @@ db.once('open', () => {
 
 var Schema = mongoose.Schema;
 
-var RepositorySchema = new Schema({
-  url: {type: String, unique: true},
-  name: String,
-  projects: [{type: Schema.Types.ObjectId, ref: 'Project'}]
-});
-
 var ProjectSchema = new Schema({
+  projectId: {type: String, unique: true},
   name: String,
-  classpath: [String],
-  glue: String
+  tag: String,
+  description: String,
+  workingCopyPath: String,
+  featuresRoot: String
 });
 
-var FeatureSchema = new Schema({
-  _id: Number,
-  name: String,
-  sourcePath: String,
-  scenarios: [{type: Schema.Types.ObjectId, ref: 'Scenario'}]
+var FilterSchema = new Schema({
+  filterId: {type: String, unique: true},
+  filter: Object
 });
 
 var TagExecutionResultSchema = new Schema({
@@ -61,32 +56,45 @@ var TagExecutionResultSchema = new Schema({
   reviewed: {type: Boolean, 'default': false}
 });
 
+var ExecutionSchema = new Schema({
+  scenarioId: { type: String, unique: true},
+  executions: [
+    {
+      result: String,
+      time: {type: Date, default: Date.now}
+    }
+  ]
+});
+
 var ScenarioSchema = new Schema({
-  _feature: {type: Number, ref: 'Feature'},
-  repositoryPath: String,
   project: String,
   classpath: String,
   featureName: String,
   scenarioName: String,
+  exampleParams: String,
   scenarioLine: Number,
   tags: Array
 });
 
 ScenarioSchema.index({
-  repositoryPath: 1,
+  project: 1,
   featureName: 1,
   scenarioName: 1,
-  scenarioLine: 1
+  exampleParams: 1
 }, {unique: true});
 
+ScenarioSchema.methods.getScenarioId = function getScenarioId() {
+  return this.featureName + ' -> ' + this.scenarioName + '(' + this.exampleParams + ')';
+};
+
 var Scenario = mongoose.model('Scenario', ScenarioSchema);
-var Feature = mongoose.model('Feature', FeatureSchema);
 var Project = mongoose.model('Project', ProjectSchema);
-var Repository = mongoose.model('Repository', RepositorySchema);
 var TagExecutionResult = mongoose.model('TagExecutionResult', TagExecutionResultSchema);
+var Filter = mongoose.model('Filter', FilterSchema);
+var Execution = mongoose.model('Execution', ExecutionSchema);
 
 module.exports.Scenario = Scenario;
-module.exports.Feature = Feature;
 module.exports.Project = Project;
-module.exports.Repository = Repository;
 module.exports.TagExecutionResult = TagExecutionResult;
+module.exports.Filter = Filter;
+module.exports.Execution = Execution;
