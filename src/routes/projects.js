@@ -170,11 +170,13 @@ router.get('/:project/v2', (req, res) => {
 
     Scenario.find({project: project.projectId}, (err, scenarios) => {
       if (err) log.error(err);
-      let development = [];
-      let daily = [];
-      let muted = [];
-      let full = [];
-      let missing = [];
+      let scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
+      let scenariosScopes = {};
+      for (let scenarioFilter of scenarioFilters) {
+        scenariosScopes[scenarioFilter.id] = {filter: scenarioFilter, scenarios: []};
+      }
+      scenariosScopes['disabled'] = {filter: {id:'disabled', displayName: 'Disabled', description: 'Scenarios that didn\'t pass any filters'}, scenarios: []};
+
       let scenarioPromises = scenarios.map((sc) => {
         return new Promise((scResolve, scReject) => {
           Execution.findOne({scenarioId: sc.getScenarioId()}, (err, execution) => {
@@ -185,31 +187,21 @@ router.get('/:project/v2', (req, res) => {
               }
             }
             let inScopes = false;
-            if (filter.applyFilter(sc, filter.development)) {
-              development.push(sc);
-              inScopes = true;
-            }
-            if (filter.applyFilter(sc, filter.daily)) {
-              daily.push(sc);
-              inScopes = true;
-            }
-            if (filter.applyFilter(sc, filter.muted)) {
-              muted.push(sc);
-              inScopes = true;
-            }
-            if (filter.applyFilter(sc, filter.full)) {
-              full.push(sc);
-              inScopes = true;
+            for (let scenarioFilter of scenarioFilters) {
+              if (filter.applyFilter(sc, scenarioFilter)) {
+                scenariosScopes[scenarioFilter.id].scenarios.push(sc);
+                inScopes = true;
+              }
             }
             if (!inScopes) {
-              missing.push(sc);
+              scenariosScopes['disabled'].scenarios.push(sc);
             }
             scResolve();
           });
         });
       });
       Promise.all(scenarioPromises).then(() => {
-        res.render('project-new', {name: project.name, description: project.description, development: development, daily: daily, muted: muted, full: full, missing: missing});
+        res.render('project-new', {name: project.name, description: project.description, scopes: scenariosScopes});
       }).catch(log.error);
     });
   });

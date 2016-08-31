@@ -16,7 +16,7 @@ module.exports.development = {
 
 module.exports.daily = {
   id: 'daily',
-  displayName: 'Daily Tests',
+  displayName: 'Daily',
   executionRules: [{
     result: 'passed',
     number: 5,
@@ -33,7 +33,7 @@ module.exports.daily = {
 
 module.exports.muted = {
   id: 'muted',
-  displayName: 'Failed Tests',
+  displayName: 'Failed',
   executionRules: [{
     result: 'passed',
     number: 5,
@@ -71,7 +71,6 @@ function validateExecutionsRowRule(scenario, rule) {
       maxInARow = currentInARow;
     }
     if (maxInARow >= rule.number) {
-      log.debug('Max in a row > expected: ' + maxInARow + ' > ' + rule.number);
       result = true;
     }
   }
