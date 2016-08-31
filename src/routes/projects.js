@@ -157,7 +157,7 @@ router.get('/:project/scan', (req, res) => {
   });
 });
 
-router.get('/:project/2.0', (req, res) => {
+router.get('/:project/v2', (req, res) => {
   let projectId = req.params.project;
   Project.findOne({projectId: projectId}, (err, project) => {
     if (err) {
