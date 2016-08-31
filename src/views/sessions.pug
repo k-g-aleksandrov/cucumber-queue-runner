@@ -34,7 +34,7 @@ block content
                 - var progressCount = session.getScenariosCount('in progress')
                 - var passedCount = session.getScenariosCount('passed')
                 - var failedCount = session.getScenariosCount('failed')
-                - var doneCount = passedCount + failedCount
+                - var doneCount = session.getScenariosCount('done')
                 - var totalCount = session.getScenariosCount()
                 tr
                     td(style='vertical-align: center;' rowspan='2')
@@ -45,8 +45,7 @@ block content
                     td(style='text-align: center;')
                         a(href='/sessions/' + session.sessionId + '/info#queue')= queueCount
                     td(style='text-align: center;')
-                        a(href='/sessions/' + session.sessionId +
-                        '/info#progress')= progressCount
+                        a(href='/sessions/' + session.sessionId + '/info#progress')= progressCount
                     td(style='text-align: center;')
                         a(href='/sessions/' + session.sessionId + '/info#done')= passedCount + failedCount
                     td(style='text-align: center;')

@@ -190,7 +190,7 @@ class Session {
       var failedCount = 0;
       for (let doneFeature of Object.keys(this.doneScenarios)) {
         for (let scenario of this.doneScenarios[doneFeature]) {
-          if ('failed' === scenario.result) {
+          if ('failed' === scenario.result || 'undefined' === scenario.result) {
             failedCount++;
           }
         }
