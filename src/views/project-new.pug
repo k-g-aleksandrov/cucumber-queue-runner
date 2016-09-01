@@ -6,7 +6,8 @@ mixin scopeTable(scope)
             tr(style='background-color:#d9edf7')
                 th(colspan='3')
                     h4
-                        span.glyphicon.glyphicon-collapse-down
+                        small
+                            span.glyphicon.glyphicon-collapse-down
                         span &nbsp;#{scope.filter.displayName} - #{scope.scenarios.length} scenarios
                     span(style='padding-left:8px;color:gray;font-style:italic;font-weight:lighter')= scope.filter.description
         tbody.collapseWithGlyphicon.collapse.in(id='collapsable-' + scope.filter.id)
@@ -16,7 +17,7 @@ mixin scopeTable(scope)
                     td
                         b #{sc.featureName}:&nbsp;
                         span #{sc.scenarioName} (:#{sc.scenarioLine})
-                    td
+                    td(style='text-align:right;')
                         if sc.executions
                             each exec in sc.executions
                                 if exec.result == 'passed'
@@ -24,7 +25,7 @@ mixin scopeTable(scope)
                                 else
                                     span(style='color: red;') &#x25cf;
     else
-        tbody
+        tbody(style='margin-bottom:12px')
             tr(style='background-color:#d9edf7')
                 th(colspan='3')
                     h4 No scenarios found by filter '#{scope.filter.displayName}'
@@ -32,6 +33,9 @@ mixin scopeTable(scope)
 block navigationbar
     - var active = 'projects'
 block content
+    div(style='padding-bottom:12px')
+        span Switch to&nbsp;
+        a(href='/projects/' + id + '') Old Details Page
     div
         h2 #{name}
         em= description

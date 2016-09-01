@@ -201,7 +201,7 @@ router.get('/:project/v2', (req, res) => {
         });
       });
       Promise.all(scenarioPromises).then(() => {
-        res.render('project-new', {name: project.name, description: project.description, scopes: scenariosScopes});
+        res.render('project-new', {id: projectId, name: project.name, description: project.description, scopes: scenariosScopes});
       }).catch(log.error);
     });
   });
@@ -210,7 +210,7 @@ router.get('/:project/v2', (req, res) => {
 router.get('/:project', (req, res) => {
   let project = req.params.project;
   Scenario.find({project: project}, (err, scenarios) => {
-    let responseObject = {development: [], daily: [], muted: []};
+    let responseObject = {name: project, development: [], daily: [], muted: []};
     if (err) log.error(err);
     let scenarioPromises = scenarios.map((sc) => {
       return new Promise((scResolve, scReject) => {

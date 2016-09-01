@@ -16,7 +16,7 @@ mixin scopeTable(project,list)
                         each tag in sc.tags
                             span #{tag.tag}
                             br
-                    td
+                    td(style='text-align:right')
                         each tag in sc.tags
                             if tag.executions
                                 each run in tag.executions
@@ -33,9 +33,9 @@ mixin scopeTable(project,list)
 block navigationbar
     - var active = 'projects'
 block content
-    div
-        h2 #{name}
-        em= description
+    div(style='padding-bottom:12px')
+        span Switch to&nbsp;
+        a(href='/projects/' + name + '/v2') New Details Page
     table.table.table-striped.table-bordered
         +scopeTable('Development', development)
         +scopeTable('Daily', daily)
