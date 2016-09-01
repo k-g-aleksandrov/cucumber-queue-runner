@@ -161,7 +161,7 @@ block content
     div.tabcontent#list_progress
         table.table.table-bordered(style='margin-bottom:0px;')
             each inProgress in status.inProgress
-                tr.active
+                tr(style='background-color:lightgray;')
                     td
                         b #{inProgress.featureName}:&nbsp;
                         span #{inProgress.scenarioName} (:#{inProgress.scenarioLine})
@@ -172,10 +172,10 @@ block content
                     th Feature: #{feature}
                     each done in scenarios
                         if done.result === 'passed'
-                            - var scenarioClass = 'success'
+                            - var backgroundColor = '#92DD96'
                         else if done.result === 'failed'
-                            - var scenarioClass = 'danger'
-                        tr(class=scenarioClass onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;')
+                            - var backgroundColor = '#F2928C'
+                        tr(style='background-color:' + backgroundColor onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;')
                             td
                                 p #{done.scenarioName} (:#{done.scenarioLine})
                                 div(id='sc' + done.scenarioId onclick='event.stopPropagation();' style='display:none;cursor:text;')
