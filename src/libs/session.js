@@ -203,10 +203,11 @@ class Session {
     }
   }
 
-  getNextScenario() {
+  getNextScenario(executor) {
     var next = this.scenarios.shift();
     if (next) {
-      next.requestTime = Date.now();
+      next.startTimestamp = Date.now();
+      next.executor = executor;
       this.inProgressScenarios[next._id] = next;
     }
     return next;
@@ -253,13 +254,13 @@ class Session {
     }
   }
 
-  storeExecutionResult(scenarioId, result) {
+  storeExecutionResult(scenario) {
     Execution.update(
-      {scenarioId: scenarioId},
+      {scenarioId: scenario.getScenarioId()},
       {
         $push: {
           'executions': {
-            $each: [{result: result}],
+            $each: [{startTimestamp: scenario.startTimestamp, result: scenario.result, executor: scenario.executor}],
             $slice: -100
           }
         }
@@ -267,7 +268,7 @@ class Session {
       {safe: true, upsert: true},
       (err) => {
         if (err) throw err;
-        log.info('Successfully stored execution result for scenario ' + scenarioId);
+        log.info('Successfully stored execution result for scenario ' + scenario.scenarioId);
       }
     );
   }
@@ -319,7 +320,7 @@ class Session {
       sc.result = this.getScenarioState(scenarioReport);
       if (sc.result !== 'skipped') {
         this.writeTagsExecutionResultToDb(sc.tags, sc.result);
-        this.storeExecutionResult(sc.getScenarioId(), sc.result);
+        this.storeExecutionResult(sc);
       }
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
       delete this.inProgressScenarios[scenarioId];

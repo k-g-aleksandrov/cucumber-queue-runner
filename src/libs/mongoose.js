@@ -61,7 +61,9 @@ var ExecutionSchema = new Schema({
   executions: [
     {
       result: String,
-      time: {type: Date, default: Date.now}
+      startTimestamp: {type: Date},
+      endTimestamp: {type: Date, default: Date.now},
+      executor: String
     }
   ]
 });

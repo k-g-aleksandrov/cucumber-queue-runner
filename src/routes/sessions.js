@@ -42,12 +42,13 @@ router.get('/start', (req, res) => {
  */
 router.get('/:sessionId/next', (req, res) => {
   let currentSession = this.sessions[req.params.sessionId];
+  let executor = req.params.slaveId;
   // respond with empty object
   if (!currentSession) {
     res.send({state: Session.NOT_FOUND});
     return;
   }
-  let nextScenario = currentSession.getNextScenario();
+  let nextScenario = currentSession.getNextScenario(executor);
   if (nextScenario) {
     var responseData = {state: Session.OK, scenario: {}};
     responseData.scenario.path = nextScenario.classpath + ':'
