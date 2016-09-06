@@ -83,7 +83,7 @@ class Session {
       log.debug(sessionId + ': ' + this.getStatistics());
       for (let scenarioId of inProgressScenariosIds) {
         var inProgressScenario = this.inProgressScenarios[scenarioId];
-        var requestDate = inProgressScenario.requestTime;
+        var requestDate = inProgressScenario.startTimestamp;
         if ((Date.now() - requestDate) / 1000 > this.TIMEOUT_SEC) {
           log.error(sessionId + ': scenario execution were not finished in '
             + this.TIMEOUT_SEC + ' seconds. Moving it back to scenarios queue');
@@ -268,7 +268,7 @@ class Session {
       {safe: true, upsert: true},
       (err) => {
         if (err) throw err;
-        log.info('Successfully stored execution result for scenario ' + scenario.scenarioId);
+        log.info('Successfully stored execution result for scenario ' + scenario.getScenarioId());
       }
     );
   }
