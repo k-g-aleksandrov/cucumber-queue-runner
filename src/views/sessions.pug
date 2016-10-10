@@ -9,6 +9,7 @@ block pagehead
             height: 15px;
             float: left;
         }
+
         .progress-chart:after {
             clear: both;
         }
@@ -49,8 +50,8 @@ block content
                     td(style='text-align: center;')
                         a(href='/sessions/' + session.sessionId + '/info#done')= passedCount + failedCount
                     td(style='text-align: center;')
-                        span= doneCount>0?((passedCount/doneCount)*100).toFixed(2) + '%':'-'
-                        span &nbsp(<font color="green">#{passedCount}</font>:<font color="red">#{failedCount}</font>)
+                        span= doneCount > 0 ? ((passedCount / doneCount) * 100).toFixed(2) + '%' : '-'
+                        span &nbsp;(<font color="green">#{passedCount}</font>:<font color="red">#{failedCount}</font>)
                     td(rowspan='2' style='text-align:center; vertical-align:center;')
                         button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' +
                         session.sessionId + '/remove"') Remove
@@ -60,6 +61,6 @@ block content
                             div(style='background-color:#92DD96;width:' + (passedCount * 100) / totalCount + '%')
                             div(style='background-color:#F2928C;width:' + (failedCount * 100) / totalCount + '%')
                             div(style='background-color:#F5F28F;width:' + (progressCount * 100) / totalCount + '%')
-                            div(style='background-color:lightgray;width:' + (queueCount*100)/totalCount + '%')
+                            div(style='background-color:lightgray;width:' + (queueCount * 100) / totalCount + '%')
     else
         div.alert.alert-info No running sessions

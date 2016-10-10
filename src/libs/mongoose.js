@@ -57,7 +57,7 @@ var TagExecutionResultSchema = new Schema({
 });
 
 var ExecutionSchema = new Schema({
-  scenarioId: { type: String, unique: true},
+  scenarioId: {type: String, unique: true},
   executions: [
     {
       result: String,

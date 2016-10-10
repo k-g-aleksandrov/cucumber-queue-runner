@@ -103,7 +103,7 @@ module.exports.zipDirectory = function (dir, name) {
   execFileSync('zip', ['-r', '-j', name, dir]);
 };
 
-module.exports.shuffleArray = function(array) {
+module.exports.shuffleArray = function (array) {
   var currentIndex = array.length, temporaryValue, randomIndex;
 
   // While there remain elements to shuffle...

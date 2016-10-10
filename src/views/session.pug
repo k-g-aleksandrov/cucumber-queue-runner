@@ -175,10 +175,12 @@ block content
                             - var backgroundColor = '#92DD96'
                         else if done.result === 'failed'
                             - var backgroundColor = '#F2928C'
-                        tr(onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;background-color:' + backgroundColor)
+                        tr(onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;background-color:' +
+                        backgroundColor)
                             td
                                 p #{done.scenarioName} (:#{done.scenarioLine})
-                                div(id='sc' + done.scenarioId onclick='event.stopPropagation();' style='display:none;cursor:text;')
+                                div(id='sc' +
+                                done.scenarioId onclick='event.stopPropagation();' style='display:none;cursor:text;')
     script.
         function toggle(scenarioId) {
             $('#sc' + scenarioId).load('/sessions/#{sessionId}/reports/' + scenarioId).toggle();
