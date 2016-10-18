@@ -51,61 +51,49 @@ class Session {
     }, 10000);
 
     this.trackSessionState = setInterval(() => {
-      if (this.getScenariosCount(Session.STATE_IN_PROGRESS) +
-        this.getScenariosCount(Session.STATE_IN_QUEUE) +
-        this.getScenariosCount(Session.STATE_DONE) == 0) {
-        log.debug(this.sessionId + ': Stopping session');
-        clearInterval(this.inProgressTracking);
-        clearInterval(this.trackSessionState);
-        fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
-        util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
-        this.sessionState = Session.NOT_FOUND;
-        log.debug(this.sessionId + ': Session stopped');
-        return;
-      }
-
       if (this.getScenariosCount(Session.STATE_IN_PROGRESS)
         + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
-        log.debug(this.sessionId + ': Stopping session');
         clearInterval(this.inProgressTracking);
-        log.debug(this.sessionId
-          + ': Tests execution done. Preparing reports...');
-
+        log.debug(this.sessionId + ': Tests execution done');
         let haveReports = false;
-        for (let key of Object.keys(this.doneScenarios)) {
-          var combinedReport = null;
-          log.info('Processing feature ' + key + ' report');
-          var featureReports = this.doneScenarios[key];
-          for (let scenario of featureReports) {
-            if (!scenario.report) {
-              log.debug('No report for scenario ' + scenario.getScenarioId() + ' saved');
-              continue;
-            }
-            var report = scenario.report[0];
-            if (report) {
-              log.debug('Added report for scenario ' + report.elements[0].keyword
-                + ': ' + report.elements[0].name);
-              if (!combinedReport) {
-                combinedReport = scenario.report;
-              } else {
-                combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+        if (this.getScenariosCount(Session.STATE_DONE) > 0) {
+          log.debug(this.sessionId + ': Tests execution done. Preparing reports...');
+          for (let key of Object.keys(this.doneScenarios)) {
+            var combinedReport = null;
+            log.info('Processing feature ' + key + ' report');
+            var featureReports = this.doneScenarios[key];
+            for (let scenario of featureReports) {
+              if (!scenario.report) {
+                log.debug('No report for scenario ' + scenario.getScenarioId() + ' saved');
+                continue;
               }
-            } else {
-              log.debug('Report for scenario ' + scenario.getScenarioId() + ' was not sent correctly');
+              var report = scenario.report[0];
+              if (report) {
+                log.debug('Added report for scenario ' + report.elements[0].keyword
+                  + ': ' + report.elements[0].name);
+                if (!combinedReport) {
+                  combinedReport = scenario.report;
+                } else {
+                  combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+                }
+              } else {
+                log.debug('Report for scenario ' + scenario.getScenarioId() + ' was not sent correctly');
+              }
+            }
+            let filename = key.replace(/\W/g, '');
+            if (combinedReport) {
+              fs.writeFileSync(this.sessionPath + '/' + filename + '.json', JSON.stringify(combinedReport, null, 4));
+              haveReports = true;
             }
           }
-          let filename = key.replace(/\W/g, '');
-          if (combinedReport) {
-            fs.writeFileSync(this.sessionPath + '/' + filename
-              + '.json', JSON.stringify(combinedReport, null, 4));
-            haveReports = true;
-          }
         }
-        if (haveReports) {
-          util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
+
+        if (!haveReports) {
+          fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
         }
-        this.sessionState = Session.NOT_FOUND;
+        util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
         clearInterval(this.trackSessionState);
+        this.sessionState = Session.NOT_FOUND;
         log.debug(this.sessionId + ': Session stopped');
       }
     }, 10000);

@@ -1,5 +1,21 @@
 extends layout
 
+mixin doneRow(scenario)
+    if scenario.result === 'passed'
+        - var backgroundColor = '#92DD96'
+    else if scenario.result === 'failed'
+        - var backgroundColor = '#F2928C'
+    else if scenario.result === 'skipped'
+        - var backgroundColor = 'lightgray'
+    if scenario.result !== 'skipped'
+        tr(onclick="toggle('" + scenario.scenarioId + "')" style='cursor: pointer;background-color:' + backgroundColor)
+            td
+                p #{scenario.scenarioName} (:#{scenario.scenarioLine})
+                div(id='sc' + scenario.scenarioId onclick='event.stopPropagation();' style='display:none;cursor:text;')
+    else
+        tr(style='background-color:'+backgroundColor)
+            td
+                p #{scenario.scenarioName} (:#{scenario.scenarioLine})
 block pagehead
     script.
         function openSelectedTab(selectedTab) {
@@ -120,7 +136,9 @@ block pagehead
             padding: 8px;
             text-decoration: none;
             transition: 0.3s;
-            font-size: 18px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #ddd;
         }
 
         /* Change background color of links on hover */
@@ -177,18 +195,7 @@ block content
                 tr
                     th Feature: #{feature}
                     each done in scenarios
-                        if done.result === 'passed'
-                            - var backgroundColor = '#92DD96'
-                        else if done.result === 'failed'
-                            - var backgroundColor = '#F2928C'
-                        else if done.result === 'skipped'
-                            - var backgroundColor = 'lightgray'
-                        tr(onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;background-color:' +
-                        backgroundColor)
-                            td
-                                p #{done.scenarioName} (:#{done.scenarioLine})
-                                div(id='sc' +
-                                done.scenarioId onclick='event.stopPropagation();' style='display:none;cursor:text;')
+                        +doneRow(done)
     script.
         function toggle(scenarioId) {
             $('#sc' + scenarioId).load('/sessions/#{sessionId}/reports/' + scenarioId).toggle();
