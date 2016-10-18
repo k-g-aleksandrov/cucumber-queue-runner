@@ -56,6 +56,7 @@ class Session {
         this.getScenariosCount(Session.STATE_DONE) == 0) {
         log.debug(this.sessionId + ': Stopping session');
         clearInterval(this.inProgressTracking);
+        clearInterval(this.trackSessionState);
         fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
         util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
         this.sessionState = Session.NOT_FOUND;
@@ -67,7 +68,6 @@ class Session {
         + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
         log.debug(this.sessionId + ': Stopping session');
         clearInterval(this.inProgressTracking);
-
         log.debug(this.sessionId
           + ': Tests execution done. Preparing reports...');
 
@@ -207,7 +207,7 @@ class Session {
       }
     }
   }
-  
+
   stopSession() {
     this.scenarios = [];
     this.inProgressScenarios = {};
