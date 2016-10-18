@@ -4,8 +4,6 @@ let log = require('libs/log')(module);
 
 let Project = require('libs/mongoose').Project;
 let Scenario = require('libs/mongoose').Scenario;
-let Execution = require('libs/mongoose').Execution;
-let TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 
 let fs = require('fs');
 let util = require('libs/util');
@@ -157,120 +155,23 @@ router.get('/:project/scan', (req, res) => {
   });
 });
 
-router.get('/:project/v2', (req, res) => {
-  let projectId = req.params.project;
-  Project.findOne({projectId: projectId}, (err, project) => {
-    if (err) {
-      log.error(err);
-      return res.send({error: err});
-    }
-    if (!project) {
-      return res.send({error: 'Can\'t find project with id ' + projectId});
-    }
-
-    Scenario.find({project: project.projectId}, (err, scenarios) => {
-      if (err) log.error(err);
-      let scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
-      let scenariosScopes = {};
-      for (let scenarioFilter of scenarioFilters) {
-        scenariosScopes[scenarioFilter.id] = {filter: scenarioFilter, scenarios: []};
-      }
-      scenariosScopes['disabled'] = {filter: {id:'disabled', displayName: 'Disabled', description: 'Scenarios that didn\'t pass any filters'}, scenarios: []};
-
-      let scenarioPromises = scenarios.map((sc) => {
-        return new Promise((scResolve, scReject) => {
-          Execution.findOne({scenarioId: sc.getScenarioId()}, (err, execution) => {
-            sc.projectTag = project.tag;
-            if (execution) {
-              if (execution.executions) {
-                sc.executions = execution.executions;
-              }
-            }
-            let inScopes = false;
-            for (let scenarioFilter of scenarioFilters) {
-              if (filter.applyFilter(sc, scenarioFilter)) {
-                scenariosScopes[scenarioFilter.id].scenarios.push(sc);
-                inScopes = true;
-              }
-            }
-            if (!inScopes) {
-              scenariosScopes['disabled'].scenarios.push(sc);
-            }
-            scResolve();
-          });
-        });
-      });
-      Promise.all(scenarioPromises).then(() => {
-        res.render('project-new', {id: projectId, name: project.name, description: project.description, scopes: scenariosScopes});
-      }).catch(log.error);
-    });
-  });
-});
-
 router.get('/:project', (req, res) => {
-  let project = req.params.project;
-  Scenario.find({project: project}, (err, scenarios) => {
-    let responseObject = {name: project, development: [], daily: [], muted: []};
-    if (err) log.error(err);
-    let scenarioPromises = scenarios.map((sc) => {
-      return new Promise((scResolve, scReject) => {
-        let scenarioObject = {};
-        let executions = [];
-        let idTags = [];
-        let scenarioState = null;
-        for (let tag of sc.tags) {
-          if (tag.startsWith('@id')) {
-            idTags.push(tag);
-          }
-        }
-        let tagPromises = idTags.map((idTag) => {
-          return new Promise((tagResolve, tagReject) => {
-            TagExecutionResult.find({tag: idTag}, (err, result) => {
-              if (err) return tagReject(err);
-              if (!result || result.length === 0) {
-                log.info('Skipped results for tag ' + idTag);
-              } else {
-                if (!result[0].reviewed) {
-                  scenarioState = 'development';
-                } else if (result[0].executions[result[0].executions.length - 1].result === 'failed') {
-                  if (scenarioState !== 'development') {
-                    scenarioState = 'failed';
-                  }
-                } else {
-                  if (scenarioState !== 'development' && scenarioState !== 'failed') {
-                    scenarioState = 'passed';
-                  }
-                }
-                let execs = [];
-                for (let exec of result[0].executions) {
-                  execs.push(exec.result);
-                }
-                executions.push({tag: idTag, executions: execs});
-              }
-              tagResolve();
-            });
-          });
-        });
-        Promise.all(tagPromises).then(() => {
-          if (!sc.scenarioName.trim()) {
-            log.warn('Skipping scenario with empty name');
-            return scResolve();
-          }
-          scenarioObject = {featureName: sc.featureName, scenarioName: sc.scenarioName, scenarioLine: sc.scenarioLine, tags: executions};
-          if (scenarioState === 'development' || scenarioState === null) {
-            responseObject.development.push(scenarioObject);
-          } else if (scenarioState === 'failed') {
-            responseObject.muted.push(scenarioObject);
-          } else if (scenarioState === 'passed') {
-            responseObject.daily.push(scenarioObject);
-          }
-          scResolve();
-        }).catch(log.error);
-      });
+  let project;
+  Project.findOne({projectId: req.params.project}, (err, foundProject) => {
+    project = foundProject;
+  });
+  let scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
+  let scenariosScopes = {};
+  for (let scenarioFilter of scenarioFilters) {
+    scenariosScopes[scenarioFilter.id] = {filter: scenarioFilter, scenarios: []};
+  }
+  filter.applyFiltersToProject(req.params.project, scenarioFilters, (err, project, scenariosScopes) => {
+    res.render('project', {
+      id: project.projectId,
+      name: project.name,
+      description: project.description,
+      scopes: scenariosScopes
     });
-    Promise.all(scenarioPromises).then(() => {
-      res.render('project', responseObject);
-    }).catch(log.error);
   });
 });
 

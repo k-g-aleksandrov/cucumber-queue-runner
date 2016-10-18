@@ -6,13 +6,15 @@ block content
     if projects.length
         table.table.table-striped.table-bordered
             tr
-                th(colspan='2') Available Projects
+                th(colspan='3') Available Projects
             each project in projects
                 tr
                     td
                         a(href='/projects/' + project.projectId) #{project.name}
                     td
                         span #{project.description}
+                    td(align='center')
+                        a.btn.btn-primary(role='button' href='/projects/' + project.projectId + '/scan') Rescan Project
     else
         div.alert.alert-info Create at least one project
     button.btn.btn-info(id='add-project-button' data-toggle='modal' data-target='#add-project-form') Add Project

@@ -37,14 +37,14 @@ block pagehead
                         "#8AF",
                         "#F5F28F",
                         "#92DD96",
-                        "#F2928C"
+                        "#F2928C",
+                        "lightgray"
                     ]);
             var chart = new CanvasJS.Chart("chartContainer",
                     {
                         colorSet: "resultsColorSet",
                         title: {
                             text: "Execution State",
-                            fontFamily: "Impact",
                             fontWeight: "normal"
                         },
 
@@ -56,7 +56,6 @@ block pagehead
                             {
                                 //startAngle: 45,
                                 indexLabelFontSize: 20,
-                                indexLabelFontFamily: "Garamond",
                                 indexLabelFontColor: "darkgrey",
                                 indexLabelLineColor: "darkgrey",
                                 indexLabelPlacement: "outside",
@@ -82,6 +81,11 @@ block pagehead
                                         y: #{status.failed.length},
                                         legendText: "Failed #{status.failed.length}",
                                         indexLabel: "Failed #{status.failed.length}"
+                                    },
+                                    {
+                                        y: #{status.skipped.length},
+                                        legendText: "Skipped #{status.skipped.length}",
+                                        indexLabel: "Skipped #{status.skipped.length}"
                                     }
                                 ]
                             }
@@ -158,6 +162,8 @@ block content
                     td
                         b #{queue.featureName}:&nbsp;
                         span #{queue.scenarioName} (:#{queue.scenarioLine})
+                    td
+                        a(href='/sessions/' + sessionId + '/skip/' + queue.scenarioId) Skip Scenario ->
     div.tabcontent#list_progress
         table.table.table-bordered(style='margin-bottom:0px;')
             each inProgress in status.inProgress
@@ -175,6 +181,8 @@ block content
                             - var backgroundColor = '#92DD96'
                         else if done.result === 'failed'
                             - var backgroundColor = '#F2928C'
+                        else if done.result === 'skipped'
+                            - var backgroundColor = 'lightgray'
                         tr(onclick="toggle('" + done.scenarioId + "')" style='cursor: pointer;background-color:' +
                         backgroundColor)
                             td

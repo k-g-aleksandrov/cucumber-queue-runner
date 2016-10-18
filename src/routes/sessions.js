@@ -123,7 +123,7 @@ router.get('/list', (req, res) => {
 /**
  * get current session information
  */
-router.get('/:sessionId/info', (req, res) => {
+router.get('/:sessionId/details', (req, res) => {
   let session = this.sessions[req.params.sessionId];
   if (session) {
     let status = this.sessions[req.params.sessionId].getStatus();
@@ -136,7 +136,7 @@ router.get('/:sessionId/info', (req, res) => {
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   let session = this.sessions[req.params.sessionId];
   if (!session) {
-    return res.redirect('/sessions/list?state=sessionlost&session=' + req.params.sessionId);
+    return res.send('<div class="alert alert-warning">Seems like session is already finished. See Cucumber Report on Jenkins</div>');
   }
   for (let feature of Object.keys(session.doneScenarios)) {
     for (let scenario of session.doneScenarios[feature]) {
@@ -148,7 +148,17 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   res.send({error: 'Scenario ' + req.params.scenarioId + ' does not exist or not yet finished.'});
 });
 
+router.get('/:sessionId/skip/:scenarioId', (req, res) => {
+  let session = this.sessions[req.params.sessionId];
+  if (!session) {
+    return res.redirect('/sessions/list?state=sessionlost&session=' + req.params.sessionId);
+  }
+  session.skipScenario(req.params.scenarioId);
+  res.redirect('/sessions/' + req.params.sessionId + '/details#queue');
+});
+
 router.get('/:sessionId/remove', (req, res) => {
+  this.sessions[req.params.sessionId].stopSession();
   delete this.sessions[req.params.sessionId];
   res.redirect('/sessions/list');
 });

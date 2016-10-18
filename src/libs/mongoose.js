@@ -45,17 +45,6 @@ var FilterSchema = new Schema({
   filter: Object
 });
 
-var TagExecutionResultSchema = new Schema({
-  tag: {type: String, unique: true},
-  executions: [
-    {
-      result: String,
-      time: {type: Date, default: Date.now}
-    }
-  ],
-  reviewed: {type: Boolean, 'default': false}
-});
-
 var ExecutionSchema = new Schema({
   scenarioId: {type: String, unique: true},
   executions: [
@@ -91,12 +80,10 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
 
 var Scenario = mongoose.model('Scenario', ScenarioSchema);
 var Project = mongoose.model('Project', ProjectSchema);
-var TagExecutionResult = mongoose.model('TagExecutionResult', TagExecutionResultSchema);
 var Filter = mongoose.model('Filter', FilterSchema);
 var Execution = mongoose.model('Execution', ExecutionSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
-module.exports.TagExecutionResult = TagExecutionResult;
 module.exports.Filter = Filter;
 module.exports.Execution = Execution;

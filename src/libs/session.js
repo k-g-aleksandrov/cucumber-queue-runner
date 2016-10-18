@@ -1,15 +1,15 @@
 'use strict';
 
-var Scenario = require('libs/mongoose').Scenario;
 var log = require('libs/log')(module);
 var util = require('libs/util');
 var fs = require('fs');
 
-var TagExecutionResult = require('libs/mongoose').TagExecutionResult;
 var Execution = require('libs/mongoose').Execution;
 
+let filter = require('libs/filter');
+
 class Session {
-  constructor(sessionId, tags, mode, project) {
+  constructor(sessionId, tags, scope, project) {
     this.TIMEOUT_SEC = 1800;
     this.startDate = new Date();
     this.sessionId = sessionId;
@@ -18,60 +18,17 @@ class Session {
     this.sessionState = Session.NOT_FOUND;
     this.sessionPath = `public/results/${this.sessionId}`;
     this.project = project;
+    this.scope = scope;
 
     fs.mkdirSync(this.sessionPath);
 
-    let filter = {project: project, tags: {$in: tags}};
-    if (mode === Session.MODE_FAILED) {
-      TagExecutionResult.find({}, (err, foundTags) => {
-        if (err) throw err;
-        let failedTags = [];
-        for (let tag of foundTags) {
-          if (!tag.tag.startsWith('@id')) continue;
-          if (!tag.reviewed) continue;
-          let execution = tag.executions[tag.executions.length - 1];
-          if (execution.result === 'failed') {
-            failedTags.push(tag.tag);
-          }
-        }
-        filter = {project: project, tags: {$in: failedTags}};
-        this.startSessionCallback(this.sessionId, filter);
-      });
-    } else if (mode === Session.MODE_DAILY) {
-      log.debug('Daily mode starting');
-      TagExecutionResult.find({}, (err, foundTags) => {
-        if (err) throw err;
-        let passedTags = [];
-        for (let tag of foundTags) {
-          if (!tag.tag.startsWith('@id')) continue;
-          if (!tag.reviewed) {
-            log.debug('Tag ' + tag.tag + ' is in development. Skipped');
-            continue;
-          }
-          let execution = tag.executions[tag.executions.length - 1];
-          if (execution.result === 'passed') {
-            log.debug('Found tag ' + tag.tag + ', adding it to scope');
-            passedTags.push(tag.tag);
-          }
-        }
-        filter = {project: project, tags: {$in: passedTags}};
-        this.startSessionCallback(this.sessionId, filter);
-      });
-    } else if (mode === Session.MODE_DEVELOPMENT) {
-      TagExecutionResult.find({}, (err, foundTags) => {
-        if (err) throw err;
-        let noRunTags = [];
-        for (let tag of foundTags) {
-          if (!tag.tag.startsWith('@id')) continue;
-          if (!tag.reviewed) continue;
-          noRunTags.push(tag.tag);
-        }
-        filter = {project: project, tags: {$nin: noRunTags, $in: tags}};
-        this.startSessionCallback(this.sessionId, filter);
-      });
-    } else {
-      this.startSessionCallback(this.sessionId, filter);
+    if (!filter.getFilterByName(scope)) {
+      log.error('Cant find filter with name ' + scope);
+      return;
     }
+    filter.applyFilterToProject(project, filter.getFilterByName(scope), (err, project, scenarios) => {
+      this.startSessionCallback(err, scenarios);
+    });
 
     this.inProgressTracking = setInterval(() => {
       if (!this.inProgressScenarios) {
@@ -97,58 +54,70 @@ class Session {
       if (this.getScenariosCount(Session.STATE_IN_PROGRESS) +
         this.getScenariosCount(Session.STATE_IN_QUEUE) +
         this.getScenariosCount(Session.STATE_DONE) == 0) {
+        log.debug(this.sessionId + ': Stoppping session');
         clearInterval(this.inProgressTracking);
         fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
+        fs.close();
         util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
         this.sessionState = Session.NOT_FOUND;
+        log.debug(this.sessionId + ': Session stopped');
         return;
       }
 
       if (this.getScenariosCount(Session.STATE_IN_PROGRESS)
         + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
+        log.debug(this.sessionId + ': Stopping session');
         clearInterval(this.inProgressTracking);
 
         log.debug(this.sessionId
           + ': Tests execution done. Preparing reports...');
 
+        let haveReports = false;
         for (let key of Object.keys(this.doneScenarios)) {
           var combinedReport = null;
           log.info('Processing feature ' + key + ' report');
           var featureReports = this.doneScenarios[key];
           for (let scenario of featureReports) {
+            if (!scenario.report) {
+              log.debug('No report for scenario ' + scenario.getScenarioId() + ' saved');
+              continue;
+            }
             var report = scenario.report[0];
-            log.debug('Added report for scenario ' + report.elements[0].keyword
-              + ': ' + report.elements[0].name);
-            if (!combinedReport) {
-              combinedReport = scenario.report;
+            if (report) {
+              log.debug('Added report for scenario ' + report.elements[0].keyword
+                + ': ' + report.elements[0].name);
+              if (!combinedReport) {
+                combinedReport = scenario.report;
+              } else {
+                combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+              }
             } else {
-              combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+              log.debug('Report for scenario ' + scenario.getScenarioId() + ' was not sent correctly');
             }
           }
           let filename = key.replace(/\W/g, '');
-          fs.writeFileSync(this.sessionPath + '/' + filename
-            + '.json', JSON.stringify(combinedReport, null, 4));
+          if (combinedReport) {
+            fs.writeFileSync(this.sessionPath + '/' + filename
+              + '.json', JSON.stringify(combinedReport, null, 4));
+            haveReports = true;
+          }
         }
-        util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
+        if (haveReports) {
+          util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
+        }
         this.sessionState = Session.NOT_FOUND;
         clearInterval(this.trackSessionState);
+        log.debug(this.sessionId + ': Session stopped');
       }
     }, 10000);
   }
 
-  startSessionCallback(sessionId, filter) {
-    log.info('Started new session ' + sessionId);
-    Scenario.find(filter, (err, scenarios) => {
-      log.debug(sessionId + ': List of scenarios to be executed: ');
-      for (let scenario of scenarios) {
-        log.debug(sessionId + ':    ' + scenario.classpath + ':'
-          + scenario.scenarioLine);
-      }
-      log.info(sessionId + ': Number of scenarios to be executed - '
-        + scenarios.length);
-      this.scenarios = util.shuffleArray(scenarios);
-      this.sessionState = Session.OK;
-    });
+  startSessionCallback(err, scenarios) {
+    if (err) {
+      log.error(err);
+    }
+    this.scenarios = util.shuffleArray(scenarios);
+    this.sessionState = Session.OK;
   }
 
   getSessionId() {
@@ -190,12 +159,22 @@ class Session {
       var failedCount = 0;
       for (let doneFeature of Object.keys(this.doneScenarios)) {
         for (let scenario of this.doneScenarios[doneFeature]) {
-          if ('failed' === scenario.result || 'undefined' === scenario.result) {
+          if ('failed' === scenario.result) {
             failedCount++;
           }
         }
       }
       return failedCount;
+    } else if (Session.STATE_SKIPPED === state) {
+      var skippedCount = 0;
+      for (let doneFeature of Object.keys(this.doneScenarios)) {
+        for (let scenario of this.doneScenarios[doneFeature]) {
+          if ('skipped' === scenario.result || 'undefined' === scenario.result) {
+            skippedCount++;
+          }
+        }
+      }
+      return skippedCount;
     } else {
       return this.getScenariosCount(Session.STATE_IN_QUEUE)
         + this.getScenariosCount(Session.STATE_IN_PROGRESS)
@@ -213,10 +192,38 @@ class Session {
     return next;
   }
 
+  pushScenarioToDone(scenario) {
+    if (!this.doneScenarios[scenario.featureName]) {
+      this.doneScenarios[scenario.featureName] = [];
+    }
+    this.doneScenarios[scenario.featureName].push(scenario);
+  }
+
+  skipScenario(scenarioId) {
+    for (let i = 0; i < this.scenarios.length; i++) {
+      if (this.scenarios[i]._id.toString() === scenarioId) {
+        this.scenarios[i].result = 'skipped';
+        this.pushScenarioToDone(this.scenarios[i]);
+        this.scenarios.splice(i, 1);
+      }
+    }
+  }
+
+  stopSession() {
+    this.scenarios = [];
+    this.inProgressScenarios = {};
+  }
+
   getScenarioState(report) {
     let result = 'passed';
     for (let reportEntry of report) {
       for (let element of reportEntry.elements) {
+        for (let before of element.before) {
+          if (before.result.status === 'failed') {
+            result = 'failed';
+            break;
+          }
+        }
         for (let step of element.steps) {
           if (step.result.status === 'failed') {
             result = 'failed';
@@ -230,28 +237,6 @@ class Session {
       }
     }
     return result;
-  }
-
-  writeTagsExecutionResultToDb(scenarioTags, result) {
-    for (let tag of scenarioTags) {
-      TagExecutionResult.update(
-        {tag: tag},
-        {
-          $push: {
-            'executions': {
-              $each: [{result: result}],
-              $slice: -10
-            }
-          }
-        },
-        {safe: true, upsert: true},
-        (err) => {
-          if (err) throw err;
-          log.info('Successfully added execution for tag ' + tag);
-          this.updateTagDevelopmentStatus(tag);
-        }
-      );
-    }
   }
 
   storeExecutionResult(scenario) {
@@ -273,39 +258,6 @@ class Session {
     );
   }
 
-  updateTagDevelopmentStatus(tag) {
-    log.debug('Checking current state for tag ' + tag);
-    TagExecutionResult.find({tag: tag}, (err, tags) => {
-      for (let t of tags) {
-        if (t.reviewed) continue;
-        let maxPassedSequence = 0;
-        let currentPassedSequence = 0;
-        for (let execution of t.executions) {
-          if (execution.result === 'passed') {
-            currentPassedSequence++;
-          } else {
-            maxPassedSequence = (maxPassedSequence < currentPassedSequence) ? currentPassedSequence : maxPassedSequence;
-            currentPassedSequence = 0;
-          }
-        }
-        maxPassedSequence = (maxPassedSequence < currentPassedSequence) ? currentPassedSequence : maxPassedSequence;
-        if (maxPassedSequence >= 5) {
-          log.debug('Updating tag state to reviewed ' + tag);
-          TagExecutionResult.update(
-            {tag: tag},
-            {$set: {reviewed: true}},
-            {upsert: true},
-            (err) => {
-              if (err) throw err;
-            }
-          );
-        } else {
-          log.debug('Tag still in development mode ' + tag);
-        }
-      }
-    });
-  }
-
   saveScenarioResult(scenarioId, scenarioReport, cb) {
     log.debug('Saving scenario ' + scenarioId + ' result');
     if (this.inProgressScenarios[scenarioId] == null) {
@@ -319,7 +271,6 @@ class Session {
       sc.report = scenarioReport;
       sc.result = this.getScenarioState(scenarioReport);
       if (sc.result !== 'skipped') {
-        this.writeTagsExecutionResultToDb(sc.tags, sc.result);
         this.storeExecutionResult(sc);
       }
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
@@ -333,7 +284,7 @@ class Session {
   }
 
   getStatus() {
-    var status = {queue: [], inProgress: [], done: {}, passed: [], failed: []};
+    var status = {queue: [], inProgress: [], done: {}, passed: [], failed: [], skipped: []};
     for (let queueScenario of this.scenarios) {
       status.queue.push({
         scenarioId: queueScenario._id,
@@ -376,6 +327,14 @@ class Session {
             scenarioName: scenario.scenarioName,
             result: scenario.result
           });
+        } else if (scenario.result === 'skipped') {
+          status.skipped.push({
+            scenarioId: scenario._id,
+            classpath: scenario.classpath,
+            scenarioLine: scenario.scenarioLine,
+            scenarioName: scenario.scenarioName,
+            result: scenario.result
+          });
         } else {
           status.passed.push({
             scenarioId: scenario._id,
@@ -396,6 +355,7 @@ Session.STATE_IN_PROGRESS = 'in progress';
 Session.STATE_DONE = 'done';
 Session.STATE_PASSED = 'passed';
 Session.STATE_FAILED = 'failed';
+Session.STATE_SKIPPED = 'skipped';
 
 Session.OK = 'OK';
 Session.NOT_FOUND = 'NOT_FOUND';

@@ -1,42 +1,58 @@
 extends layout
 
-mixin scopeTable(project,list)
-    if list && list.length
-        tr
-            th(colspan='4')
-                h4 #{project} (#{list.length})
-        each sc, index in list
-            if (sc.scenarioName)
+mixin scopeTable(scope)
+    if scope.scenarios.length
+        - var collapsableClass = 'collapse collapseWithGlyphicon';
+        - if (!scope.filter.hideInUi) { collapsableClass += ' in'; };
+        tbody(style='cursor:pointer' data-toggle='collapse' data-target='#collapsable-' + scope.filter.id)
+            tr(style='background-color:#d9edf7')
+                th(colspan='3')
+                    h4
+                        small
+                            if scope.filter.hideInUi
+                                span.glyphicon.glyphicon-expand
+                            else
+                                span.glyphicon.glyphicon-collapse-down
+                        span &nbsp;#{scope.filter.displayName} - #{scope.scenarios.length} scenarios
+                    span(style='padding-left:8px;color:gray;font-style:italic;font-weight:lighter')= scope.filter.description
+        tbody(id='collapsable-' + scope.filter.id class=collapsableClass)
+            each sc, index in scope.scenarios
                 tr
                     td.col-md-1= index + 1
                     td
                         b #{sc.featureName}:&nbsp;
                         span #{sc.scenarioName} (:#{sc.scenarioLine})
-                    td
-                        each tag in sc.tags
-                            span #{tag.tag}
-                            br
-                    td(style='text-align:right')
-                        each tag in sc.tags
-                            if tag.executions
-                                each run in tag.executions
-                                    if run == 'passed'
-                                        span(style='color: green;') &#x25cf;
-                                    else
-                                        span(style='color: red;') &#x25cf;
-                                br
+                    td(style='text-align:right;')
+                        if sc.executions
+                            each exec in sc.executions
+                                if exec.result == 'passed'
+                                    span(style='color: green;') &#x25cf;
+                                else
+                                    span(style='color: red;') &#x25cf;
     else
-        tr
-            th(colspan='4')
-                h4 No scenarios found by filter '#{project}'
+        tbody(style='margin-bottom:12px')
+            tr(style='background-color:#d9edf7')
+                th(colspan='3')
+                    h4 No scenarios found by filter '#{scope.filter.displayName}'
 
 block navigationbar
     - var active = 'projects'
 block content
-    div(style='padding-bottom:12px')
-        span Switch to&nbsp;
-        a(href='/projects/' + name + '/v2') New Details Page
+    div
+        h2 #{name}
+        em= description
     table.table.table-striped.table-bordered
-        +scopeTable('Development', development)
-        +scopeTable('Daily', daily)
-        +scopeTable('Muted', muted)
+        each scope,index in scopes
+            +scopeTable(scope)
+    script.
+        $('.collapseWithGlyphicon').on({
+            'shown.bs.collapse': function () {
+                var collapsableId = this.id;
+                $(this).parent().find('*[data-target=\"#' + collapsableId +
+                        '\"] .glyphicon').removeClass('glyphicon-expand').addClass('glyphicon-collapse-down');
+            });
+        $('.collapseWithGlyphicon').on('hidden.bs.collapse', function () {
+            var collapsableId = this.id;
+            $(this).parent().find('*[data-target=\"#' + collapsableId +
+                    '\"] .glyphicon').removeClass('glyphicon-collapse-down').addClass('glyphicon-expand');
+        });
