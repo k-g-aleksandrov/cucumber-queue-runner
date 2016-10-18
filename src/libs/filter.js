@@ -195,6 +195,9 @@ module.exports.applyFiltersToProject = function (projectId, filters, callback) {
             if (execution && execution.executions) {
               sc.executions = execution.executions;
             }
+            if (sc.executions) {
+              sc.executions = sc.executions.slice(Math.max(sc.executions.length - 30, 1));
+            }
             let inScopes = false;
             for (let filter of filters) {
               if (this.applyFilter(sc, filter)) {
