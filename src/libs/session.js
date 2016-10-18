@@ -54,10 +54,9 @@ class Session {
       if (this.getScenariosCount(Session.STATE_IN_PROGRESS) +
         this.getScenariosCount(Session.STATE_IN_QUEUE) +
         this.getScenariosCount(Session.STATE_DONE) == 0) {
-        log.debug(this.sessionId + ': Stoppping session');
+        log.debug(this.sessionId + ': Stopping session');
         clearInterval(this.inProgressTracking);
         fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
-        fs.close();
         util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
         this.sessionState = Session.NOT_FOUND;
         log.debug(this.sessionId + ': Session stopped');
@@ -208,7 +207,7 @@ class Session {
       }
     }
   }
-
+  
   stopSession() {
     this.scenarios = [];
     this.inProgressScenarios = {};

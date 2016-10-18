@@ -157,6 +157,11 @@ router.get('/:sessionId/skip/:scenarioId', (req, res) => {
   res.redirect('/sessions/' + req.params.sessionId + '/details#queue');
 });
 
+router.get('/:sessionId/finish', (req, res) => {
+  this.sessions[req.params.sessionId].stopSession();
+  res.redirect('/sessions/list');
+});
+
 router.get('/:sessionId/remove', (req, res) => {
   this.sessions[req.params.sessionId].stopSession();
   delete this.sessions[req.params.sessionId];
