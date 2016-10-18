@@ -217,10 +217,12 @@ class Session {
     let result = 'passed';
     for (let reportEntry of report) {
       for (let element of reportEntry.elements) {
-        for (let before of element.before) {
-          if (before.result.status === 'failed') {
-            result = 'failed';
-            break;
+        if (element.before) {
+          for (let before of element.before) {
+            if (before.result.status === 'failed') {
+              result = 'failed';
+              break;
+            }
           }
         }
         for (let step of element.steps) {
