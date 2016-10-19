@@ -23,12 +23,20 @@ class Session {
     fs.mkdirSync(this.sessionPath);
 
     if (!filter.getFilterByName(scope)) {
-      log.error('Cant find filter with name ' + scope);
-      return;
+      throw Error('Can\'t find filter with name ' + scope);
     }
-    filter.applyFilterToProject(project, filter.getFilterByName(scope), (err, project, scenarios) => {
-      this.startSessionCallback(err, scenarios);
-    });
+    if (scope === 'custom') {
+      if (!tags) {
+        throw Error('You should specify tags to filter scenarios if you use custom filter.');
+      }
+      filter.applyCustomFilterToProject(project, tags, (err, project, scenarios) => {
+        this.startSessionCallback(err, scenarios);
+      });
+    } else {
+      filter.applyFilterToProject(project, filter.getFilterByName(scope), (err, project, scenarios) => {
+        this.startSessionCallback(err, scenarios);
+      });
+    }
 
     this.inProgressTracking = setInterval(() => {
       if (!this.inProgressScenarios) {

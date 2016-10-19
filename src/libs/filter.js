@@ -60,6 +60,14 @@ module.exports.full = {
   hideInUi: true
 };
 
+module.exports.custom = {
+  id: 'custom',
+  displayName: 'Custom Scope',
+  description: 'Custom scope',
+  ignoreProjectTag: true,
+  hideInUi: true
+};
+
 function validateExecutionsRowRule(scenario, rule) {
   let maxInARow = 0;
   let currentInARow = 0;
@@ -125,7 +133,45 @@ module.exports.getFilterByName = function (filter) {
     return this.muted;
   } else if ('daily' === filter) {
     return this.daily;
+  } else if ('custom' === filter) {
+    return this.custom;
   }
+};
+
+module.exports.applyCustomFilterToProject = function (projectId, tags, callback) {
+  Project.findOne({projectId: projectId}, (err, project) => {
+    if (err) {
+      log.error(err);
+    }
+    if (!project) {
+      log.error('Failed to find project with id ' + projectId);
+    }
+    let filteredScenarios = [];
+    log.debug('Found project ' + projectId + '. Search for scenarios related to this project...');
+    Scenario.find({project: project.projectId}, (err, scenarios) => {
+      if (err) {
+        log.error(err);
+      }
+      let scenarioPromises = scenarios.map((sc) => {
+        return new Promise((scResolve) => {
+          Execution.findOne({scenarioId: sc.getScenarioId()}, (err, execution) => {
+            sc.projectTag = project.tag;
+            if (execution && execution.executions) {
+              sc.executions = execution.executions;
+            }
+            if (tags && this.applyTags(sc, tags)) {
+              filteredScenarios.push(sc);
+            }
+            scResolve();
+          });
+        });
+      });
+      Promise.all(scenarioPromises).then(() => {
+        log.info(JSON.stringify(filteredScenarios));
+        callback(null, project, filteredScenarios);
+      }).catch(log.error);
+    });
+  });
 };
 
 module.exports.applyFilterToProject = function (projectId, filter, callback) {
@@ -218,6 +264,15 @@ module.exports.applyFiltersToProject = function (projectId, filters, callback) {
     });
   });
 };
+
+module.exports.applyTags = function(scenario, tags) {
+  for (let tag of tags) {
+    if (checkProjectTag(scenario, tag)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 module.exports.applyFilter = function (scenario, filter) {
   let result = true;

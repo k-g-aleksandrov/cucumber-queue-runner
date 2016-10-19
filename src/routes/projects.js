@@ -156,10 +156,6 @@ router.get('/:project/scan', (req, res) => {
 });
 
 router.get('/:project', (req, res) => {
-  let project;
-  Project.findOne({projectId: req.params.project}, (err, foundProject) => {
-    project = foundProject;
-  });
   let scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
   let scenariosScopes = {};
   for (let scenarioFilter of scenarioFilters) {
