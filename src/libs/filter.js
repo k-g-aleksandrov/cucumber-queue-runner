@@ -272,7 +272,7 @@ module.exports.applyTags = function(scenario, tags) {
     }
   }
   return false;
-}
+};
 
 module.exports.applyFilter = function (scenario, filter) {
   let result = true;

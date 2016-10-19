@@ -54,7 +54,7 @@ block content
                         span= doneCount > 0 ? ((passedCount / doneCount) * 100).toFixed(2) + '%' : '-'
                         span &nbsp;(<font color="green">#{passedCount}</font>:<font color="red">#{failedCount}</font>:<font color="gray">#{skippedCount}</font>)
                     td(rowspan='2' style='text-align:center; vertical-align:center;')
-                        button.btn.btn-info(type=submit onclick='window.location.href="/sessions/' + session.sessionId + '/finish"') Finish
+                        button.btn.btn-primary(type=submit onclick='window.location.href="/sessions/' + session.sessionId + '/finish"') Finish
                         span &nbsp;
                         button.btn.btn-danger(type=submit onclick='window.location.href="/sessions/' + session.sessionId + '/remove"') Remove
                 tr

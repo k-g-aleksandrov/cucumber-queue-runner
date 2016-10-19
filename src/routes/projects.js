@@ -86,6 +86,11 @@ router.get('/:project/scan', (req, res) => {
     }
     let projectId = project.projectId;
     let workingCopyPath = project.workingCopyPath;
+    if (req.query.path) {
+      log.debug('Working copy path \'' + workingCopyPath + '\' will be overridden by query parameter to \'' +
+        req.query.path + '\'');
+      workingCopyPath = req.query.path;
+    }
     let featuresRoot = project.featuresRoot;
     if (!workingCopyPath) {
       res.statusCode = 400;

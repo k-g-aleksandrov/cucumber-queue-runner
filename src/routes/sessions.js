@@ -42,7 +42,7 @@ router.get('/start', (req, res) => {
  */
 router.get('/:sessionId/next', (req, res) => {
   let currentSession = this.sessions[req.params.sessionId];
-  let executor = req.params.slaveId;
+  let executor = req.query.slaveId;
   // respond with empty object
   if (!currentSession) {
     res.send({state: Session.NOT_FOUND});
@@ -126,7 +126,7 @@ router.get('/list', (req, res) => {
 router.get('/:sessionId/details', (req, res) => {
   let session = this.sessions[req.params.sessionId];
   if (session) {
-    let status = this.sessions[req.params.sessionId].getStatus();
+    let status = session.getStatus();
     res.render('session', {sessionId: req.params.sessionId, status: status});
   } else {
     res.redirect('/sessions/list?state=sessionlost&session=' + req.params.sessionId);
