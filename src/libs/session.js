@@ -2,6 +2,7 @@
 
 var log = require('libs/log')(module);
 var util = require('libs/util');
+
 var fs = require('fs');
 
 var Execution = require('libs/mongoose').Execution;
@@ -38,72 +39,12 @@ class Session {
       });
     }
 
-    this.inProgressTracking = setInterval(() => {
-      if (!this.inProgressScenarios) {
-        log.debug(sessionId
-          + ': There are no in progress scenarios at this moment');
-        return;
-      }
-      var inProgressScenariosIds = Object.keys(this.inProgressScenarios);
-      log.debug(sessionId + ': ' + this.getStatistics());
-      for (let scenarioId of inProgressScenariosIds) {
-        var inProgressScenario = this.inProgressScenarios[scenarioId];
-        var requestDate = inProgressScenario.startTimestamp;
-        if ((Date.now() - requestDate) / 1000 > this.TIMEOUT_SEC) {
-          log.error(sessionId + ': scenario execution were not finished in '
-            + this.TIMEOUT_SEC + ' seconds. Moving it back to scenarios queue');
-          this.scenarios.push(inProgressScenario);
-          delete this.inProgressScenarios[scenarioId];
-        }
-      }
+    this.trackInProgressTimeout = setInterval(() => {
+      Session.trackInProgressTimeoutFunc(this);
     }, 10000);
 
     this.trackSessionState = setInterval(() => {
-      if (this.getScenariosCount(Session.STATE_IN_PROGRESS)
-        + this.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
-        clearInterval(this.inProgressTracking);
-        log.debug(this.sessionId + ': Tests execution done');
-        let haveReports = false;
-        if (this.getScenariosCount(Session.STATE_DONE) > 0) {
-          log.debug(this.sessionId + ': Tests execution done. Preparing reports...');
-          for (let key of Object.keys(this.doneScenarios)) {
-            var combinedReport = null;
-            log.info('Processing feature ' + key + ' report');
-            var featureReports = this.doneScenarios[key];
-            for (let scenario of featureReports) {
-              if (!scenario.report) {
-                log.debug('No report for scenario ' + scenario.getScenarioId() + ' saved');
-                continue;
-              }
-              var report = scenario.report[0];
-              if (report) {
-                log.debug('Added report for scenario ' + report.elements[0].keyword
-                  + ': ' + report.elements[0].name);
-                if (!combinedReport) {
-                  combinedReport = scenario.report;
-                } else {
-                  combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
-                }
-              } else {
-                log.debug('Report for scenario ' + scenario.getScenarioId() + ' was not sent correctly');
-              }
-            }
-            let filename = key.replace(/\W/g, '');
-            if (combinedReport) {
-              fs.writeFileSync(this.sessionPath + '/' + filename + '.json', JSON.stringify(combinedReport, null, 4));
-              haveReports = true;
-            }
-          }
-        }
-
-        if (!haveReports) {
-          fs.writeFileSync(this.sessionPath + '/dummy.txt', '', {});
-        }
-        util.zipDirectory(this.sessionPath, this.sessionPath + '/reports.zip');
-        clearInterval(this.trackSessionState);
-        this.sessionState = Session.NOT_FOUND;
-        log.debug(this.sessionId + ': Session stopped');
-      }
+      Session.trackSessionStateFunc(this);
     }, 10000);
   }
 
@@ -125,55 +66,43 @@ class Session {
       + ', done - ' + this.getScenariosCount(Session.STATE_DONE);
   }
 
-  getScenariosCount(state) {
-    if (Session.STATE_IN_QUEUE === state) {
-      if (this.scenarios) {
-        return this.scenarios.length;
+  getDoneScenariosCount(filter) {
+    let resultCount = 0;
+    for (let doneFeature of Object.keys(this.doneScenarios)) {
+      if (filter) {
+        for (let scenario of this.doneScenarios[doneFeature]) {
+          if (filter.indexOf(scenario.result) > -1) {
+            resultCount++;
+          }
+        }
       } else {
-        return 0;
+        resultCount += this.doneScenarios[doneFeature].length;
       }
-    } else if (Session.STATE_IN_PROGRESS === state) {
-      return Object.keys(this.inProgressScenarios).length;
-    } else if (Session.STATE_DONE === state) {
-      var doneCount = 0;
-      for (let doneFeature of Object.keys(this.doneScenarios)) {
-        doneCount += this.doneScenarios[doneFeature].length;
-      }
-      return doneCount;
-    } else if (Session.STATE_PASSED === state) {
-      var passedCount = 0;
-      for (let doneFeature of Object.keys(this.doneScenarios)) {
-        for (let scenario of this.doneScenarios[doneFeature]) {
-          if ('passed' === scenario.result) {
-            passedCount++;
-          }
-        }
-      }
-      return passedCount;
-    } else if (Session.STATE_FAILED === state) {
-      var failedCount = 0;
-      for (let doneFeature of Object.keys(this.doneScenarios)) {
-        for (let scenario of this.doneScenarios[doneFeature]) {
-          if ('failed' === scenario.result) {
-            failedCount++;
-          }
-        }
-      }
-      return failedCount;
-    } else if (Session.STATE_SKIPPED === state) {
-      var skippedCount = 0;
-      for (let doneFeature of Object.keys(this.doneScenarios)) {
-        for (let scenario of this.doneScenarios[doneFeature]) {
-          if ('skipped' === scenario.result || 'undefined' === scenario.result) {
-            skippedCount++;
-          }
-        }
-      }
-      return skippedCount;
-    } else {
+    }
+    return resultCount;
+  }
+
+  getScenariosCount(state) {
+    if (!state) {
       return this.getScenariosCount(Session.STATE_IN_QUEUE)
         + this.getScenariosCount(Session.STATE_IN_PROGRESS)
         + this.getScenariosCount(Session.STATE_DONE);
+    }
+    switch (state) {
+      case Session.STATE_IN_QUEUE:
+        return this.scenarios ? this.scenarios.length : 0;
+      case Session.STATE_IN_PROGRESS:
+        return Object.keys(this.inProgressScenarios).length;
+      case Session.STATE_DONE:
+        return this.getDoneScenariosCount();
+      case Session.STATE_PASSED:
+        return this.getDoneScenariosCount(['passed']);
+      case Session.STATE_FAILED:
+        return this.getDoneScenariosCount(['failed']);
+      case Session.STATE_SKIPPED:
+        return this.getDoneScenariosCount(['skipped', 'undefined']);
+      default:
+        throw Error('There is no such state - ' + state);
     }
   }
 
@@ -209,33 +138,6 @@ class Session {
     this.inProgressScenarios = {};
   }
 
-  getScenarioState(report) {
-    let result = 'passed';
-    for (let reportEntry of report) {
-      for (let element of reportEntry.elements) {
-        if (element.before) {
-          for (let before of element.before) {
-            if (before.result.status === 'failed') {
-              result = 'failed';
-              break;
-            }
-          }
-        }
-        for (let step of element.steps) {
-          if (step.result.status === 'failed') {
-            result = 'failed';
-            break;
-          } else if (step.result.status === 'undefined') {
-            result = 'undefined';
-          } else if (step.result.status === 'skipped' && result === 'passed') {
-            result = 'skipped';
-          }
-        }
-      }
-    }
-    return result;
-  }
-
   storeExecutionResult(scenario) {
     Execution.update(
       {scenarioId: scenario.getScenarioId()},
@@ -266,7 +168,7 @@ class Session {
       }
       var sc = this.inProgressScenarios[scenarioId];
       sc.report = scenarioReport;
-      sc.result = this.getScenarioState(scenarioReport);
+      sc.result = Session.getScenarioState(scenarioReport);
       if (sc.result !== 'skipped') {
         this.storeExecutionResult(sc);
       }
@@ -316,36 +218,116 @@ class Session {
           scenarioName: scenario.scenarioName,
           result: scenario.result
         });
-        if (scenario.result === 'failed') {
-          status.failed.push({
-            scenarioId: scenario._id,
-            classpath: scenario.classpath,
-            scenarioLine: scenario.scenarioLine,
-            scenarioName: scenario.scenarioName,
-            result: scenario.result
-          });
-        } else if (scenario.result === 'skipped') {
-          status.skipped.push({
-            scenarioId: scenario._id,
-            classpath: scenario.classpath,
-            scenarioLine: scenario.scenarioLine,
-            scenarioName: scenario.scenarioName,
-            result: scenario.result
-          });
-        } else {
-          status.passed.push({
-            scenarioId: scenario._id,
-            classpath: scenario.classpath,
-            scenarioLine: scenario.scenarioLine,
-            scenarioName: scenario.scenarioName,
-            result: scenario.result
-          });
-        }
+        Session.pushScenarioToStatusList(status, scenario);
       }
     }
     return status;
   }
 }
+
+Session.pushScenarioToStatusList = function(resultObject,scenario) {
+  resultObject[scenario.result].push({
+    scenarioId: scenario._id,
+    classpath: scenario.classpath,
+    scenarioLine: scenario.scenarioLine,
+    scenarioName: scenario.scenarioName,
+    result: scenario.result
+  });
+};
+
+Session.getScenarioState = function (report) {
+  let result = 'passed';
+  for (let reportEntry of report) {
+    for (let element of reportEntry.elements) {
+      if (element.before) {
+        for (let before of element.before) {
+          if (before.result.status === 'failed') {
+            result = 'failed';
+            break;
+          }
+        }
+      }
+      for (let step of element.steps) {
+        if (step.result.status === 'failed') {
+          result = 'failed';
+          break;
+        } else if (step.result.status === 'undefined') {
+          result = 'undefined';
+        } else if (step.result.status === 'skipped' && result === 'passed') {
+          result = 'skipped';
+        }
+      }
+    }
+  }
+  return result;
+};
+
+Session.trackSessionStateFunc = function (session) {
+  if (session.getScenariosCount(Session.STATE_IN_PROGRESS)
+    + session.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
+    clearInterval(session.trackInProgressTimeout);
+    log.debug(session.sessionId + ': Tests execution done');
+    let haveReports = false;
+    if (session.getScenariosCount(Session.STATE_DONE) > 0) {
+      log.debug(session.sessionId + ': Tests execution done. Preparing reports...');
+      for (let key of Object.keys(session.doneScenarios)) {
+        var combinedReport = null;
+        log.info('Processing feature ' + key + ' report');
+        var featureReports = session.doneScenarios[key];
+        for (let scenario of featureReports) {
+          if (!scenario.report) {
+            log.debug('No report for scenario ' + scenario.getScenarioId() + ' saved');
+            continue;
+          }
+          var report = scenario.report[0];
+          if (report) {
+            log.debug('Added report for scenario ' + report.elements[0].keyword
+              + ': ' + report.elements[0].name);
+            if (!combinedReport) {
+              combinedReport = scenario.report;
+            } else {
+              combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+            }
+          } else {
+            log.debug('Report for scenario ' + scenario.getScenarioId() + ' was not sent correctly');
+          }
+        }
+        let filename = key.replace(/\W/g, '');
+        if (combinedReport) {
+          fs.writeFileSync(session.sessionPath + '/' + filename + '.json', JSON.stringify(combinedReport, null, 4));
+          haveReports = true;
+        }
+      }
+    }
+
+    if (!haveReports) {
+      fs.writeFileSync(session.sessionPath + '/dummy.txt', '', {});
+    }
+    util.zipDirectory(session.sessionPath, session.sessionPath + '/reports.zip');
+    clearInterval(session.trackSessionState);
+    session.sessionState = Session.NOT_FOUND;
+    log.debug(session.sessionId + ': Session stopped');
+  }
+};
+
+Session.trackInProgressTimeoutFunc = function (session) {
+  if (!session.inProgressScenarios) {
+    log.debug(session.sessionId + ': There are no in progress scenarios at this moment');
+    return;
+  }
+  var inProgressScenariosIds = Object.keys(session.inProgressScenarios);
+  log.debug(session.sessionId + ': ' + session.getStatistics());
+  for (let scenarioId of inProgressScenariosIds) {
+    var inProgressScenario = session.inProgressScenarios[scenarioId];
+    var requestDate = inProgressScenario.startTimestamp;
+    if ((Date.now() - requestDate) / 1000 > session.TIMEOUT_SEC) {
+      log.error(session.sessionId + ': scenario execution were not finished in '
+        + session.TIMEOUT_SEC + ' seconds. Moving it back to scenarios queue');
+      session.scenarios.push(inProgressScenario);
+      delete session.inProgressScenarios[scenarioId];
+    }
+  }
+};
 
 Session.STATE_IN_QUEUE = 'in queue';
 Session.STATE_IN_PROGRESS = 'in progress';
@@ -358,10 +340,5 @@ Session.OK = 'OK';
 Session.NOT_FOUND = 'NOT_FOUND';
 Session.IN_PROGRESS = 'IN_PROGRESS';
 Session.FINALIZATION = 'FINALIZATION';
-
-Session.MODE_FULL_RUN = 'full';
-Session.MODE_DEVELOPMENT = 'dev';
-Session.MODE_FAILED = 'failed';
-Session.MODE_DAILY = 'daily';
 
 module.exports = Session;

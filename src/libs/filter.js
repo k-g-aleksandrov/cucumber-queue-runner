@@ -242,7 +242,7 @@ module.exports.applyFiltersToProject = function (projectId, filters, callback) {
               sc.executions = execution.executions;
             }
             if (sc.executions) {
-              sc.executions = sc.executions.slice(Math.max(sc.executions.length - 30, 1));
+              sc.executions = sc.executions;
             }
             let inScopes = false;
             for (let filter of filters) {
