@@ -79,8 +79,7 @@ router.post('/:sessionId/result', (req, res) => {
   this.sessions[req.params.sessionId].saveScenarioResult(scenarioId, scenarioReport, (err) => {
     if (err) {
       log.error(err);
-      res.status(500)
-        .send(err);
+      return res.status(404).send(err);
     }
   });
   res.send('Report for scenario ' + scenarioId + ' successfully saved');
