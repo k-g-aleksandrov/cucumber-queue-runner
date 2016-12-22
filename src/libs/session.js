@@ -172,6 +172,19 @@ class Session {
       if (sc.result !== 'skipped') {
         this.storeExecutionResult(sc);
       }
+      for (let i = 0; i < sc.report.length; i++) {
+        let elements = sc.report[i].elements;
+        if (elements) {
+          for (let j = 0; j < elements.length; j++) {
+            let tags = elements[j].tags;
+            if (tags) {
+              let newTag = JSON.parse(JSON.stringify(tags[0]));
+              newTag.name = '@' + sc.executor;
+              tags.push(newTag);
+            }
+          }
+        }
+      }
       this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
       delete this.inProgressScenarios[scenarioId];
       cb();
