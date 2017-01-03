@@ -265,7 +265,7 @@ Session.getScenarioState = function (report) {
           result = 'failed';
           break;
         } else if (step.result.status === 'undefined') {
-          result = 'undefined';
+          result = 'skipped';
         } else if (step.result.status === 'skipped' && result === 'passed') {
           result = 'skipped';
         }
