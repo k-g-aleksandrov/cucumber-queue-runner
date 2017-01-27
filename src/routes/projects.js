@@ -74,6 +74,7 @@ router.get('/:project/scan', (req, res) => {
     res.statusCode = 400;
     return res.send({error: 'Please specify project name'});
   }
+
   let projectId = req.params.project;
   Project.findOne({projectId: projectId}, (err, project) => {
     if (err) {
@@ -84,18 +85,20 @@ router.get('/:project/scan', (req, res) => {
     if (!project) {
       return res.send({error: 'Can\'t find project with id ' + projectId});
     }
-    let projectId = project.projectId;
+
     let workingCopyPath = project.workingCopyPath;
     if (req.query.path) {
       log.debug('Working copy path \'' + workingCopyPath + '\' will be overridden by query parameter to \'' +
-        req.query.path + '\'');
+            req.query.path + '\'');
       workingCopyPath = req.query.path;
     }
-    let featuresRoot = project.featuresRoot;
     if (!workingCopyPath) {
       res.statusCode = 400;
       return res.send({error: 'Repository path should be specified to scan feature files'});
     }
+
+    let featuresRoot = project.featuresRoot;
+
     util.scanRepository(workingCopyPath, (err, results) => {
       if (err) {
         res.statusCode = 400;
@@ -118,25 +121,26 @@ router.get('/:project/scan', (req, res) => {
           log.info(`Parsing feature ${feature.name}`);
           for (let child of feature.children) {
             if (child.type === 'ScenarioOutline') {
-              var examples = child.examples[0];
-              for (let example of examples.tableBody) {
-                let paramsString = ':';
-                for (let exampleParam of example.cells) {
-                  paramsString += exampleParam.value + ':';
-                }
-                log.debug(feature.name + ' -> ' + child.name + ':' + example.location.line + ' (' + paramsString + ')');
-                saveScenario(project, classpath, feature.name, child.name, example.location.line, paramsString, child.tags, (err, data) => {
-                  if (err) {
-                    if (err.message.indexOf('duplicate key') > -1) {
-                      log.debug('Scenario ' + child.name
-                        + ' already exists in DB, skipped');
-                    } else {
-                      res.statusCode = 500;
-                      log.error('Internal error(%d): %s', res.statusCode, err.message);
-                      return res.send({error: 'Server error'});
-                    }
+              var examples = child.examples;
+              for (let examplesBlock of examples) {
+                for (let example of examplesBlock.tableBody) {
+                  let paramsString = ':';
+                  for (let exampleParam of example.cells) {
+                    paramsString += exampleParam.value + ':';
                   }
-                });
+                  log.debug(feature.name + ' -> ' + child.name + ':' + example.location.line + ' (' + paramsString + ')');
+                  saveScenario(project, classpath, feature.name, child.name, example.location.line, paramsString, child.tags.concat(examplesBlock.tags), (err, data) => {
+                    if (err) {
+                      if (err.message.indexOf('duplicate key') > -1) {
+                        log.debug('Scenario ' + child.name + ' already exists in DB, skipped');
+                      } else {
+                        res.statusCode = 500;
+                        log.error('Internal error(%d): %s', res.statusCode, err.message);
+                        return res.send({error: 'Server error'});
+                      }
+                    }
+                  });
+                }
               }
             } else if (child.type !== 'Background') {
               saveScenario(project, classpath, feature.name, child.name, child.location.line, null, child.tags, (err, data) => {
