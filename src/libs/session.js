@@ -2,7 +2,7 @@ const log = require('libs/log')(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Execution } from 'libs/mongoose';
+import { Scenario } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
@@ -110,9 +110,13 @@ class Session {
       case Session.STATE_DONE:
         return this.getDoneScenariosCount();
       case Session.STATE_PASSED:
-        return this.getDoneScenariosCount(['passed']);
+        return this.getDoneScenariosCount([
+          'passed'
+        ]);
       case Session.STATE_FAILED:
-        return this.getDoneScenariosCount(['failed']);
+        return this.getDoneScenariosCount([
+          'failed'
+        ]);
       case Session.STATE_SKIPPED:
         return this.getDoneScenariosCount(['skipped', 'undefined']);
       default:
@@ -154,8 +158,8 @@ class Session {
   }
 
   storeExecutionResult(scenario) {
-    Execution.update(
-      { scenarioId: scenario.getScenarioId() },
+    Scenario.update(
+      { _id: scenario._id },
       {
         $push: {
           'executions': {

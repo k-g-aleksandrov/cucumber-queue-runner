@@ -8,7 +8,7 @@ const dockerPort = (process.env.MONGO_PORT_27017_TCP_PORT)
   ? process.env.MONGO_PORT_27017_TCP_PORT
   : '27017';
 
-var connectWithRetry = function () {
+function connectWithRetry() {
   const mongoUrl = `mongodb://${dockerAddr}:${dockerPort}/cucumber-queue-db`;
 
   return mongoose.connect(mongoUrl, (err) => {
@@ -17,7 +17,7 @@ var connectWithRetry = function () {
       setTimeout(connectWithRetry, 5000);
     }
   });
-};
+}
 
 connectWithRetry();
 
@@ -38,23 +38,6 @@ const ProjectSchema = new Schema({
   featuresRoot: String
 });
 
-const FilterSchema = new Schema({
-  filterId: { type: String, unique: true },
-  filter: Object
-});
-
-const ExecutionSchema = new Schema({
-  scenarioId: { type: String, unique: true },
-  executions: [
-    {
-      result: String,
-      startTimestamp: { type: Date },
-      endTimestamp: { type: Date, default: Date.now },
-      executor: String
-    }
-  ]
-});
-
 const ScenarioSchema = new Schema({
   project: String,
   classpath: String,
@@ -62,7 +45,23 @@ const ScenarioSchema = new Schema({
   scenarioName: String,
   exampleParams: String,
   scenarioLine: Number,
-  tags: Array
+  tags: Array,
+  executions: [
+    {
+      result: String,
+      startTimestamp: { type: Date },
+      endTimestamp: { type: Date, default: Date.now },
+      executor: String
+    }
+  ],
+  filters: {
+    type: [
+      String
+    ],
+    default: [
+      'full', 'dev'
+    ]
+  }
 });
 
 ScenarioSchema.index({
@@ -78,10 +77,6 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
 
 const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
-const Filter = mongoose.model('Filter', FilterSchema);
-const Execution = mongoose.model('Execution', ExecutionSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
-module.exports.Filter = Filter;
-module.exports.Execution = Execution;

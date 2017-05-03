@@ -7,6 +7,8 @@ import { Tab, Row, Col, Nav, NavItem, Table } from 'react-bootstrap';
 
 import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
 
+let Doughnut;
+
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
@@ -23,7 +25,7 @@ class SessionPage extends Component {
   }
 
   componentDidMount() {
-    this.Doughnut = require('react-chartjs-2').Doughnut;
+    Doughnut = require('react-chartjs-2').Doughnut;
 
     this.fetchSessionDetails();
     this.timerID = setInterval(
@@ -93,7 +95,7 @@ class SessionPage extends Component {
     return (
       <div>
         <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
-        <this.Doughnut data={chartData} height={75} style={{ bottomPadding: '10px', height: '50px' }}/>
+        <Doughnut data={chartData} height={75} style={{ bottomPadding: '10px', height: '50px' }}/>
         <Tab.Container id='tabs-with-dropdown' defaultActiveKey='queue'>
           <Row className='clearfix'>
             <Col sm={12}>

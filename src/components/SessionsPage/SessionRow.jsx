@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 
 import moment from 'moment';
 
+import { Link } from 'react-router';
+
 import Button from 'react-bootstrap-button-loader';
 
 import { finishSession, deleteSession } from 'redux/actions/sessionsActions';
@@ -42,7 +44,7 @@ class SessionRow extends Component {
     return (
       <tr style={{ backgroundColor: this.state.isFinishing ? 'lightgray' : 'white' }}>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
-          <a href={`/sessions/${session.sessionId}`}>{session.sessionId}</a>
+          <Link to={`/sessions/${session.sessionId}`}>{session.sessionId}</Link>
         </td>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
           {moment(session.startDate).format('DD.MM.YYYY HH:mm:ss')}
@@ -51,13 +53,13 @@ class SessionRow extends Component {
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>(scope: {session.scope})</span>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <a href={`/sessions/${session.sessionId}/#queue`}>{session.queueCount}</a>
+          <Link to={`/sessions/${session.sessionId}/#queue`}>{session.queueCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <a href={`/sessions/${session.sessionId}/#progress`}>{session.progressCount}</a>
+          <Link to={`/sessions/${session.sessionId}/#progress`}>{session.progressCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <a href={`/sessions/${session.sessionId}/#done`}>{session.doneCount}</a>
+          <Link to={`/sessions/${session.sessionId}/#done`}>{session.doneCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
           <span>

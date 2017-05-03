@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import ScopeDetails from './ScopeDetails';
+import ProjectLoadingScreen from './ProjectLoadingScreen';
 
 import { fetchProjectFilters } from 'redux/actions/projectsActions';
 
@@ -30,7 +31,7 @@ class ProjectPage extends Component {
 
   render() {
     if (this.props.loading) {
-      return <div>Loading...</div>;
+      return <ProjectLoadingScreen/>;
     }
     if (!this.props.projectDetails || !this.props.projectDetails.name) {
       return <div>{this.props.projectDetails}</div>;
@@ -41,7 +42,6 @@ class ProjectPage extends Component {
     return (
       <div>
         <h2>{projectDetails.name}</h2>
-        {projectDetails.description && <em>{projectDetails.description}</em>}
         <div>
           {Object.keys(projectDetails.scopes).map((scope, i) => {
             return <ScopeDetails scope={projectDetails.scopes[scope]} key={i}/>;

@@ -9,31 +9,35 @@ const log = require('libs/log')(module);
 
 const router = express.Router();
 
-function saveScenario(project, classpath, featureName, scenarioName, scenarioLine, exampleParams, tags, callback) {
+function saveScenario(scenario, callback) {
   const tagsList = [];
 
-  if (tags) {
-    for (const tag of tags) {
+  if (scenario.tags) {
+    for (const tag of scenario.tags) {
       tagsList.push(tag.name);
     }
   }
 
-  const scenario = new Scenario({
-    project: project,
-    classpath: classpath,
-    featureName: featureName,
-    scenarioName: scenarioName,
-    scenarioLine: scenarioLine,
-    exampleParams: exampleParams,
+  const scenarioDbObject = new Scenario({
+    project: scenario.project,
+    classpath: scenario.classpath,
+    featureName: scenario.featureName,
+    scenarioName: scenario.scenarioName,
+    scenarioLine: scenario.scenarioLine,
+    exampleParams: scenario.exampleParams,
     tags: tagsList
   });
 
-  scenario.save(callback);
+  scenarioDbObject.save(callback);
 }
 
 router.get('/', (req, res) => {
-  Project.find({}, (err, projects) => {
-    res.send({ projects: projects });
+  Project.find({}, (projectSearchError, projects) => {
+    if (projectSearchError) {
+      log.error(projectSearchError);
+      res.send({ error: 'project_not_found' });
+    }
+    res.send({ projects });
   });
 });
 
@@ -73,10 +77,10 @@ router.get('/:project/scan', (req, res) => {
 
   const projectId = req.params.project;
 
-  Project.findOne({ projectId: projectId }, (err, project) => {
-    if (err) {
-      log.error(err);
-      res.send({ error: err });
+  Project.findOne({ projectId }, (findProjectError, project) => {
+    if (findProjectError) {
+      log.error(findProjectError);
+      res.send({ error: findProjectError });
     }
 
     if (!project) {
@@ -96,16 +100,16 @@ router.get('/:project/scan', (req, res) => {
 
     const featuresRoot = project.featuresRoot;
 
-    util.scanRepository(workingCopyPath, (err, results) => {
-      if (err) {
+    util.scanRepository(workingCopyPath, (scanRepositoryError, results) => {
+      if (scanRepositoryError) {
         res.statusCode = 400;
-        log.error(err);
+        log.error(scanRepositoryError);
         return res.send({ error: `Path not found: ${workingCopyPath}` });
       }
 
-      Scenario.remove({ project: projectId }, (err) => {
-        if (err) {
-          log.error(err);
+      Scenario.remove({ project: projectId }, (removeScenariosError) => {
+        if (removeScenariosError) {
+          log.error(removeScenariosError);
         }
         for (const result of results) {
           const parser = new gherkin.Parser();
@@ -129,13 +133,23 @@ router.get('/:project/scan', (req, res) => {
                     paramsString += `${exampleParam.value}:`;
                   }
                   log.debug(`${feature.name} -> ${child.name}:${example.location.line} (${paramsString})`);
-                  saveScenario(project, classpath, feature.name, child.name, example.location.line, paramsString, child.tags.concat(examplesBlock.tags), (err, data) => {
-                    if (err) {
-                      if (err.message.indexOf('duplicate key') > -1) {
+                  const scenarioObject = {
+                    project,
+                    classpath,
+                    featureName: feature.name,
+                    scenarioName: child.name,
+                    scenarioLine: example.location.line,
+                    exampleParams: paramsString,
+                    tags: child.tags.concat(examplesBlock.tags)
+                  };
+
+                  saveScenario(scenarioObject, (saveScenarioError, data) => {
+                    if (saveScenarioError) {
+                      if (saveScenarioError.message.indexOf('duplicate key') > -1) {
                         log.debug(`Scenario ${child.name} already exists in DB, skipped`);
                       } else {
                         res.statusCode = 500;
-                        log.error('Internal error(%d): %s', res.statusCode, err.message);
+                        log.error('Internal error(%d): %s', res.statusCode, saveScenarioError.message);
                         return res.send({ error: 'Server error' });
                       }
                     }
@@ -143,13 +157,23 @@ router.get('/:project/scan', (req, res) => {
                 }
               }
             } else if (child.type !== 'Background') {
-              saveScenario(project, classpath, feature.name, child.name, child.location.line, null, child.tags, (err, data) => {
-                if (err) {
-                  if (err.message.indexOf('duplicate key') > -1) {
+              const scenarioObject = {
+                project,
+                classpath,
+                featureName: feature.name,
+                scenarioName: child.name,
+                scenarioLine: child.location.line,
+                exampleParams: null,
+                tags: child.tags
+              };
+
+              saveScenario(scenarioObject, (saveScenarioError, data) => {
+                if (saveScenarioError) {
+                  if (saveScenarioError.message.indexOf('duplicate key') > -1) {
                     log.debug(`Scenario ${child.name} already exists in DB, skipped`);
                   } else {
                     res.statusCode = 500;
-                    log.error(`Internal error(${res.statusCode}): ${err.message}`);
+                    log.error(`Internal error(${res.statusCode}): ${saveScenarioError.message}`);
                     return res.send({ error: 'Server error' });
                   }
                 }
@@ -166,7 +190,10 @@ router.get('/:project/scan', (req, res) => {
 router.get('/:project', (req, res) => {
   const scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
 
-  filter.applyFiltersToProject(req.params.project, scenarioFilters, (err, project, scenariosScopes) => {
+  filter.applyFiltersToProject(req.params.project, scenarioFilters, (applyFiltersError, project, scenariosScopes) => {
+    if (applyFiltersError) {
+      throw applyFiltersError;
+    }
     res.send({
       project: {
         id: project.projectId,

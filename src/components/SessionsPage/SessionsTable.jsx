@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Table } from 'react-bootstrap';
+import { Table, Alert } from 'react-bootstrap';
 import SessionsTableHeader from './SessionsTableHeader';
 import SessionRow from './SessionRow';
 import SessionProgressBar from './SessionProgressBar';
 
+import { fetchSessions } from 'redux/actions/sessionsActions';
+
 const propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
   availableSessions: PropTypes.array
 };
 
@@ -20,10 +24,33 @@ class SessionsTable extends Component {
     };
   }
 
+  componentDidMount() {
+    this.fetchSessions();
+    this.timerID = setInterval(
+      () => this.fetchSessions(),
+      3000
+    );
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+
+  fetchSessions() {
+    this.props.dispatch(fetchSessions());
+  }
+
   render() {
     const { availableSessions } = this.props;
+
+    if (!availableSessions) {
+      return <div>Loading...</div>;
+    }
     const rows = [];
 
+    if (availableSessions.length === 0) {
+      return <Alert bsStyle='info'>No running sessions</Alert>;
+    }
     for (let i = 0; i < availableSessions.length; i++) {
       rows.push(<SessionRow key={`${availableSessions[i].sessionId}-row`} session={availableSessions[i]}/>);
       rows.push(

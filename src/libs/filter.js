@@ -2,7 +2,6 @@ const log = require('libs/log')(module);
 
 const Project = require('libs/mongoose').Project;
 const Scenario = require('libs/mongoose').Scenario;
-const Execution = require('libs/mongoose').Execution;
 
 module.exports.development = {
   id: 'dev',
@@ -160,28 +159,14 @@ module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(
       if (err) {
         log.error(err);
       }
-      const scenarioPromises = scenarios.map((sc) => {
-        return new Promise((scResolve) => {
-          Execution.findOne({ scenarioId: sc.getScenarioId() }, (executionSearchError, execution) => {
-            if (executionSearchError) {
-              log.error(executionSearchError);
-            }
-            sc.projectTag = project.tag;
-            if (execution && execution.executions) {
-              sc.executions = execution.executions;
-            }
-            if (tags && this.applyTags(sc, tags)) {
-              filteredScenarios.push(sc);
-            }
-            scResolve();
-          });
-        });
-      });
-
-      Promise.all(scenarioPromises).then(() => {
-        log.info(JSON.stringify(filteredScenarios));
-        callback(null, project, filteredScenarios);
-      }).catch(log.error);
+      for (const scenario of scenarios) {
+        scenario.projectTag = project.tag;
+        if (tags && this.applyTags(scenario, tags)) {
+          filteredScenarios.push(scenario);
+        }
+      }
+      log.info(JSON.stringify(filteredScenarios));
+      callback(null, project, filteredScenarios);
     });
   });
 };
@@ -202,28 +187,14 @@ module.exports.applyFilterToProject = function applyFilterToProject(projectId, f
         log.error(scenarioSearchError);
       }
 
-      const scenarioPromises = scenarios.map((sc) => {
-        return new Promise((scResolve) => {
-          Execution.findOne({ scenarioId: sc.getScenarioId() }, (executionSearchError, execution) => {
-            if (executionSearchError) {
-              log.error(executionSearchError);
-            }
-            sc.projectTag = project.tag;
-            if (execution && execution.executions) {
-              sc.executions = execution.executions;
-            }
-            if (this.applyFilter(sc, filter)) {
-              filteredScenarios.push(sc);
-            }
-            scResolve();
-          });
-        });
-      });
-
-      Promise.all(scenarioPromises).then(() => {
-        log.info(JSON.stringify(filteredScenarios));
-        callback(null, project, filteredScenarios);
-      }).catch(log.error);
+      for (const scenario of scenarios) {
+        scenario.projectTag = project.tag;
+        if (this.applyFilter(scenario, filter)) {
+          filteredScenarios.push(scenario);
+        }
+      }
+      log.info(JSON.stringify(filteredScenarios));
+      callback(null, project, filteredScenarios);
     });
   });
 };
@@ -253,40 +224,32 @@ module.exports.applyFiltersToProject = function applyFilterToProject(projectId, 
       if (scenarioSearchError) {
         log.error(scenarioSearchError);
       }
-      const scenarioPromises = scenarios.map((sc) => {
+
+      for (const scenario of scenarios) {
         const scenarioObject = {
-          featureName: sc.featureName,
-          scenarioName: sc.scenarioName,
-          scenarioLine: sc.scenarioLine,
-          exampleParams: sc.exampleParams,
-          tags: sc.tags
+          projectTag: project.tag,
+          featureName: scenario.featureName,
+          scenarioName: scenario.scenarioName,
+          scenarioLine: scenario.scenarioLine,
+          exampleParams: scenario.exampleParams,
+          executions: scenario.executions,
+          tags: scenario.tags
         };
 
-        return new Promise((scResolve) => {
-          Execution.findOne({ scenarioId: sc.getScenarioId() }, (err, execution) => {
-            scenarioObject.projectTag = project.tag;
-            if (execution && execution.executions) {
-              scenarioObject.executions = execution.executions;
-            }
-            let inScopes = false;
+        let inScopes = false;
 
-            for (const filter of filters) {
-              if (this.applyFilter(scenarioObject, filter)) {
-                scenariosScopes[filter.id].scenarios.push(scenarioObject);
-                inScopes = true;
-              }
-            }
-            if (!inScopes) {
-              scenariosScopes.disabled.scenarios.push(scenarioObject);
-            }
-            scResolve();
-          });
-        });
-      });
+        for (const filter of filters) {
+          if (this.applyFilter(scenarioObject, filter)) {
+            scenariosScopes[filter.id].scenarios.push(scenarioObject);
+            inScopes = true;
+          }
+        }
+        if (!inScopes) {
+          scenariosScopes.disabled.scenarios.push(scenarioObject);
+        }
+      }
 
-      Promise.all(scenarioPromises).then(() => {
-        callback(null, project, scenariosScopes);
-      }).catch(log.error);
+      callback(null, project, scenariosScopes);
     });
   });
 };

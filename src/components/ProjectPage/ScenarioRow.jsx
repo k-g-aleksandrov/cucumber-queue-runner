@@ -32,18 +32,18 @@ class ScenarioRow extends Component {
           <span style={{ fontStyle: 'italic' }}>Examples: {scenario.exampleParams}</span>
         </Col>
         <Col md={3} style={{ textAlign: 'right', verticalAlign: 'center' }}>
-          {scenario.executions && scenario.executions.slice(
-            Math.max(scenario.executions.length - 30, 1)
-          ).map((execution, eI) => {
-            return (
-              <span
-                key={eI}
-                style={execution.result === 'passed' ? { color: 'green' } : { color: 'red' }}
-              >
+          {scenario.executions
+            ? scenario.executions.slice(Math.max(scenario.executions.length - 30, 0)).map((execution, eI) => {
+              return (
+                <span
+                  key={eI}
+                  style={execution.result === 'passed' ? { color: 'green' } : { color: 'red' }}
+                >
                 &#x25cf;
               </span>
-            );
-          })}
+              );
+            })
+            : null}
         </Col>
       </Row>
     );
