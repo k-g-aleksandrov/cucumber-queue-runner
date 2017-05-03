@@ -10,8 +10,7 @@ import { finishSession, deleteSession } from 'redux/actions/sessionsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
-  session: PropTypes.any.isRequired,
-  isFinishing: PropTypes.bool
+  session: PropTypes.any.isRequired
 };
 
 class SessionRow extends Component {

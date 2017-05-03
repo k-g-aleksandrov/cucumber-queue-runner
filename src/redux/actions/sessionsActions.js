@@ -39,3 +39,13 @@ export function deleteSession(sessionId) {
     }
   };
 }
+
+export function skipScenario(sessionId, scenarioId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/sessions/${sessionId}/skip/${scenarioId}`,
+      method: 'POST',
+      types: ['session/skip/scenario/REQUEST', 'session/skip/scenario/SUCCESS', 'session/skip/scenario/FAILURE']
+    }
+  };
+}

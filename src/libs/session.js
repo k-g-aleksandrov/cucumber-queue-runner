@@ -262,7 +262,7 @@ class Session {
   }
 }
 
-Session.pushScenarioToStatusList = function (resultObject, scenario) {
+Session.pushScenarioToStatusList = function pushScenarioToStatusList(resultObject, scenario) {
   resultObject[scenario.result].push({
     scenarioId: scenario._id,
     classpath: scenario.classpath,
@@ -352,7 +352,7 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
   }
 };
 
-Session.trackInProgressTimeoutFunc = function (session) {
+Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session) {
   if (!session.inProgressScenarios) {
     log.debug(`${session.sessionId}: There are no in progress scenarios at this moment`);
     return;

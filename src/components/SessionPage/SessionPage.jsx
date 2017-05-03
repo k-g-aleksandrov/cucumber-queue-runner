@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { Link } from 'react-router';
+import Button from 'react-bootstrap-button-loader';
 import { Tab, Row, Col, Nav, NavItem, Table } from 'react-bootstrap';
 
-import { fetchSessionDetails } from 'redux/actions/sessionsActions';
+import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -18,6 +18,8 @@ class SessionPage extends Component {
 
   constructor(props) {
     super(props);
+
+    this.handleSkipScenarioClick = this.handleSkipScenarioClick.bind(this);
   }
 
   componentDidMount() {
@@ -30,6 +32,10 @@ class SessionPage extends Component {
 
   componentWillUnmount() {
     clearInterval(this.timerID);
+  }
+
+  handleSkipScenarioClick(sessionId, scenarioId) {
+    this.props.dispatch(skipScenario(sessionId, scenarioId));
   }
 
   fetchSessionDetails() {
@@ -77,9 +83,9 @@ class SessionPage extends Component {
                               <span>{`${queueItem.scenarioName} (:${queueItem.scenarioLine})`}</span>
                             </td>
                             <td>
-                              <Link to={`/api/sessions/${sessionId}/skip/${queueItem.scenarioId}`}>
+                              <Button onClick={() => this.handleSkipScenarioClick(sessionId, queueItem.scenarioId)}>
                                 Skip Scenario ->
-                              </Link>
+                              </Button>
                             </td>
                           </tr>
                         );

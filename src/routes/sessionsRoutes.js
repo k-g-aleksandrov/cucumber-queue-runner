@@ -169,23 +169,33 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   });
 });
 
-router.get('/:sessionId/skip/:scenarioId', (req, res) => {
+router.post('/:sessionId/skip/:scenarioId', (req, res) => {
   const session = Session.sessions[req.params.sessionId];
 
   if (!session) {
-    return res.redirect(`/sessions/list?state=sessionlost&session=${req.params.sessionId}`);
+    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
   }
   session.skipScenario(req.params.scenarioId);
-  res.redirect(`/sessions/${req.params.sessionId}/details#queue`);
+  res.send({ success: true });
 });
 
 router.post('/:sessionId/finish', (req, res) => {
-  Session.sessions[req.params.sessionId].stopSession();
+  const session = Session.sessions[req.params.sessionId];
+
+  if (!session) {
+    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
+  }
+  session.stopSession();
   res.send({ success: true });
 });
 
 router.delete('/:sessionId', (req, res) => {
-  Session.sessions[req.params.sessionId].stopSession();
+  const session = Session.sessions[req.params.sessionId];
+
+  if (!session) {
+    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
+  }
+  session.stopSession();
   delete Session.sessions[req.params.sessionId];
   res.send({ success: true });
 });
