@@ -23,6 +23,8 @@ class SessionPage extends Component {
   }
 
   componentDidMount() {
+    this.Doughnut = require('react-chartjs-2').Doughnut;
+
     this.fetchSessionDetails();
     this.timerID = setInterval(
       () => this.fetchSessionDetails(),
@@ -52,9 +54,46 @@ class SessionPage extends Component {
         <div>No session</div>
       );
     }
+
+    const chartData = {
+      labels: [
+        `In Queue (${session.status.queue.length})`,
+        `In Progress (${session.status.inProgress.length})`,
+        `Passed (${session.status.passed.length})`,
+        `Failed (${session.status.failed.length})`,
+        `Skipped (${session.status.skipped.length})`
+      ],
+      datasets: [
+        {
+          data: [
+            session.status.queue.length,
+            session.status.inProgress.length,
+            session.status.passed.length,
+            session.status.failed.length,
+            session.status.skipped.length
+          ],
+          backgroundColor: [
+            '#8AF',
+            '#F5F28F',
+            '#92DD96',
+            '#F2928C',
+            'lightgray'
+          ],
+          hoverBackgroundColor: [
+            '#8AF',
+            '#F5F28F',
+            '#92DD96',
+            '#F2928C',
+            'lightgray'
+          ]
+        }
+      ]
+    };
+
     return (
       <div>
-        <span>{session.sessionId}</span>
+        <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
+        <this.Doughnut data={chartData} height={75} style={{ bottomPadding: '10px', height: '50px' }}/>
         <Tab.Container id='tabs-with-dropdown' defaultActiveKey='queue'>
           <Row className='clearfix'>
             <Col sm={12}>

@@ -23,14 +23,15 @@ class ScenarioRow extends Component {
 
     return (
       <Row className='show-grid'>
-        <Col md={1} style={{ textAlign: 'right' }}>
+        <Col md={1} style={{ textAlign: 'right', verticalAlign: 'center' }}>
           {this.props.index + 1}
         </Col>
         <Col md={8}>
           <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
-          {scenario.scenarioName} ({scenario.exampleParams})
+          {scenario.scenarioName} ({scenario.scenarioLine})<br/>
+          <span style={{ fontStyle: 'italic' }}>Examples: {scenario.exampleParams}</span>
         </Col>
-        <Col md={3} style={{ textAlign: 'right' }}>
+        <Col md={3} style={{ textAlign: 'right', verticalAlign: 'center' }}>
           {scenario.executions && scenario.executions.slice(
             Math.max(scenario.executions.length - 30, 1)
           ).map((execution, eI) => {

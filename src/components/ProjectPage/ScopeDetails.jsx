@@ -24,7 +24,7 @@ class ScopeDetails extends Component {
 
     const title = (
       <div onClick={() => this.setState({ open: !this.state.open })}>
-        <h4>{scope.filter.displayName}</h4>
+        <h4>{scope.filter.displayName} - {scope.scenarios.length} scenarios</h4>
         <span style={{ fontSize: 'small', fontStyle: 'italic' }}>{scope.filter.description}</span>
       </div>
     );

@@ -41,7 +41,7 @@ class ProjectPage extends Component {
     return (
       <div>
         <h2>{projectDetails.name}</h2>
-        {projectDetails.description && <em>projectDetails.description</em>}
+        {projectDetails.description && <em>{projectDetails.description}</em>}
         <div>
           {Object.keys(projectDetails.scopes).map((scope, i) => {
             return <ScopeDetails scope={projectDetails.scopes[scope]} key={i}/>;

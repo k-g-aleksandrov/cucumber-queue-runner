@@ -35,7 +35,7 @@ class ProjectsTable extends Component {
                 <td>
                   <span>{project.description}</span>
                 </td>
-                <td style={{ align: 'center' }}>
+                <td style={{ textAlign: 'center' }}>
                   <a className='btn btn-primary' role='button' href={`/api/projects/${project.projectId}/scan`}>
                     Rescan Project
                   </a>
