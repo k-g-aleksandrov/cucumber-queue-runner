@@ -7,46 +7,52 @@ const Execution = require('libs/mongoose').Execution;
 module.exports.development = {
   id: 'dev',
   displayName: 'Development',
-  executionRules: [{
-    result: 'passed',
-    number: 5,
-    mode: 'row',
-    inverted: true
-  }],
+  executionRules: [
+    {
+      result: 'passed',
+      number: 5,
+      mode: 'row',
+      inverted: true
+    }
+  ],
   description: 'Have less than 5 passed executions in a row'
 };
 
 module.exports.daily = {
   id: 'daily',
   displayName: 'Daily',
-  executionRules: [{
-    result: 'passed',
-    number: 5,
-    mode: 'row',
-    inverted: false
-  }, {
-    result: 'passed',
-    number: 1,
-    mode: 'last',
-    inverted: false
-  }],
+  executionRules: [
+    {
+      result: 'passed',
+      number: 5,
+      mode: 'row',
+      inverted: false
+    }, {
+      result: 'passed',
+      number: 1,
+      mode: 'last',
+      inverted: false
+    }
+  ],
   description: 'Have at least 5 passed executions in a row, and passed last execution'
 };
 
 module.exports.muted = {
   id: 'muted',
   displayName: 'Failed',
-  executionRules: [{
-    result: 'passed',
-    number: 5,
-    mode: 'row',
-    inverted: false
-  }, {
-    result: 'passed',
-    number: 1,
-    mode: 'last',
-    inverted: true
-  }],
+  executionRules: [
+    {
+      result: 'passed',
+      number: 5,
+      mode: 'row',
+      inverted: false
+    }, {
+      result: 'passed',
+      number: 1,
+      mode: 'last',
+      inverted: true
+    }
+  ],
   description: 'Have at least 5 passed executions in a row, and failed last execution'
 };
 
@@ -116,9 +122,8 @@ function validateExecutionRule(scenario, rule) {
     return validateExecutionsRowRule(scenario, rule);
   } else if (rule.mode === 'last') {
     return validateLastExecutionsRule(scenario, rule);
-  } else {
-    return true;
   }
+  return true;
 }
 
 function checkProjectTag(scenario, projectTag) {
@@ -140,7 +145,7 @@ module.exports.getFilterByName = function getFilterByName(filter) {
 };
 
 module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(projectId, tags, callback) {
-  Project.findOne({ projectId: projectId }, (projectSearchError, project) => {
+  Project.findOne({ projectId }, (projectSearchError, project) => {
     if (projectSearchError) {
       log.error(projectSearchError);
     }
@@ -182,7 +187,7 @@ module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(
 };
 
 module.exports.applyFilterToProject = function applyFilterToProject(projectId, filter, callback) {
-  Project.findOne({ projectId: projectId }, (projectSearchError, project) => {
+  Project.findOne({ projectId }, (projectSearchError, project) => {
     if (projectSearchError) {
       log.error(projectSearchError);
     }
@@ -252,6 +257,7 @@ module.exports.applyFiltersToProject = function applyFilterToProject(projectId, 
         const scenarioObject = {
           featureName: sc.featureName,
           scenarioName: sc.scenarioName,
+          scenarioLine: sc.scenarioLine,
           exampleParams: sc.exampleParams,
           tags: sc.tags
         };
