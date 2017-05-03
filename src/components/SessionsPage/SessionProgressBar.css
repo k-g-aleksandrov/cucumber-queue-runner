@@ -1,0 +1,12 @@
+.progress-chart {
+    width: 100%;
+}
+
+.progress-chart div {
+    height: 15px;
+    float: left;
+}
+
+.progress-chart:after {
+    clear: both;
+}
