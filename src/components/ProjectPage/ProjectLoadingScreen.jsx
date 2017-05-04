@@ -5,7 +5,7 @@ import { Panel } from 'react-bootstrap';
 function ProjectLoadingScreen() {
   return (
     <div>
-      <h2>Loading Project Details...</h2>
+      <h2>...</h2>
       <div>
         <Panel header={<h4>Development</h4>} bsStyle='info'>
           <h4>Loading scenarios for filter 'Development'</h4>

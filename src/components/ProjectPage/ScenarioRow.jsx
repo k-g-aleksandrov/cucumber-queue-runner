@@ -28,8 +28,8 @@ class ScenarioRow extends Component {
         </Col>
         <Col md={8}>
           <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
-          {scenario.scenarioName} ({scenario.scenarioLine})<br/>
-          <span style={{ fontStyle: 'italic' }}>Examples: {scenario.exampleParams}</span>
+          {scenario.scenarioName} (:{scenario.scenarioLine})<br/>
+          {scenario.exampleParams && <span style={{ fontStyle: 'italic' }}>Examples: {scenario.exampleParams}</span>}
         </Col>
         <Col md={3} style={{ textAlign: 'right', verticalAlign: 'center' }}>
           {scenario.executions

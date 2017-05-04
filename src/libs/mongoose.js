@@ -38,6 +38,18 @@ const ProjectSchema = new Schema({
   featuresRoot: String
 });
 
+const ExecutionSchema = new Schema({
+  scenarioId: { type: String, unique: true },
+  executions: [
+    {
+      result: String,
+      startTimestamp: { type: Date },
+      endTimestamp: { type: Date, default: Date.now },
+      executor: String
+    }
+  ]
+});
+
 const ScenarioSchema = new Schema({
   project: String,
   classpath: String,
@@ -77,6 +89,8 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
 
 const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
+const Execution = mongoose.model('Execution', ExecutionSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
+module.exports.Execution = Execution;

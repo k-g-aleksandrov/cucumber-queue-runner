@@ -1,5 +1,5 @@
 import express from 'express';
-import { Project, Scenario } from 'libs/mongoose';
+import { Project, Scenario, Execution } from 'libs/mongoose';
 import util from 'libs/util';
 import filter from 'libs/filter';
 import gherkin from 'gherkin';
@@ -30,6 +30,39 @@ function saveScenario(scenario, callback) {
 
   scenarioDbObject.save(callback);
 }
+
+router.get('/update', (req, res) => {
+  Scenario.find({}, (scenarioSearchError, scenarios) => {
+    log.info('got response from scenario db');
+    if (scenarioSearchError) {
+      log.error(scenarioSearchError);
+    }
+
+    for (const scenario of scenarios) {
+      log.info(`Processing scenario ${scenario.getScenarioId()}`);
+      Execution.findOneAndRemove({ scenarioId: scenario.getScenarioId() }, (executionSearchError, execution) => {
+        log.info(`Got execution results for scenario ${scenario.getScenarioId()}`);
+        if (execution && execution.executions) {
+          Scenario.update(
+            { _id: scenario._id },
+            {
+              $pushAll: {
+                'executions': execution.executions
+              }
+            },
+            { safe: true, upsert: true },
+            (err) => {
+              if (err) throw err;
+              log.info(`Stored execution results for scenario ${scenario.getScenarioId()}`);
+            }
+          );
+        }
+      });
+    }
+
+    res.send({ success: true });
+  });
+});
 
 router.get('/', (req, res) => {
   Project.find({}, (projectSearchError, projects) => {
@@ -204,5 +237,6 @@ router.get('/:project', (req, res) => {
     });
   });
 });
+
 
 export default router;
