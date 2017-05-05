@@ -2,13 +2,12 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { getScenarioReport } from 'redux/actions/sessionsActions';
+import Report from './Report';
 
 const propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
   session: PropTypes.any,
-  scenario: PropTypes.any
+  scenario: PropTypes.any,
+  report: PropTypes.any
 };
 
 class DoneScenarioRow extends Component {
@@ -19,12 +18,17 @@ class DoneScenarioRow extends Component {
     this.state = {
       report: null
     };
-
-    this.handleGetScenarioReportClick = this.handleGetScenarioReportClick.bind(this);
   }
 
   handleGetScenarioReportClick(sessionId, scenarioId) {
-    this.props.dispatch(getScenarioReport(sessionId, scenarioId));
+    fetch(`/api/sessions/${sessionId}/reports/${scenarioId}`)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({ report: responseJson.report });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   render() {
@@ -41,24 +45,20 @@ class DoneScenarioRow extends Component {
     }
 
     return (
-      <tr onClick={this.handleGetScenarioReportClick(session.sessionId, scenario.scenarioId)}
+      <tr onClick={() => {
+        this.handleGetScenarioReportClick(session.sessionId, scenario.scenarioId);
+      }}
         style={{ backgroundColor }}
       >
         <td>
-          <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span>
+          <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
+          {scenario.result !== 'skipped' && <Report report={this.state.report}/>}
         </td>
-        <Report/>
       </tr>
     );
   }
 }
 
-function mapStateToProps(state) {
-  const { loading, report } = state.report;
-
-  return { loading, report };
-}
-
 DoneScenarioRow.propTypes = propTypes;
 
-export default connect(mapStateToProps)(DoneScenarioRow);
+export default connect()(DoneScenarioRow);
