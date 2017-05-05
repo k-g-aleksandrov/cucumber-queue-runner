@@ -1,5 +1,6 @@
 const initialState = {
   projectDetails: [],
+  projectScanResult: null,
   errors: null,
   loading: false
 };
@@ -11,12 +12,17 @@ export default function (state = initialState, action) {
     case 'project/delete/REQUEST':
       return Object.assign({}, state, { loading: true, errors: null });
     case 'project/SUCCESS':
-    case 'project/scan/SUCCESS':
     case 'project/delete/SUCCESS':
       return {
         loading: false,
         errors: null,
         projectDetails: action.payload.project
+      };
+    case 'project/scan/SUCCESS':
+      return {
+        loading: false,
+        errors: null,
+        projectScanResult: action.payload.project
       };
     case 'project/FAILURE':
     case 'project/scan/FAILURE':
