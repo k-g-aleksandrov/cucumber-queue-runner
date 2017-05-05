@@ -57,23 +57,7 @@ const ScenarioSchema = new Schema({
   scenarioName: String,
   exampleParams: String,
   scenarioLine: Number,
-  tags: Array,
-  executions: [
-    {
-      result: String,
-      startTimestamp: { type: Date },
-      endTimestamp: { type: Date, default: Date.now },
-      executor: String
-    }
-  ],
-  filters: {
-    type: [
-      String
-    ],
-    default: [
-      'full', 'dev'
-    ]
-  }
+  tags: Array
 });
 
 ScenarioSchema.index({

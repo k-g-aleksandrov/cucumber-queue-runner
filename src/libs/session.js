@@ -2,7 +2,7 @@ const log = require('libs/log')(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Scenario } from 'libs/mongoose';
+import { Scenario, Execution } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
@@ -158,8 +158,8 @@ class Session {
   }
 
   storeExecutionResult(scenario) {
-    Scenario.update(
-      { _id: scenario._id },
+    Execution.update(
+      { scenarioId: scenario.getScenarioId() },
       {
         $push: {
           'executions': {

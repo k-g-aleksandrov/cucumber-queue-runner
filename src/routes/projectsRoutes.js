@@ -1,5 +1,5 @@
 import express from 'express';
-import { Project, Scenario, Execution } from 'libs/mongoose';
+import { Project, Scenario } from 'libs/mongoose';
 import util from 'libs/util';
 import filter from 'libs/filter';
 import gherkin from 'gherkin';
@@ -31,39 +31,6 @@ function saveScenario(scenario, callback) {
   scenarioDbObject.save(callback);
 }
 
-router.get('/update', (req, res) => {
-  Scenario.find({}, (scenarioSearchError, scenarios) => {
-    log.info('got response from scenario db');
-    if (scenarioSearchError) {
-      log.error(scenarioSearchError);
-    }
-
-    for (const scenario of scenarios) {
-      log.info(`Processing scenario ${scenario.getScenarioId()}`);
-      Execution.findOneAndRemove({ scenarioId: scenario.getScenarioId() }, (executionSearchError, execution) => {
-        log.info(`Got execution results for scenario ${scenario.getScenarioId()}`);
-        if (execution && execution.executions) {
-          Scenario.update(
-            { _id: scenario._id },
-            {
-              $pushAll: {
-                'executions': execution.executions
-              }
-            },
-            { safe: true, upsert: true },
-            (err) => {
-              if (err) throw err;
-              log.info(`Stored execution results for scenario ${scenario.getScenarioId()}`);
-            }
-          );
-        }
-      });
-    }
-
-    res.send({ success: true });
-  });
-});
-
 router.get('/', (req, res) => {
   Project.find({}, (projectSearchError, projects) => {
     if (projectSearchError) {
@@ -75,21 +42,13 @@ router.get('/', (req, res) => {
 });
 
 router.post('/add', (req, res) => {
-  log.info('request started');
-  const id = req.body.id;
-  const name = req.body.name;
-  const tag = req.body.tag;
-  const description = req.body.description;
-  const workingCopyPath = req.body.wcpath;
-  const featuresRoot = req.body.frpath;
-
   const newProject = new Project({
-    projectId: id,
-    name: name,
-    tag: tag,
-    description: description,
-    workingCopyPath: workingCopyPath,
-    featuresRoot: featuresRoot
+    projectId: req.body.id,
+    name: req.body.name,
+    tag: req.body.tag,
+    description: req.body.description,
+    workingCopyPath: req.body.wcpath,
+    featuresRoot: req.body.frpath
   });
 
   newProject.save((err) => {
@@ -237,6 +196,5 @@ router.get('/:project', (req, res) => {
     });
   });
 });
-
 
 export default router;
