@@ -154,18 +154,17 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   const session = Session.sessions[req.params.sessionId];
 
   if (!session) {
-    return res.send(
-      '<div class="alert alert-warning">Seems like session is already finished. See Cucumber Report on Jenkins</div>');
+    return res.send({ session: { sessionId: req.params.sessionId }, error: 'no_session' });
   }
   for (const feature of Object.keys(session.doneScenarios)) {
     for (const scenario of session.doneScenarios[feature]) {
       if (req.params.scenarioId === scenario._id.toString()) {
-        return res.render('report', { report: scenario.report });
+        return res.send({ report: scenario.report });
       }
     }
   }
   res.send({
-    error: `Scenario ${req.params.scenarioId} does not exist or not yet finished.`
+    session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
   });
 });
 

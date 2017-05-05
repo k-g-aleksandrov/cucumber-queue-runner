@@ -4,7 +4,6 @@ import Grid from 'react-bootstrap/lib/Grid';
 import Nav from 'react-bootstrap/lib/Nav';
 import Navbar from 'react-bootstrap/lib/Navbar';
 import NavItem from 'react-bootstrap/lib/NavItem';
-import { Link } from 'react-router';
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
 import './bootstrap.css';
@@ -17,11 +16,8 @@ class App extends Component {
   render() {
     return (
       <div style={{ padding: 0 }}>
-        <Navbar inverse>
+        <Navbar inverse fluid>
           <Navbar.Header>
-            <Navbar.Brand>
-              <Link to='/'>Cucumber Runner</Link>
-            </Navbar.Brand>
             <Navbar.Toggle/>
           </Navbar.Header>
           <Navbar.Collapse>

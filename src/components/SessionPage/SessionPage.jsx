@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 import Button from 'react-bootstrap-button-loader';
 import { Tab, Row, Col, Nav, NavItem, Table } from 'react-bootstrap';
 
+import Spinner from 'components/Spinner';
+import DoneScenarioRow from './DoneScenarioRow';
+
 import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
 
 let Doughnut;
@@ -27,7 +30,6 @@ class SessionPage extends Component {
   componentDidMount() {
     Doughnut = require('react-chartjs-2').Doughnut;
 
-    this.fetchSessionDetails();
     this.timerID = setInterval(
       () => this.fetchSessionDetails(),
       5000
@@ -53,7 +55,7 @@ class SessionPage extends Component {
 
     if (!session) {
       return (
-        <div>No session</div>
+        <Spinner/>
       );
     }
 
@@ -95,7 +97,7 @@ class SessionPage extends Component {
     return (
       <div>
         <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
-        <Doughnut data={chartData} height={75} style={{ bottomPadding: '10px', height: '50px' }}/>
+        <Doughnut data={chartData} height={50}/><br/>
         <Tab.Container id='tabs-with-dropdown' defaultActiveKey='queue'>
           <Row className='clearfix'>
             <Col sm={12}>
@@ -123,7 +125,7 @@ class SessionPage extends Component {
                               <span style={{ fontWeight: 'bold' }}>{queueItem.featureName}:&nbsp;</span>
                               <span>{`${queueItem.scenarioName} (:${queueItem.scenarioLine})`}</span>
                             </td>
-                            <td>
+                            <td style={{ textAlign: 'center' }}>
                               <Button onClick={() => this.handleSkipScenarioClick(sessionId, queueItem.scenarioId)}>
                                 Skip Scenario ->
                               </Button>
@@ -159,23 +161,7 @@ class SessionPage extends Component {
                             <th>{feature}</th>
                           </tr>
                           {session.status.done[feature].map((scenario, j) => {
-                            let backgroundColor = 'white';
-
-                            if (scenario.result === 'passed') {
-                              backgroundColor = '#92DD96';
-                            } else if (scenario.result === 'failed') {
-                              backgroundColor = '#F2928C';
-                            } else if (scenario.result === 'skipped') {
-                              backgroundColor = 'lightgray';
-                            }
-
-                            return (
-                              <tr key={j} style={{ backgroundColor }}>
-                                <td>
-                                  <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span>
-                                </td>
-                              </tr>
-                            );
+                            return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
                           })}
                         </tbody>
                       );

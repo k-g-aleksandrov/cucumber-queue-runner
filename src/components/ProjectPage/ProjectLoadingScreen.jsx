@@ -2,10 +2,11 @@ import React from 'react';
 
 import { Panel } from 'react-bootstrap';
 
+import Spinner from 'components/Spinner';
+
 function ProjectLoadingScreen() {
   return (
     <div>
-      <h2>...</h2>
       <div>
         <Panel header={<h4>Development</h4>} bsStyle='info'>
           <h4>Loading scenarios for filter 'Development'</h4>
@@ -23,14 +24,7 @@ function ProjectLoadingScreen() {
           <h4>Loading scenarios for filter 'Disabled'</h4>
         </Panel>
       </div>
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0,
-        width: '100%', height: '100%',
-        background: 'rgba(255,255,255,0.5)',
-        padding: 0, margin: 0
-      }}
-      />
+      <Spinner/>
     </div>
   );
 }

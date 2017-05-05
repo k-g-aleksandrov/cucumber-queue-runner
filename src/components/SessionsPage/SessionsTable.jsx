@@ -6,6 +6,7 @@ import { Table, Alert } from 'react-bootstrap';
 import SessionsTableHeader from './SessionsTableHeader';
 import SessionRow from './SessionRow';
 import SessionProgressBar from './SessionProgressBar';
+import Spinner from 'components/Spinner';
 
 import { fetchSessions } from 'redux/actions/sessionsActions';
 
@@ -20,7 +21,7 @@ class SessionsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      availableSessions: []
+      availableSessions: null
     };
   }
 
@@ -44,7 +45,7 @@ class SessionsTable extends Component {
     const { availableSessions } = this.props;
 
     if (!availableSessions) {
-      return <div>Loading...</div>;
+      return <Spinner/>;
     }
     const rows = [];
 
