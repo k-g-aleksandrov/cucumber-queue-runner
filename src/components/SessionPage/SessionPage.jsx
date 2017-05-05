@@ -3,7 +3,14 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import Button from 'react-bootstrap-button-loader';
-import { Tab, Row, Col, Nav, NavItem, Table } from 'react-bootstrap';
+import Tab from 'react-bootstrap/lib/Tab';
+import Row from 'react-bootstrap/lib/Row';
+import Col from 'react-bootstrap/lib/Col';
+import Nav from 'react-bootstrap/lib/Nav';
+import NavItem from 'react-bootstrap/lib/NavItem';
+import Table from 'react-bootstrap/lib/Table';
+
+import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
 import Spinner from 'components/Spinner';
 import DoneScenarioRow from './DoneScenarioRow';
@@ -15,6 +22,7 @@ let Doughnut;
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
+  location: PropTypes.any,
   session: PropTypes.any,
   params: PropTypes.object
 };
@@ -50,7 +58,7 @@ class SessionPage extends Component {
 
   render() {
     const sessionId = this.props.params.session;
-
+    const queryParams = this.props.location.query;
     const { session } = this.props;
 
     if (!session) {
@@ -94,27 +102,35 @@ class SessionPage extends Component {
       ]
     };
 
+    const activeTab = queryParams.tab ? queryParams.tab : 'queue';
+
     return (
-      <div>
+      <div style={{ width: '100%' }}>
         <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
         <Doughnut data={chartData} height={50}/><br/>
-        <Tab.Container id='tabs-with-dropdown' defaultActiveKey='queue'>
+        <Tab.Container id='tabs-with-dropdown' defaultActiveKey={activeTab}>
           <Row className='clearfix'>
             <Col sm={12}>
               <Nav bsStyle='tabs'>
-                <NavItem eventKey='queue'>
-                  Queue
-                </NavItem>
-                <NavItem eventKey='progress'>
-                  In Progress
-                </NavItem>
-                <NavItem eventKey='done'>
-                  Done
-                </NavItem>
+                <LinkContainer to={`/sessions/${sessionId}?tab=queue`}>
+                  <NavItem eventKey='queue'>
+                    Queue
+                  </NavItem>
+                </LinkContainer>
+                <LinkContainer to={`/sessions/${sessionId}?tab=progress`}>
+                  <NavItem eventKey='progress'>
+                    In Progress
+                  </NavItem>
+                </LinkContainer>
+                <LinkContainer to={`/sessions/${sessionId}?tab=done`}>
+                  <NavItem eventKey='done'>
+                    Done
+                  </NavItem>
+                </LinkContainer>
               </Nav>
             </Col>
             <Col sm={12}>
-              <Tab.Content animation>
+              <Tab.Content>
                 <Tab.Pane eventKey='queue'>
                   <Table bordered style={{ marginBottom: '0px' }}>
                     <tbody>

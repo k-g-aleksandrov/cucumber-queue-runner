@@ -159,7 +159,7 @@ router.get('/:project/scan', (req, res) => {
                 tags: child.tags
               };
 
-              saveScenario(scenarioObject, (saveScenarioError, data) => {
+              saveScenario(scenarioObject, (saveScenarioError) => {
                 if (saveScenarioError) {
                   if (saveScenarioError.message.indexOf('duplicate key') > -1) {
                     log.debug(`Scenario ${child.name} already exists in DB, skipped`);
@@ -173,7 +173,7 @@ router.get('/:project/scan', (req, res) => {
             }
           }
         }
-        res.send(results);
+        res.send({ project: { projectId, results } });
       });
     });
   });
@@ -194,6 +194,15 @@ router.get('/:project', (req, res) => {
         scopes: scenariosScopes
       }
     });
+  });
+});
+
+router.delete('/:project', (req, res) => {
+  Project.findOneAndRemove({ projectId: req.params.project }, (err) => {
+    if (err) {
+      res.send({ error: 'failed_to_delete', project: req.params.project });
+    }
+    res.send({ project: { projectId: req.params.project, success: true } });
   });
 });
 

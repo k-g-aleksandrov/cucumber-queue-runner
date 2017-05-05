@@ -16,19 +16,23 @@ class DoneScenarioRow extends Component {
     super(props);
 
     this.state = {
+      reportDisplayed: false,
       report: null
     };
   }
 
   handleGetScenarioReportClick(sessionId, scenarioId) {
-    fetch(`/api/sessions/${sessionId}/reports/${scenarioId}`)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({ report: responseJson.report });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    this.setState({ reportDisplayed: !this.state.reportDisplayed });
+    if (this.state.reportDisplayed && this.state.report === null) {
+      fetch(`/api/sessions/${sessionId}/reports/${scenarioId}`)
+        .then((response) => response.json())
+        .then((responseJson) => {
+          this.setState({ report: responseJson.report });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   }
 
   render() {
@@ -51,8 +55,8 @@ class DoneScenarioRow extends Component {
         style={{ backgroundColor }}
       >
         <td>
-          <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
-          {scenario.result !== 'skipped' && <Report report={this.state.report}/>}
+          <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
+          {scenario.result !== 'skipped' && this.state.reportDisplayed && <Report report={this.state.report}/>}
         </td>
       </tr>
     );

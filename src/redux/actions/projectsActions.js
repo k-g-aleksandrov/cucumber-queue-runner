@@ -19,3 +19,23 @@ export function fetchProjectFilters(projectId) {
     }
   };
 }
+
+export function scanProject(projectId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/projects/${projectId}/scan`,
+      method: 'GET',
+      types: ['project/scan/REQUEST', 'project/scan/SUCCESS', 'project/scan/FAILURE']
+    }
+  };
+}
+
+export function deleteProject(projectId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/projects/${projectId}`,
+      method: 'DELETE',
+      types: ['project/delete/REQUEST', 'project/delete/SUCCESS', 'project/delete/FAILURE']
+    }
+  };
+}

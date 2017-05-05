@@ -3,8 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import { Table } from 'react-bootstrap';
+import Button from 'react-bootstrap-button-loader';
+
+import { scanProject, deleteProject } from 'redux/actions/projectsActions';
 
 const propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+  projectDetails: PropTypes.any,
   availableProjects: PropTypes.array
 };
 
@@ -15,6 +21,17 @@ class ProjectsTable extends Component {
     this.state = {
       availableProjects: []
     };
+
+    this.handleRescanProjectClick = this.handleRescanProjectClick.bind(this);
+    this.handleDeleteProjectClick = this.handleDeleteProjectClick.bind(this);
+  }
+
+  handleRescanProjectClick(projectId) {
+    this.props.dispatch(scanProject(projectId));
+  }
+
+  handleDeleteProjectClick(projectId) {
+    this.props.dispatch(deleteProject(projectId));
   }
 
   render() {
@@ -36,9 +53,13 @@ class ProjectsTable extends Component {
                   <span>{project.description}</span>
                 </td>
                 <td style={{ textAlign: 'center' }}>
-                  <a className='btn btn-primary' role='button' href={`/api/projects/${project.projectId}/scan`}>
+                  <Button bsStyle='primary' onClick={() => this.handleRescanProjectClick(project.projectId)}>
                     Rescan Project
-                  </a>
+                  </Button>
+                  <span>&nbsp;</span>
+                  <Button bsStyle='danger' onClick={() => this.handleDeleteProjectClick(project.projectId)}>
+                    Delete Project
+                  </Button>
                 </td>
               </tr>
             );
@@ -50,9 +71,9 @@ class ProjectsTable extends Component {
 }
 
 function mapStateToProps(state) {
-  const { loading, availableProjects } = state.projects;
+  const { loading, availableProjects, projectDetails } = state.projects;
 
-  return { loading, availableProjects };
+  return { loading, availableProjects, projectDetails };
 }
 
 ProjectsTable.propTypes = propTypes;

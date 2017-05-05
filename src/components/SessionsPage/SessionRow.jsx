@@ -53,13 +53,13 @@ class SessionRow extends Component {
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>(scope: {session.scope})</span>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <Link to={`/sessions/${session.sessionId}/#queue`}>{session.queueCount}</Link>
+          <Link to={`/sessions/${session.sessionId}?tab=queue`}>{session.queueCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <Link to={`/sessions/${session.sessionId}/#progress`}>{session.progressCount}</Link>
+          <Link to={`/sessions/${session.sessionId}?tab=progress`}>{session.progressCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <Link to={`/sessions/${session.sessionId}/#done`}>{session.doneCount}</Link>
+          <Link to={`/sessions/${session.sessionId}?tab=done`}>{session.doneCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
           <span>
