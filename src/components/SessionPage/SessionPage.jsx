@@ -66,9 +66,7 @@ class SessionPage extends Component {
     const { session } = this.props;
 
     if (!session) {
-      return (
-        <Spinner/>
-      );
+      return <Spinner/>;
     }
 
     const chartData = {

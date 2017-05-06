@@ -147,7 +147,7 @@ router.get('/:sessionId', (req, res) => {
 
     res.send({ session: { sessionId: req.params.sessionId, details, status } });
   } else {
-    res.send({ session: { sessionId: req.params.sessionId, details: null, status: null }, error: 'session_lost' });
+    res.send({ session: { sessionId: req.params.sessionId, details: null, status: null, error: 'session_lost' } });
   }
 });
 
@@ -183,7 +183,7 @@ router.post('/:sessionId/finish', (req, res) => {
   const session = Session.sessions[req.params.sessionId];
 
   if (!session) {
-    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
+    res.send({ session: { sessionId: req.params.sessionId, status: null, error: 'session_lost' } });
   }
   session.stopSession();
   res.send({ success: true });
@@ -193,7 +193,7 @@ router.delete('/:sessionId', (req, res) => {
   const session = Session.sessions[req.params.sessionId];
 
   if (!session) {
-    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
+    res.send({ session: { sessionId: req.params.sessionId, status: null, error: 'session_lost' } });
   }
   session.stopSession();
   delete Session.sessions[req.params.sessionId];
