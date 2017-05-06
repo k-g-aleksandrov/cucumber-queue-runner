@@ -17,6 +17,7 @@ class Session {
     this.sessionPath = `public/results/${this.sessionId}`;
     this.project = project;
     this.scope = scope;
+    this.tags = tags;
 
     fs.mkdirSync(this.sessionPath);
 
@@ -57,12 +58,23 @@ class Session {
     return this.sessionId;
   }
 
-  getBriefDetails() {
+  getSessionDetails() {
     return {
       sessionId: this.sessionId,
       startDate: this.startDate,
       project: this.project,
       scope: this.scope,
+      tags: this.tags
+    };
+  }
+
+  getBriefStatus() {
+    return {
+      sessionId: this.sessionId,
+      startDate: this.startDate,
+      project: this.project,
+      scope: this.scope,
+      tags: this.tags,
       queueCount: this.getScenariosCount('in queue'),
       progressCount: this.getScenariosCount('in progress'),
       passedCount: this.getScenariosCount('passed'),
@@ -241,7 +253,8 @@ class Session {
         classpath: inProgressScenario.classpath,
         featureName: inProgressScenario.featureName,
         scenarioLine: inProgressScenario.scenarioLine,
-        scenarioName: inProgressScenario.scenarioName
+        scenarioName: inProgressScenario.scenarioName,
+        executor: inProgressScenario.executor
       });
     }
 

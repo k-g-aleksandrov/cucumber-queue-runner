@@ -5,13 +5,12 @@ class SessionsTableHeader extends Component {
   render() {
     return (
       <tr>
-        <th>Session ID</th>
-        <th>Start Date</th>
-        <th>Project</th>
-        <th style={{ verticalAlign: 'center' }}>In Queue</th>
-        <th style={{ verticalAlign: 'center' }}>In Progress</th>
-        <th style={{ verticalAlign: 'center' }}>Done</th>
-        <th>Pass Rate</th>
+        <th>Session</th>
+        <th>Started</th>
+        <th style={{ textAlign: 'center' }}>Queue</th>
+        <th style={{ textAlign: 'center' }}>In Progress</th>
+        <th style={{ textAlign: 'center' }}>Done</th>
+        <th style={{ textAlign: 'center' }}>Pass Rate</th>
         <th>&nbsp;</th>
       </tr>
     );

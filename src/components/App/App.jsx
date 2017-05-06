@@ -7,6 +7,7 @@ import NavItem from 'react-bootstrap/lib/NavItem';
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
 import './bootstrap.css';
+import './App.css';
 
 const propTypes = {
   children: PropTypes.node

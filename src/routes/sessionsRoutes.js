@@ -41,7 +41,7 @@ router.get('/start', (req, res) => {
  */
 router.get('/:sessionId/next', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
-  const executor = req.query.slaveId;
+  const executor = req.query.executor;
 
   // respond with empty object
   if (!currentSession) {
@@ -117,7 +117,7 @@ router.get('/', (req, res) => {
   if (Session.sessions) {
     responseObject.availableSessions = [];
     for (const sessionId of Object.keys(Session.sessions)) {
-      responseObject.availableSessions.push(Session.sessions[sessionId].getBriefDetails());
+      responseObject.availableSessions.push(Session.sessions[sessionId].getBriefStatus());
     }
   }
   res.send(responseObject);
@@ -142,11 +142,12 @@ router.get('/:sessionId', (req, res) => {
   const session = Session.sessions[req.params.sessionId];
 
   if (session) {
+    const details = session.getSessionDetails();
     const status = session.getStatus();
 
-    res.send({ session: { sessionId: req.params.sessionId, status } });
+    res.send({ session: { sessionId: req.params.sessionId, details, status } });
   } else {
-    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
+    res.send({ session: { sessionId: req.params.sessionId, details: null, status: null }, error: 'session_lost' });
   }
 });
 

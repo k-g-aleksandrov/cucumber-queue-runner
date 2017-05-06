@@ -44,13 +44,20 @@ class SessionRow extends Component {
     return (
       <tr style={{ backgroundColor: this.state.isFinishing ? 'lightgray' : 'white' }}>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
-          <Link to={`/sessions/${session.sessionId}`}>{session.sessionId}</Link>
+          {session.project}&nbsp;
+          <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>
+            (scope: {session.scope === 'custom' ? `custom - ${session.tags}` : session.scope})
+          </span><br/>
+          <Link to={`/sessions/${session.sessionId}`}>
+            {session.sessionId}
+          </Link>
         </td>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
-          {moment(session.startDate).format('DD.MM.YYYY HH:mm:ss')}
-        </td>
-        <td style={{ verticalAlign: 'center' }} rowSpan='2'>{session.project}&nbsp;
-          <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>(scope: {session.scope})</span>
+          {moment(new Date()).to(moment(session.startDate))}
+          <br/>
+          <span style={{ fontSize: '90%', fontStyle: 'italic' }}>
+            {moment(session.startDate).format('DD.MM.YYYY HH:mm:ss')}
+          </span>
         </td>
         <td style={{ textAlign: 'center' }}>
           <Link to={`/sessions/${session.sessionId}?tab=queue`}>{session.queueCount}</Link>
