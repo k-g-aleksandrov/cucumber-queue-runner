@@ -12,8 +12,7 @@ import { fetchSessions } from 'redux/actions/sessionsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
-  availableSessions: PropTypes.array
+  availableSessions: PropTypes.any
 };
 
 class SessionsTable extends Component {
@@ -49,16 +48,21 @@ class SessionsTable extends Component {
     }
     const rows = [];
 
-    if (availableSessions.length === 0) {
+    if (Object.keys(availableSessions).length === 0) {
       return <Alert bsStyle='info'>No running sessions</Alert>;
     }
-    for (let i = 0; i < availableSessions.length; i++) {
-      rows.push(<SessionRow key={`${availableSessions[i].sessionId}-row`} session={availableSessions[i]}/>);
-      rows.push(
-        <SessionProgressBar key={`${availableSessions[i].sessionId}-progress`}
-          session={availableSessions[i]}
-        />
-      );
+    for (const key of Object.keys(availableSessions)) {
+      if (availableSessions[key].details && availableSessions[key].briefStatus) {
+        rows.push(
+          <SessionRow key={`${availableSessions[key].details.sessionId}-row`}
+            session={availableSessions[key]}
+          />);
+        rows.push(
+          <SessionProgressBar key={`${availableSessions[key].details.sessionId}-progress`}
+            session={availableSessions[key]}
+          />
+        );
+      }
     }
 
     return (
@@ -73,9 +77,9 @@ class SessionsTable extends Component {
 }
 
 function mapStateToProps(state) {
-  const { loading, availableSessions } = state.sessions;
+  const { availableSessions } = state.sessions;
 
-  return { loading, availableSessions };
+  return { availableSessions };
 }
 
 SessionsTable.propTypes = propTypes;

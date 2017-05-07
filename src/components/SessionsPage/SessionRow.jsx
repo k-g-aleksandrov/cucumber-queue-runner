@@ -39,42 +39,45 @@ class SessionRow extends Component {
   }
 
   render() {
-    const { session } = this.props;
+    const { details, briefStatus } = this.props.session;
 
+    if (!details || !briefStatus) {
+      return null;
+    }
     return (
       <tr style={{ backgroundColor: this.state.isFinishing ? 'lightgray' : 'white' }}>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
-          {session.project}&nbsp;
+          {details.project}&nbsp;
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>
-            (scope: {session.scope === 'custom' ? `custom - ${session.tags}` : session.scope})
+            (scope: {details.scope === 'custom' ? `custom - ${details.tags}` : details.scope})
           </span><br/>
-          <Link to={`/sessions/${session.sessionId}`}>
-            {session.sessionId}
+          <Link to={`/sessions/${details.sessionId}`}>
+            {details.sessionId}
           </Link>
         </td>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
-          {moment(new Date()).to(moment(session.startDate))}
+          {moment(new Date()).to(moment(details.startDate))}
           <br/>
           <span style={{ fontSize: '90%', fontStyle: 'italic' }}>
-            {moment(session.startDate).format('DD.MM.YYYY HH:mm:ss')}
+            {moment(details.startDate).format('DD.MM.YYYY HH:mm:ss')}
           </span>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <Link to={`/sessions/${session.sessionId}?tab=queue`}>{session.queueCount}</Link>
+          <Link to={`/sessions/${details.sessionId}?tab=queue`}>{briefStatus.queueCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <Link to={`/sessions/${session.sessionId}?tab=progress`}>{session.progressCount}</Link>
+          <Link to={`/sessions/${details.sessionId}?tab=progress`}>{briefStatus.progressCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
-          <Link to={`/sessions/${session.sessionId}?tab=done`}>{session.doneCount}</Link>
+          <Link to={`/sessions/${details.sessionId}?tab=done`}>{briefStatus.doneCount}</Link>
         </td>
         <td style={{ textAlign: 'center' }}>
           <span>
-            {session.doneCount > 0 ? `${((session.passedCount / session.doneCount) * 100).toFixed(2)}%` : '-'}
+            {briefStatus.doneCount > 0 ? `${((briefStatus.passedCount / briefStatus.doneCount) * 100).toFixed(2)}%` : '-'}
           </span>
-          <span>&nbsp;(<font color='green'>{session.passedCount}</font>
-                  :<font color='red'>{session.failedCount}</font>
-                  :<font color='gray'>{session.skippedCount}</font>)</span>
+          <span>&nbsp;(<font color='green'>{briefStatus.passedCount}</font>
+                  :<font color='red'>{briefStatus.failedCount}</font>
+                  :<font color='gray'>{briefStatus.skippedCount}</font>)</span>
         </td>
         <td style={{ textAlign: 'center', verticalAlign: 'center' }} rowSpan='2'>
           <Button bsStyle='primary' onClick={this.handleFinishSessionClick}>Finish</Button>

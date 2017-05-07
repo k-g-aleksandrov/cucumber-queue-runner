@@ -25,9 +25,8 @@ let Doughnut;
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
   location: PropTypes.any,
-  session: PropTypes.any,
+  availableSessions: PropTypes.any,
   params: PropTypes.object
 };
 
@@ -63,9 +62,11 @@ class SessionPage extends Component {
   render() {
     const sessionId = this.props.params.session;
     const queryParams = this.props.location.query;
-    const { session } = this.props;
 
-    if (!session) {
+    const { availableSessions } = this.props;
+    const session = availableSessions[sessionId];
+
+    if (!session || !session.status || !session.details) {
       return <Spinner/>;
     }
 
@@ -146,7 +147,7 @@ class SessionPage extends Component {
           </Col>
           <Col md={8}>
             <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
-            <Doughnut data={chartData} height={70}/>
+            {Doughnut !== undefined && <Doughnut data={chartData} height={70}/>}
           </Col>
         </Row>
         <Row>
@@ -246,9 +247,9 @@ class SessionPage extends Component {
 }
 
 function mapStateToProps(state) {
-  const { loading, session } = state.session;
+  const { availableSessions } = state.sessions;
 
-  return { loading, session };
+  return { availableSessions };
 }
 
 SessionPage.propTypes = propTypes;

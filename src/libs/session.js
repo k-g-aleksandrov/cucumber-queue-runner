@@ -70,11 +70,6 @@ class Session {
 
   getBriefStatus() {
     return {
-      sessionId: this.sessionId,
-      startDate: this.startDate,
-      project: this.project,
-      scope: this.scope,
-      tags: this.tags,
       queueCount: this.getScenariosCount('in queue'),
       progressCount: this.getScenariosCount('in progress'),
       passedCount: this.getScenariosCount('passed'),

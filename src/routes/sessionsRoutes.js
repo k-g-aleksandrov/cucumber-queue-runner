@@ -115,24 +115,15 @@ router.get('/', (req, res) => {
   const responseObject = {};
 
   if (Session.sessions) {
-    responseObject.availableSessions = [];
+    responseObject.availableSessions = {};
     for (const sessionId of Object.keys(Session.sessions)) {
-      responseObject.availableSessions.push(Session.sessions[sessionId].getBriefStatus());
+      responseObject.availableSessions[sessionId] = {
+        details: Session.sessions[sessionId].getSessionDetails(),
+        briefStatus: Session.sessions[sessionId].getBriefStatus()
+      };
     }
   }
   res.send(responseObject);
-});
-
-/**
- * list available sessions
- */
-router.get('/list', (req, res) => {
-  const responseObject = {};
-
-  if (Session.sessions) {
-    responseObject.availableSessions = Object.keys(Session.sessions);
-  }
-  res.render('sessions', { sessions: Session.sessions, error: { state: req.query.state, info: req.query.session } });
 });
 
 /**

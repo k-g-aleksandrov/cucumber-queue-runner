@@ -15,21 +15,42 @@ class SessionProgressBar extends Component {
   }
 
   render() {
-    const { session } = this.props;
+    const { briefStatus } = this.props.session;
 
     return (
       <tr>
         <td colSpan='4' style={{ height: '15px', padding: 0 }}>
           <div className='progress-chart'>
-            <div style={{ backgroundColor: '#92DD96', width: `${(session.passedCount * 100) / session.totalCount}%` }}/>
-            <div style={{ backgroundColor: '#F2928C', width: `${(session.failedCount * 100) / session.totalCount}%` }}/>
             <div
-              style={{ backgroundColor: 'lightgray', width: `${(session.skippedCount * 100) / session.totalCount}%` }}
+              style={{
+                backgroundColor: '#92DD96',
+                width: `${(briefStatus.passedCount * 100) / briefStatus.totalCount}%`
+              }}
             />
             <div
-              style={{ backgroundColor: '#F5F28F', width: `${(session.progressCount * 100) / session.totalCount}%` }}
+              style={{
+                backgroundColor: '#F2928C',
+                width: `${(briefStatus.failedCount * 100) / briefStatus.totalCount}%`
+              }}
             />
-            <div style={{ backgroundColor: '#8AF', width: `${(session.queueCount * 100) / session.totalCount}%` }}/>
+            <div
+              style={{
+                backgroundColor: 'lightgray',
+                width: `${(briefStatus.skippedCount * 100) / briefStatus.totalCount}%`
+              }}
+            />
+            <div
+              style={{
+                backgroundColor: '#F5F28F',
+                width: `${(briefStatus.progressCount * 100) / briefStatus.totalCount}%`
+              }}
+            />
+            <div
+              style={{
+                backgroundColor: '#8AF',
+                width: `${(briefStatus.queueCount * 100) / briefStatus.totalCount}%`
+              }}
+            />
           </div>
         </td>
       </tr>

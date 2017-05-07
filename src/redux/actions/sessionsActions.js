@@ -15,7 +15,11 @@ export function fetchSessionDetails(sessionId) {
     [CALL_API]: {
       endpoint: `/api/sessions/${sessionId}`,
       method: 'GET',
-      types: ['session/REQUEST', 'session/SUCCESS', 'session/FAILURE']
+      types: [
+        { type: 'session/REQUEST', meta: { sessionId } },
+        { type: 'session/SUCCESS', meta: { sessionId } },
+        { type: 'session/FAILURE', meta: { sessionId } }
+      ]
     }
   };
 }
