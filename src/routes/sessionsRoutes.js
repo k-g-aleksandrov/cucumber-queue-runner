@@ -174,7 +174,7 @@ router.post('/:sessionId/finish', (req, res) => {
   const session = Session.sessions[req.params.sessionId];
 
   if (!session) {
-    res.send({ session: { sessionId: req.params.sessionId, status: null, error: 'session_lost' } });
+    return res.send({ session: { sessionId: req.params.sessionId, status: null, error: 'session_lost' } });
   }
   session.stopSession();
   res.send({ success: true });

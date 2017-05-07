@@ -30,12 +30,12 @@ class SessionRow extends Component {
 
   handleFinishSessionClick() {
     this.setState({ isFinishing: true });
-    this.props.dispatch(finishSession(this.props.session.sessionId));
+    this.props.dispatch(finishSession(this.props.session.details.sessionId));
   }
 
   handleDeleteSessionClick() {
     this.setState({ isFinishing: true });
-    this.props.dispatch(deleteSession(this.props.session.sessionId));
+    this.props.dispatch(deleteSession(this.props.session.details.sessionId));
   }
 
   render() {
