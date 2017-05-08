@@ -50,7 +50,7 @@ class DoneScenarioRow extends Component {
 
     return (
       <tr onClick={() => {
-        this.handleGetScenarioReportClick(session.sessionId, scenario.scenarioId);
+        this.handleGetScenarioReportClick(session.details.sessionId, scenario.scenarioId);
       }}
         style={{ backgroundColor }}
       >

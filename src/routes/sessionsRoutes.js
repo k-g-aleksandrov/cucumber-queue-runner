@@ -73,7 +73,7 @@ router.get('/:sessionId/next', (req, res) => {
 
   // respond with empty object
   if (!currentSession) {
-    return res.send(getSessionLostObject(req.params.sessionId));
+    return res.send({ state: Session.NOT_FOUND });
   }
   const nextScenario = currentSession.getNextScenario(executor);
 
@@ -116,20 +116,21 @@ router.get('/:sessionId/state', extendTimeout, (req, res) => {
 /**
  * post executed scenario report to server
  */
-router.post('/:sessionId/reports/:scenarioId', (req, res) => {
+router.post('/:sessionId/reports', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
+  const scenarioId = req.body.id;
   const scenarioReport = req.body.report;
 
   if (!currentSession) {
     return res.send(getSessionLostObject(req.params.sessionId));
   }
-  currentSession.saveScenarioResult(req.params.scenarioId, scenarioReport, (err) => {
+  currentSession.saveScenarioResult(scenarioId, scenarioReport, (err) => {
     if (err) {
       log.error(err);
       return res.status(404).send(err);
     }
   });
-  res.send(`Report for scenario ${req.params.scenarioId} successfully saved`);
+  res.send(`Report for scenario ${scenarioId} successfully saved`);
 });
 
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {
