@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import ScopeDetails from './ScopeDetails';
-import ProjectLoadingScreen from './ProjectLoadingScreen';
+import Spinner from 'components/Spinner';
 
 import { fetchProjectFilters } from 'redux/actions/projectsActions';
 
@@ -31,7 +31,7 @@ class ProjectPage extends Component {
 
   render() {
     if (this.props.loading) {
-      return <ProjectLoadingScreen/>;
+      return <Spinner/>;
     }
     if (!this.props.projectDetails || !this.props.projectDetails.name) {
       return <div>{this.props.projectDetails}</div>;
