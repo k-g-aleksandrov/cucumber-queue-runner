@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
 import { Table } from 'react-bootstrap';
-import Button from 'react-bootstrap-button-loader';
+
+import ProjectsTableRow from './ProjectsTableRow';
 
 import { scanProject, deleteProject } from 'redux/actions/projectsActions';
 
@@ -45,27 +45,7 @@ class ProjectsTable extends Component {
             <th colSpan='3'>Available Projects</th>
           </tr>
           {availableProjects.map((project, i) => {
-            return (
-              <tr key={i}>
-                <td>
-                  <Link to={`/projects/${project.projectId}`}>{project.name}</Link>
-                </td>
-                <td>
-                  <span>{project.description}</span>
-                </td>
-                <td style={{ textAlign: 'center' }}>
-                  <Button bsStyle='primary' onClick={() => this.handleRescanProjectClick(project.projectId)}>
-                    Rescan Project
-                  </Button>
-                  <span>&nbsp;</span>
-                  {this.state.deleteButton &&
-                  <Button bsStyle='danger' onClick={() => this.handleDeleteProjectClick(project.projectId)}>
-                    Delete Project
-                  </Button>
-                  }
-                </td>
-              </tr>
-            );
+            return <ProjectsTableRow key={i} project={project}/>;
           })}
         </tbody>
       </Table>
