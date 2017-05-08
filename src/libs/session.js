@@ -249,6 +249,7 @@ class Session {
         featureName: inProgressScenario.featureName,
         scenarioLine: inProgressScenario.scenarioLine,
         scenarioName: inProgressScenario.scenarioName,
+        startTimestamp: inProgressScenario.startTimestamp,
         executor: inProgressScenario.executor
       });
     }

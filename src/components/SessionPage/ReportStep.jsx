@@ -27,14 +27,14 @@ function ReportStep(props) {
   const rows = [];
 
   if (type === 'before') {
-    rows.push(<span style={{ fontWeight: 'bold' }}>Before&nbsp;</span>);
-    rows.push(<span>{step.match.location}</span>);
+    rows.push(<span key={`${step.line}-keyword`} style={{ fontWeight: 'bold' }}>Before&nbsp;</span>);
+    rows.push(<span key={`${step.line}-location`}>{step.match.location}</span>);
   } else if (type === 'after') {
-    rows.push(<span style={{ fontWeight: 'bold' }}>After&nbsp;</span>);
-    rows.push(<span>{step.match.location}</span>);
+    rows.push(<span key={`${step.line}-keyword`} style={{ fontWeight: 'bold' }}>After&nbsp;</span>);
+    rows.push(<span key={`${step.line}-location`}>{step.match.location}</span>);
   } else {
-    rows.push(<span style={{ fontWeight: 'bold' }}>{step.keyword}&nbsp;</span>);
-    rows.push(<span>{step.name}</span>);
+    rows.push(<span key={`${step.line}-keyword`} style={{ fontWeight: 'bold' }}>{step.keyword}&nbsp;</span>);
+    rows.push(<span key={`${step.line}-location`}>{step.name}</span>);
   }
 
   const errorMessage = step.result.error_message

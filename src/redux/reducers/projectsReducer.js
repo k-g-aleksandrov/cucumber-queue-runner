@@ -9,7 +9,6 @@ export default function (state = initialState, action) {
     case 'projects/REQUEST':
       return Object.assign({}, state, { loading: true, errors: null });
     case 'projects/SUCCESS':
-      console.log(JSON.stringify(action.payload));
       return {
         loading: false,
         errors: null,

@@ -23,7 +23,7 @@ class DoneScenarioRow extends Component {
 
   handleGetScenarioReportClick(sessionId, scenarioId) {
     this.setState({ reportDisplayed: !this.state.reportDisplayed });
-    if (this.state.reportDisplayed && this.state.report === null) {
+    if (this.state.report === null) {
       fetch(`/api/sessions/${sessionId}/reports/${scenarioId}`)
         .then((response) => response.json())
         .then((responseJson) => {
@@ -48,6 +48,15 @@ class DoneScenarioRow extends Component {
       backgroundColor = 'lightgray';
     }
 
+    if (scenario.result === 'skipped') {
+      return (
+        <tr style={{ backgroundColor }}>
+          <td>
+            <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
+          </td>
+        </tr>
+      );
+    }
     return (
       <tr onClick={() => {
         this.handleGetScenarioReportClick(session.details.sessionId, scenario.scenarioId);
@@ -56,7 +65,7 @@ class DoneScenarioRow extends Component {
       >
         <td>
           <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
-          {scenario.result !== 'skipped' && this.state.reportDisplayed && <Report report={this.state.report}/>}
+          {this.state.reportDisplayed && <Report report={this.state.report}/>}
         </td>
       </tr>
     );

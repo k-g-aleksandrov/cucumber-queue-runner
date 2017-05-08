@@ -19,7 +19,8 @@ class ProjectsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      availableProjects: []
+      availableProjects: [],
+      enableDelete: false
     };
 
     this.handleRescanProjectClick = this.handleRescanProjectClick.bind(this);
@@ -57,9 +58,11 @@ class ProjectsTable extends Component {
                     Rescan Project
                   </Button>
                   <span>&nbsp;</span>
+                  {this.state.deleteButton &&
                   <Button bsStyle='danger' onClick={() => this.handleDeleteProjectClick(project.projectId)}>
                     Delete Project
                   </Button>
+                  }
                 </td>
               </tr>
             );

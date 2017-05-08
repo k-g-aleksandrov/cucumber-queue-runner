@@ -206,7 +206,7 @@ class SessionPage extends Component {
                         <thead>
                           <tr>
                             <th>Scenario</th>
-                            <th>Executed On</th>
+                            <th>Taken By</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -217,7 +217,10 @@ class SessionPage extends Component {
                                   <span style={{ fontWeight: 'bold' }}>{inProgressItem.featureName}:&nbsp;</span>
                                   <span>{`${inProgressItem.scenarioName} (:${inProgressItem.scenarioLine})`}</span>
                                 </td>
-                                <td>{inProgressItem.executor}</td>
+                                <td>
+                                  {inProgressItem.executor}
+                                  &nbsp;({moment(new Date()).to(moment(inProgressItem.startTimestamp))})
+                                </td>
                               </tr>
                             );
                           })}
