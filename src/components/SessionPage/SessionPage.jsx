@@ -41,6 +41,8 @@ class SessionPage extends Component {
   componentDidMount() {
     Doughnut = require('react-chartjs-2').Doughnut;
 
+    this.fetchSessionDetails();
+
     this.timerID = setInterval(
       () => this.fetchSessionDetails(),
       5000
