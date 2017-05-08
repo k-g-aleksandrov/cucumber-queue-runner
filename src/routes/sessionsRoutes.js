@@ -8,30 +8,58 @@ const log = logTemplate(module);
 
 const router = express.Router();
 
-/**
- * start new session, return sessionId
- */
+function extendTimeout(req, res, next) {
+  res.setTimeout(480000, () => { /* Handle timeout */
+  });
+  next();
+}
+
+function getSessionLostObject(sessionId) {
+  return { session: { sessionId, error: 'session_lost' } };
+}
+
+router.get('/', (req, res) => {
+  const responseObject = {};
+
+  if (Session.sessions) {
+    responseObject.availableSessions = {};
+    for (const sessionId of Object.keys(Session.sessions)) {
+      responseObject.availableSessions[sessionId] = {
+        details: Session.sessions[sessionId].getSessionDetails(),
+        briefStatus: Session.sessions[sessionId].getBriefStatus()
+      };
+    }
+  }
+  res.send(responseObject);
+});
+
 router.get('/start', (req, res) => {
-  if (!req.query.tags) {
-    res.statusCode = 400;
-    res.send({ error: 'Tags are not specified for run' });
-  }
-  if (!req.query.mode) {
-    res.statusCode = 400;
-    res.send({ error: 'Filter is not specified for run' });
-  }
   if (!req.query.project) {
     res.statusCode = 400;
-    res.send({ error: 'Project is not specified for run' });
+    return res.send({ error: 'no_project_specified' });
   }
-  const tags = req.query.tags.split(',');
-  const mode = req.query.mode;
-  const project = req.query.project;
-  const newSession = new Session(util.generateGUID(), tags, mode, project);
 
-  if (!Session.sessions) {
-    Session.sessions = {};
+  if (!req.query.scope) {
+    res.statusCode = 400;
+    return res.send({ error: 'no_scope_specified' });
   }
+
+  const filter = {};
+
+  filter.scope = req.query.scope;
+
+  if (req.query.scope === 'custom') {
+    if (!req.query.tags) {
+      res.statusCode = 400;
+      return res.send({ error: 'no_custom_tags_specified' });
+    }
+    filter.tags = req.query.tags.split(',');
+  }
+
+  const project = req.query.project;
+
+  const newSession = new Session(util.generateGUID(), project, filter);
+
   Session.sessions[newSession.getSessionId()] = newSession;
   res.send(newSession.getSessionId());
 });
@@ -45,8 +73,7 @@ router.get('/:sessionId/next', (req, res) => {
 
   // respond with empty object
   if (!currentSession) {
-    res.send({ state: Session.NOT_FOUND });
-    return;
+    return res.send(getSessionLostObject(req.params.sessionId));
   }
   const nextScenario = currentSession.getNextScenario(executor);
 
@@ -68,38 +95,13 @@ router.get('/:sessionId/next', (req, res) => {
 });
 
 /**
- * post executed scenario report to server
- */
-router.post('/:sessionId/result', (req, res) => {
-  const scenarioId = req.body.id;
-  const scenarioReport = req.body.report;
-
-  if (!Session.sessions[req.params.sessionId]) {
-    res.statusCode = 404;
-    return res.send(`Session ${req.params.sessionId} does not exist`);
-  }
-  Session.sessions[req.params.sessionId].saveScenarioResult(scenarioId, scenarioReport, (err) => {
-    if (err) {
-      log.error(err);
-      return res.status(404).send(err);
-    }
-  });
-  res.send(`Report for scenario ${scenarioId} successfully saved`);
-});
-
-function extendTimeout(req, res, next) {
-  res.setTimeout(480000, () => { /* Handle timeout */
-  });
-  next();
-}
-
-/**
  * either receive link for reports or get message that session is still in progress
  */
 router.get('/:sessionId/state', extendTimeout, (req, res) => {
-  if (!Session.sessions[req.params.sessionId]) {
-    res.send(`/results/${req.params.sessionId}/reports.zip`);
-    return;
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(`/results/${req.params.sessionId}/reports.zip`);
   }
   const result = Session.sessions[req.params.sessionId].getSessionState();
 
@@ -111,45 +113,33 @@ router.get('/:sessionId/state', extendTimeout, (req, res) => {
   }
 });
 
-router.get('/', (req, res) => {
-  const responseObject = {};
-
-  if (Session.sessions) {
-    responseObject.availableSessions = {};
-    for (const sessionId of Object.keys(Session.sessions)) {
-      responseObject.availableSessions[sessionId] = {
-        details: Session.sessions[sessionId].getSessionDetails(),
-        briefStatus: Session.sessions[sessionId].getBriefStatus()
-      };
-    }
-  }
-  res.send(responseObject);
-});
-
 /**
- * get current session information
+ * post executed scenario report to server
  */
-router.get('/:sessionId', (req, res) => {
-  const session = Session.sessions[req.params.sessionId];
+router.post('/:sessionId/reports/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+  const scenarioReport = req.body.report;
 
-  if (session) {
-    const details = session.getSessionDetails();
-    const status = session.getStatus();
-
-    res.send({ session: { sessionId: req.params.sessionId, details, status } });
-  } else {
-    res.send({ session: { sessionId: req.params.sessionId, details: null, status: null, error: 'session_lost' } });
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
   }
+  currentSession.saveScenarioResult(req.params.scenarioId, scenarioReport, (err) => {
+    if (err) {
+      log.error(err);
+      return res.status(404).send(err);
+    }
+  });
+  res.send(`Report for scenario ${req.params.scenarioId} successfully saved`);
 });
 
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {
-  const session = Session.sessions[req.params.sessionId];
+  const currentSession = Session.sessions[req.params.sessionId];
 
-  if (!session) {
-    return res.send({ session: { sessionId: req.params.sessionId }, error: 'no_session' });
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
   }
-  for (const feature of Object.keys(session.doneScenarios)) {
-    for (const scenario of session.doneScenarios[feature]) {
+  for (const feature of Object.keys(currentSession.doneScenarios)) {
+    for (const scenario of currentSession.doneScenarios[feature]) {
       if (req.params.scenarioId === scenario._id.toString()) {
         return res.send({ report: scenario.report });
       }
@@ -161,32 +151,45 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
 });
 
 router.post('/:sessionId/skip/:scenarioId', (req, res) => {
-  const session = Session.sessions[req.params.sessionId];
+  const currentSession = Session.sessions[req.params.sessionId];
 
-  if (!session) {
-    res.send({ session: { sessionId: req.params.sessionId, status: null }, error: 'session_lost' });
+  if (!currentSession) {
+    res.send(getSessionLostObject(req.params.sessionId));
   }
-  session.skipScenario(req.params.scenarioId);
+  currentSession.skipScenario(req.params.scenarioId);
   res.send({ success: true });
 });
 
-router.post('/:sessionId/finish', (req, res) => {
-  const session = Session.sessions[req.params.sessionId];
+router.get('/:sessionId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
 
-  if (!session) {
-    return res.send({ session: { sessionId: req.params.sessionId, status: null, error: 'session_lost' } });
+  if (currentSession) {
+    const details = currentSession.getSessionDetails();
+    const status = currentSession.getStatus();
+
+    res.send({ session: { sessionId: req.params.sessionId, details, status } });
+  } else {
+    res.send(getSessionLostObject(req.params.sessionId));
   }
-  session.stopSession();
+});
+
+router.post('/:sessionId/finish', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+  currentSession.stopSession();
   res.send({ success: true });
 });
 
 router.delete('/:sessionId', (req, res) => {
-  const session = Session.sessions[req.params.sessionId];
+  const currentSession = Session.sessions[req.params.sessionId];
 
-  if (!session) {
-    res.send({ session: { sessionId: req.params.sessionId, status: null, error: 'session_lost' } });
+  if (!currentSession) {
+    res.send(getSessionLostObject(req.params.sessionId));
   }
-  session.stopSession();
+  currentSession.stopSession();
   delete Session.sessions[req.params.sessionId];
   res.send({ success: true });
 });

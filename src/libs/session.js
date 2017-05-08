@@ -2,37 +2,37 @@ const log = require('libs/log')(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Scenario, Execution } from 'libs/mongoose';
+import { Execution } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
 class Session {
-  constructor(sessionId, tags, scope, project) {
-    this.TIMEOUT_SEC = 1800;
-    this.startDate = new Date();
+  constructor(sessionId, project, scenariosFilter) {
+
     this.sessionId = sessionId;
+    this.project = project;
+    this.scenariosFilter = scenariosFilter;
+
+    this.startDate = new Date();
     this.inProgressScenarios = {};
     this.doneScenarios = {};
     this.sessionState = Session.NOT_FOUND;
     this.sessionPath = `public/results/${this.sessionId}`;
-    this.project = project;
-    this.scope = scope;
-    this.tags = tags;
 
     fs.mkdirSync(this.sessionPath);
 
-    if (!filter.getFilterByName(scope)) {
-      throw Error(`Can\'t find filter with name ${scope}`);
+    if (!filter.getFilterByName(scenariosFilter.scope)) {
+      throw Error(`Can\'t find filter with name ${scenariosFilter.scope}`);
     }
-    if (scope === 'custom') {
-      if (!tags) {
+    if (scenariosFilter.scope === 'custom') {
+      if (!scenariosFilter.tags) {
         throw Error('You should specify tags to filter scenarios if you use custom filter.');
       }
-      filter.applyCustomFilterToProject(project, tags, (err, project, scenarios) => {
+      filter.applyCustomFilterToProject(project, scenariosFilter.tags, (err, prj, scenarios) => {
         this.startSessionCallback(err, scenarios);
       });
     } else {
-      filter.applyFilterToProject(project, filter.getFilterByName(scope), (err, project, scenarios) => {
+      filter.applyFilterToProject(project, filter.getFilterByName(scenariosFilter.scope), (err, prj, scenarios) => {
         this.startSessionCallback(err, scenarios);
       });
     }
@@ -63,8 +63,7 @@ class Session {
       sessionId: this.sessionId,
       startDate: this.startDate,
       project: this.project,
-      scope: this.scope,
-      tags: this.tags
+      scenariosFilter: this.scenariosFilter
     };
   }
 
@@ -81,9 +80,11 @@ class Session {
   }
 
   getStatistics() {
-    return 'In queue - ' + this.getScenariosCount(Session.STATE_QUEUE)
-      + ', in progress - ' + this.getScenariosCount(Session.STATE_IN_PROGRESS)
-      + ', done - ' + this.getScenariosCount(Session.STATE_DONE);
+    const queueCount = this.getScenariosCount(Session.STATE_QUEUE);
+    const inProgressCount = this.getScenariosCount(Session.STATE_IN_PROGRESS);
+    const doneCount = this.getScenariosCount(Session.STATE_DONE);
+
+    return `In queue - ${queueCount}, in progress - ${inProgressCount}, done - ${doneCount}`;
   }
 
   getDoneScenariosCount(countFilter) {
@@ -186,7 +187,6 @@ class Session {
   }
 
   saveScenarioResult(scenarioId, scenarioReport, cb) {
-    log.debug(`Saving scenario ${scenarioId} result`);
     if (this.inProgressScenarios[scenarioId] === null) {
       return cb(new Error(`Can\'t find in progress scenario for ID ${scenarioId}`));
     }
@@ -376,9 +376,9 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
     const inProgressScenario = session.inProgressScenarios[scenarioId];
     const requestDate = inProgressScenario.startTimestamp;
 
-    if ((Date.now() - requestDate) / 1000 > session.TIMEOUT_SEC) {
+    if ((Date.now() - requestDate) / 1000 > Session.SCENARIO_TIMEOUT_SEC) {
       log.error(
-        `${session.sessionId}: scenario execution were not finished in ${session.TIMEOUT_SEC} seconds.
+        `${session.sessionId}: scenario execution were not finished in ${Session.SCENARIO_TIMEOUT_SEC} seconds.
          Moving it back to scenarios queue`);
       session.scenarios.push(inProgressScenario);
       delete session.inProgressScenarios[scenarioId];
@@ -387,6 +387,8 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
 };
 
 Session.sessions = {};
+
+Session.SCENARIO_TIMEOUT_SEC = 1800;
 
 Session.STATE_QUEUE = 'queue';
 Session.STATE_IN_PROGRESS = 'in progress';

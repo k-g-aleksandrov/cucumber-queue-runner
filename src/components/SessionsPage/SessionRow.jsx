@@ -49,7 +49,10 @@ class SessionRow extends Component {
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
           {details.project}&nbsp;
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>
-            (scope: {details.scope === 'custom' ? `custom - ${details.tags}` : details.scope})
+            (scope:&nbsp;
+            {details.scenariosFilter.scope === 'custom'
+              ? `custom - ${details.scenariosFilter.tags}`
+              : details.scenariosFilter.scope})
           </span><br/>
           <Link to={`/sessions/${details.sessionId}`}>
             {details.sessionId}

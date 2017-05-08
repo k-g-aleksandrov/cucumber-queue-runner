@@ -55,6 +55,7 @@ class SessionPage extends Component {
 
   handleSkipScenarioClick(sessionId, scenarioId) {
     this.props.dispatch(skipScenario(sessionId, scenarioId));
+    this.fetchSessionDetails();
   }
 
   fetchSessionDetails() {
@@ -121,7 +122,7 @@ class SessionPage extends Component {
               </thead>
               <tbody>
                 <tr>
-                  <th>Project:</th>
+                  <th>Project</th>
                   <td>{session.details.project}</td>
                 </tr>
                 <tr>
@@ -135,13 +136,15 @@ class SessionPage extends Component {
                   </td>
                 </tr>
                 <tr>
-                  <th>Session ID:</th>
+                  <th>Session ID</th>
                   <td>{session.details.sessionId}</td>
                 </tr>
                 <tr>
                   <th>Scope</th>
                   <td>
-                    {session.details.scope === 'custom' ? `custom - ${session.details.tags}` : session.details.scope}
+                    {session.details.scenariosFilter.scope === 'custom'
+                      ? `custom - ${session.details.scenariosFilter.tags}`
+                      : session.details.scenariosFilter.scope}
                   </td>
                 </tr>
               </tbody>
@@ -154,7 +157,7 @@ class SessionPage extends Component {
         </Row>
         <Row>
           <Col>
-            <Tabs id='tabs-with-dropdown' defaultActiveKey={activeTab}>
+            <Tabs id='tabs-with-dropdown' defaultActiveKey={activeTab} animation={false}>
               <Row className='clearfix'>
                 <Col sm={12}>
                   <Nav bsStyle='tabs'>
