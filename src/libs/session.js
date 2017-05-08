@@ -70,18 +70,18 @@ class Session {
 
   getBriefStatus() {
     return {
-      queueCount: this.getScenariosCount('in queue'),
-      progressCount: this.getScenariosCount('in progress'),
-      passedCount: this.getScenariosCount('passed'),
-      failedCount: this.getScenariosCount('failed'),
-      skippedCount: this.getScenariosCount('skipped'),
-      doneCount: this.getScenariosCount('done'),
+      queueCount: this.getScenariosCount(Session.STATE_QUEUE),
+      progressCount: this.getScenariosCount(Session.STATE_IN_PROGRESS),
+      doneCount: this.getScenariosCount(Session.STATE_DONE),
+      passedCount: this.getScenariosCount(Session.STATE_PASSED),
+      failedCount: this.getScenariosCount(Session.STATE_FAILED),
+      skippedCount: this.getScenariosCount(Session.STATE_SKIPPED),
       totalCount: this.getScenariosCount()
     };
   }
 
   getStatistics() {
-    return 'In queue - ' + this.getScenariosCount(Session.STATE_IN_QUEUE)
+    return 'In queue - ' + this.getScenariosCount(Session.STATE_QUEUE)
       + ', in progress - ' + this.getScenariosCount(Session.STATE_IN_PROGRESS)
       + ', done - ' + this.getScenariosCount(Session.STATE_DONE);
   }
@@ -105,12 +105,12 @@ class Session {
 
   getScenariosCount(state) {
     if (!state) {
-      return this.getScenariosCount(Session.STATE_IN_QUEUE)
+      return this.getScenariosCount(Session.STATE_QUEUE)
         + this.getScenariosCount(Session.STATE_IN_PROGRESS)
         + this.getScenariosCount(Session.STATE_DONE);
     }
     switch (state) {
-      case Session.STATE_IN_QUEUE:
+      case Session.STATE_QUEUE:
         return this.scenarios ? this.scenarios.length : 0;
       case Session.STATE_IN_PROGRESS:
         return Object.keys(this.inProgressScenarios).length;
@@ -314,7 +314,7 @@ Session.getScenarioState = function getScenarioState(report) {
 
 Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
   if (session.getScenariosCount(Session.STATE_IN_PROGRESS)
-    + session.getScenariosCount(Session.STATE_IN_QUEUE) === 0) {
+    + session.getScenariosCount(Session.STATE_QUEUE) === 0) {
     clearInterval(session.trackInProgressTimeout);
     log.debug(`${session.sessionId}: Tests execution done`);
     let haveReports = false;
@@ -388,7 +388,7 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
 
 Session.sessions = {};
 
-Session.STATE_IN_QUEUE = 'in queue';
+Session.STATE_QUEUE = 'queue';
 Session.STATE_IN_PROGRESS = 'in progress';
 Session.STATE_DONE = 'done';
 Session.STATE_PASSED = 'passed';
