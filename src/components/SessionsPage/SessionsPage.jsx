@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import SessionsTable from './SessionsTable';
 
+import Alert from 'react-bootstrap/lib/Alert';
+
 const propTypes = {
   params: PropTypes.object,
+  location: PropTypes.any,
   children: PropTypes.node
 };
 
@@ -21,7 +24,16 @@ class SessionsPage extends Component {
       );
     }
     return (
-      <SessionsTable/>
+      <div>
+        {this.props.location.query.lost &&
+        <Alert bsStyle='danger'>
+          <span style={{ fontWeight: 'bold' }}>Error: </span>
+          Session
+          <span style={{ fontWeight: 'bold' }}> {this.props.location.query.lost} </span>
+          was not started or does not exist
+        </Alert>}
+        <SessionsTable/>
+      </div>
     );
   }
 }

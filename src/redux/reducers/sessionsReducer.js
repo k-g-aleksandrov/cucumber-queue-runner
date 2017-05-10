@@ -37,7 +37,8 @@ export default function (state = initialState, action) {
           [action.meta.sessionId]: {
             ...state.availableSessions[action.meta.sessionId],
             details: action.payload.session.details,
-            status: action.payload.session.status
+            status: action.payload.session.status,
+            error: action.payload.session.error
           }
         }
       };

@@ -25,6 +25,7 @@ let Doughnut;
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
+  router: PropTypes.any,
   location: PropTypes.any,
   availableSessions: PropTypes.any,
   params: PropTypes.object
@@ -68,6 +69,10 @@ class SessionPage extends Component {
 
     const { availableSessions } = this.props;
     const session = availableSessions[sessionId];
+
+    if (session && session.error) {
+      this.props.router.push(`/sessions?lost=${sessionId}`);
+    }
 
     if (!session || !session.status || !session.details) {
       return <Spinner/>;
