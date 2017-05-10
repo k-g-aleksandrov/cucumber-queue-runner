@@ -2,7 +2,7 @@ const log = require('libs/log')(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Execution } from 'libs/mongoose';
+import { Execution, SessionHistory } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
@@ -273,6 +273,23 @@ class Session {
     }
     return status;
   }
+
+  saveHistory() {
+    const history = new SessionHistory({
+      details: {
+        ...this.getSessionDetails(),
+        endDate: new Date()
+      },
+      briefStatus: this.getBriefStatus(),
+      scenarios: this.doneScenarios
+    });
+
+    history.save((err) => {
+      if (err) {
+        log.error(err);
+      }
+    });
+  }
 }
 
 Session.pushScenarioToStatusList = function pushScenarioToStatusList(resultObject, scenario) {
@@ -358,6 +375,9 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
     if (!haveReports) {
       fs.writeFileSync(`${session.sessionPath}/dummy.txt`, '', {});
     }
+
+    session.saveHistory();
+
     util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     clearInterval(session.trackSessionState);
     session.sessionState = Session.NOT_FOUND;

@@ -53,3 +53,13 @@ export function skipScenario(sessionId, scenarioId) {
     }
   };
 }
+
+export function fetchSessionsHistory() {
+  return {
+    [CALL_API]: {
+      endpoint: '/api/sessions/history',
+      method: 'GET',
+      types: ['sessions/history/REQUEST', 'sessions/history/SUCCESS', 'sessions/history/FAILURE']
+    }
+  };
+}

@@ -41,7 +41,7 @@ class SessionRow extends Component {
   render() {
     const { details, briefStatus } = this.props.session;
 
-    if (!details || !briefStatus) {
+    if (!details) {
       return null;
     }
     return (

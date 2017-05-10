@@ -3,6 +3,8 @@ import express from 'express';
 import Session from 'libs/session';
 import util from 'libs/util';
 
+import { SessionHistory } from 'libs/mongoose';
+
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
 
@@ -31,6 +33,28 @@ router.get('/', (req, res) => {
     }
   }
   res.send(responseObject);
+});
+
+router.get('/history', (req, res) => {
+  const responseObject = {};
+  const histories = SessionHistory.find({}, null, { limit: 10, sort: { 'details.endDate': -1 } });
+
+  histories.exec((err, sessions) => {
+    if (err) {
+      res.send({ error: 'no history' });
+    }
+    responseObject.sessionsHistory = [];
+    for (const session of sessions) {
+      responseObject.sessionsHistory.push(session);
+    }
+    res.send(responseObject);
+  });
+
+
+});
+
+router.get('/history/:sessionId', (req, res) => {
+  res.send({ history: `history ${req.params.sessionId}` });
 });
 
 router.get('/start', (req, res) => {
@@ -113,9 +137,6 @@ router.get('/:sessionId/state', extendTimeout, (req, res) => {
   }
 });
 
-/**
- * post executed scenario report to server
- */
 router.post('/:sessionId/reports', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
   const scenarioId = req.body.id;

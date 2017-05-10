@@ -9,7 +9,10 @@ export default function (state = initialState, action) {
     case 'sessions/REQUEST':
       return Object.assign({}, state);
     case 'sessions/SUCCESS':
-      newState = { ...action.payload };
+      newState = {
+        ...action.payload,
+        sessionsHistory: state.sessionsHistory
+      };
       Object.keys(newState.availableSessions).map((session) => {
         newState.availableSessions[session] = {
           status: {
@@ -27,6 +30,10 @@ export default function (state = initialState, action) {
       return newState;
     case 'sessions/FAILURE':
       return Object.assign({}, state);
+    case 'sessions/history/SUCCESS':
+      newState = { ...state };
+      newState.sessionsHistory = action.payload.sessionsHistory;
+      return newState;
     case 'session/REQUEST':
       return Object.assign({}, state);
     case 'session/SUCCESS':

@@ -71,10 +71,18 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
   return `${this.featureName} -> ${this.scenarioName}(${this.exampleParams})`;
 };
 
+const SessionHistorySchema = new Schema({
+  details: Schema.Types.Mixed,
+  briefStatus: Schema.Types.Mixed,
+  scenarios: Schema.Types.Mixed
+});
+
 const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
 const Execution = mongoose.model('Execution', ExecutionSchema);
+const SessionHistory = mongoose.model('SessionHistory', SessionHistorySchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
 module.exports.Execution = Execution;
+module.exports.SessionHistory = SessionHistory;
