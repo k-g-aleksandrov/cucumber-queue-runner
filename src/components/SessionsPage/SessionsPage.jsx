@@ -34,9 +34,9 @@ class SessionsPage extends Component {
           <span style={{ fontWeight: 'bold' }}> {this.props.location.query.lost} </span>
           was not started or does not exist
         </Alert>}
-        <h3 style={{ marginBottom: '10px' }}>Current Sessions</h3>
+        <h3 style={{ paddingBottom: '10px' }}>Current Sessions</h3>
         <SessionsTable/>
-        <h3 style={{ marginBottom: '10px' }}>Sessions History</h3>
+        <h3 style={{ paddingBottom: '10px' }}>Sessions History</h3>
         <SessionsHistoryTable/>
       </div>
     );

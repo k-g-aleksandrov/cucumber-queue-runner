@@ -275,13 +275,32 @@ class Session {
   }
 
   saveHistory() {
+    const scenarios = {};
+
+    for (const featureKey of Object.keys(this.doneScenarios)) {
+      const feature = this.doneScenarios[featureKey];
+
+      for (const scenario of feature) {
+        if (!scenarios[featureKey]) {
+          scenarios[featureKey] = [];
+        }
+        scenarios[featureKey].push({
+          scenarioId: scenario._id,
+          classpath: scenario.classpath,
+          scenarioLine: scenario.scenarioLine,
+          scenarioName: scenario.scenarioName,
+          result: scenario.result,
+          report: scenario.report
+        });
+      }
+    }
     const history = new SessionHistory({
       details: {
         ...this.getSessionDetails(),
         endDate: new Date()
       },
       briefStatus: this.getBriefStatus(),
-      scenarios: this.doneScenarios
+      scenarios
     });
 
     history.save((err) => {

@@ -44,7 +44,7 @@ class SessionsHistoryTableRow extends Component {
           </span>
         </td>
         <td style={{ verticalAlign: 'center' }}>
-          {moment(details.endDate).to(moment(details.startDate))}
+          {moment(details.endDate).to(moment(details.startDate), false)}
         </td>
         <td style={{ verticalAlign: 'center', textAlign: 'center' }}>
           {briefStatus.passedCount}
