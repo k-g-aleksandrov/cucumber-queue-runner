@@ -52,6 +52,7 @@ app.use((req, res) => {
 });
 
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050/public' : '';
+const clientSuffix = process.env.NODE_ENV === 'production' ? '-76e330c8863d9188ae87' : '';
 
 function renderHTML(componentHTML, initialState) {
   return `
@@ -61,7 +62,7 @@ function renderHTML(componentHTML, initialState) {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Cucumber Queue Runner</title>
-        <link rel="stylesheet" href="${assetUrl}/assets/styles.css">
+        <link rel="stylesheet" href="${assetUrl}/assets/styles${clientSuffix}.css">
         <script type="application/javascript">
           window.REDUX_INITIAL_STATE = ${JSON.stringify(initialState)};
         </script>
@@ -69,7 +70,7 @@ function renderHTML(componentHTML, initialState) {
       <body>
         <div id="react-view">${componentHTML}</div>
         <div id="dev-tools"></div>
-        <script type="application/javascript" src="${assetUrl}/assets/bundle.js"></script>
+        <script type="application/javascript" src="${assetUrl}/assets/bundle${clientSuffix}.js"></script>
       </body>
     </html>
   `;
