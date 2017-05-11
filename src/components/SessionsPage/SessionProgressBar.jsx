@@ -23,13 +23,13 @@ class SessionProgressBar extends Component {
           <div className='progress-chart'>
             <div
               style={{
-                backgroundColor: '#92DD96',
+                backgroundColor: 'lightgreen',
                 width: `${(briefStatus.passedCount * 100) / briefStatus.totalCount}%`
               }}
             />
             <div
               style={{
-                backgroundColor: '#F2928C',
+                backgroundColor: 'tomato',
                 width: `${(briefStatus.failedCount * 100) / briefStatus.totalCount}%`
               }}
             />

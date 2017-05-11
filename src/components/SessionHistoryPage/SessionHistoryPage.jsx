@@ -68,13 +68,13 @@ class SessionHistoryPage extends Component {
             session.briefStatus.skippedCount
           ],
           backgroundColor: [
-            '#92DD96',
-            '#F2928C',
+            'lightgreen',
+            'tomato',
             'lightgray'
           ],
           hoverBackgroundColor: [
-            '#92DD96',
-            '#F2928C',
+            'lightgreen',
+            'tomato',
             'lightgray'
           ]
         }

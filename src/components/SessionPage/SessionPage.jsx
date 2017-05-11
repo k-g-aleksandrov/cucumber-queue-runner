@@ -80,7 +80,7 @@ class SessionPage extends Component {
 
     const chartData = {
       labels: [
-        `In Queue (${session.status.queue.length})`,
+        `Queue (${session.status.queue.length})`,
         `In Progress (${session.status.inProgress.length})`,
         `Passed (${session.status.passed.length})`,
         `Failed (${session.status.failed.length})`,
@@ -98,15 +98,15 @@ class SessionPage extends Component {
           backgroundColor: [
             '#8AF',
             '#F5F28F',
-            '#92DD96',
-            '#F2928C',
+            'lightgreen',
+            'tomato',
             'lightgray'
           ],
           hoverBackgroundColor: [
             '#8AF',
             '#F5F28F',
-            '#92DD96',
-            '#F2928C',
+            'lightgreen',
+            'tomato',
             'lightgray'
           ]
         }
