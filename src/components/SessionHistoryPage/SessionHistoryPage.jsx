@@ -8,6 +8,7 @@ import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 import Table from 'react-bootstrap/lib/Table';
 import Grid from 'react-bootstrap/lib/Grid';
+import Alert from 'react-bootstrap/lib/Alert';
 
 import Spinner from 'components/Spinner';
 import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
@@ -128,13 +129,13 @@ class SessionHistoryPage extends Component {
         </Row>
         <Row>
           <Col sm={12}>
-            <Table bordered style={{ marginBottom: '0px' }}>
+            <Table style={{ marginBottom: '0px' }}>
               <thead>
                 <tr>
                   <td colSpan={2}><h2>Failed Scenarios</h2></td>
                 </tr>
               </thead>
-              {Object.keys(session.scenarios).map((feature, i) => {
+              {session.scenarios && Object.keys(session.scenarios).map((feature, i) => {
                 return (
                   <tbody key={i}>
                     <tr>
@@ -146,6 +147,14 @@ class SessionHistoryPage extends Component {
                   </tbody>
                 );
               })}
+
+              {!session.scenarios &&
+              <tbody>
+                <tr>
+                  <Alert bsStyle='info'>No failed scenarios</Alert>
+                </tr>
+              </tbody>
+              }
             </Table>
           </Col>
         </Row>
