@@ -40,7 +40,7 @@ router.get('/', (req, res) => {
 
 router.get('/history', (req, res) => {
   const responseObject = {};
-  const histories = SessionHistory.find({}, null, { limit: 10, sort: { 'details.endDate': -1 } });
+  const histories = SessionHistory.find({}, null, { limit: 30, sort: { 'details.endDate': -1 } });
 
   histories.exec((err, sessions) => {
     if (err) {
@@ -52,10 +52,6 @@ router.get('/history', (req, res) => {
     }
     res.send(responseObject);
   });
-});
-
-router.get('/history/:sessionId', (req, res) => {
-  res.send({ history: `history ${req.params.sessionId}` });
 });
 
 router.get('/history/:sessionId/zip', (req, res) => {
