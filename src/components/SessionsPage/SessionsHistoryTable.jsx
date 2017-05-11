@@ -39,7 +39,7 @@ class SessionsHistoryTable extends Component {
     const { sessionsHistory } = this.props;
 
     if (!sessionsHistory) {
-      return <div>loading...</div>;
+      return <div style={{ fontStyle: 'italic' }}>loading...</div>;
     }
 
     if (Object.keys(sessionsHistory).length === 0) {
