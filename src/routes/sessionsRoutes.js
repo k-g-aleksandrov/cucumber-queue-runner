@@ -59,9 +59,18 @@ router.get('/history/:sessionId', (req, res) => {
 });
 
 router.get('/history/:sessionId/zip', (req, res) => {
-  const file = `${__dirname}/../../public/results/${req.params.sessionId}/reports.zip`;
+  const file = `${process.env.NODE_PATH}/../public/results/${req.params.sessionId}/reports.zip`;
 
-  if (fs.existsSync(file)) {
+  fs.stat(file, (err) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        res.statusCode = 404;
+        return res.send({ error: 'not_found', message: `no reports.zip for session ${req.params.sessionId}` });
+      }
+
+      throw err;
+    }
+
     const filename = path.basename(file);
     const mimetype = mime.lookup(file);
 
@@ -71,10 +80,7 @@ router.get('/history/:sessionId/zip', (req, res) => {
     const fileStream = fs.createReadStream(file);
 
     fileStream.pipe(res);
-  } else {
-    res.statusCode = 404;
-    res.send({ error: `not_found`, message: `no reports.zip for session ${req.params.sessionId}` });
-  }
+  });
 });
 
 router.get('/start', (req, res) => {
