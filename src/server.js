@@ -16,6 +16,10 @@ const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('public'));
+}
+
 app.use(favicon(path.join('public', 'favicon.ico')));
 
 app.use('/api/sessions', sessionsRoutes);
@@ -47,7 +51,7 @@ app.use((req, res) => {
   });
 });
 
-const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050' : '/';
+const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050/public' : '';
 
 function renderHTML(componentHTML, initialState) {
   return `
@@ -57,7 +61,7 @@ function renderHTML(componentHTML, initialState) {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Cucumber Queue Runner</title>
-        <link rel="stylesheet" href="${assetUrl}/public/assets/styles.css">
+        <link rel="stylesheet" href="${assetUrl}/assets/styles.css">
         <script type="application/javascript">
           window.REDUX_INITIAL_STATE = ${JSON.stringify(initialState)};
         </script>
@@ -65,7 +69,7 @@ function renderHTML(componentHTML, initialState) {
       <body>
         <div id="react-view">${componentHTML}</div>
         <div id="dev-tools"></div>
-        <script type="application/javascript" src="${assetUrl}/public/assets/bundle.js"></script>
+        <script type="application/javascript" src="${assetUrl}/assets/bundle.js"></script>
       </body>
     </html>
   `;
