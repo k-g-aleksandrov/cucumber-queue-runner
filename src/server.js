@@ -52,7 +52,7 @@ app.use((req, res) => {
 });
 
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050/public' : '';
-const clientSuffix = process.env.NODE_ENV === 'production' ? '-76e330c8863d9188ae87' : '';
+const clientSuffix = process.env.NODE_ENV === 'production' ? '-' : '';
 
 function renderHTML(componentHTML, initialState) {
   return `

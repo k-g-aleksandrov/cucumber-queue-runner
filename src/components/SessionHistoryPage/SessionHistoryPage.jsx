@@ -129,6 +129,11 @@ class SessionHistoryPage extends Component {
         <Row>
           <Col sm={12}>
             <Table bordered style={{ marginBottom: '0px' }}>
+              <thead>
+                <tr>
+                  <td colSpan={2}><h2>Failed Scenarios</h2></td>
+                </tr>
+              </thead>
               {Object.keys(session.scenarios).map((feature, i) => {
                 return (
                   <tbody key={i}>
