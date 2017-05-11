@@ -1,40 +1,38 @@
-'use strict';
+const log = require('libs/log')(module);
 
-var log = require('libs/log')(module);
-var util = require('libs/util');
+import util from 'libs/util';
+import fs from 'fs';
+import { Execution, SessionHistory } from 'libs/mongoose';
 
-var fs = require('fs');
-
-var Execution = require('libs/mongoose').Execution;
-
-let filter = require('libs/filter');
+import filter from 'libs/filter';
 
 class Session {
-  constructor(sessionId, tags, scope, project) {
-    this.TIMEOUT_SEC = 1800;
-    this.startDate = new Date();
+  constructor(sessionId, project, scenariosFilter) {
+
     this.sessionId = sessionId;
+    this.project = project;
+    this.scenariosFilter = scenariosFilter;
+
+    this.startDate = new Date();
     this.inProgressScenarios = {};
     this.doneScenarios = {};
     this.sessionState = Session.NOT_FOUND;
     this.sessionPath = `public/results/${this.sessionId}`;
-    this.project = project;
-    this.scope = scope;
 
     fs.mkdirSync(this.sessionPath);
 
-    if (!filter.getFilterByName(scope)) {
-      throw Error('Can\'t find filter with name ' + scope);
+    if (!filter.getFilterByName(scenariosFilter.scope)) {
+      throw Error(`Can\'t find filter with name ${scenariosFilter.scope}`);
     }
-    if (scope === 'custom') {
-      if (!tags) {
+    if (scenariosFilter.scope === 'custom') {
+      if (!scenariosFilter.tags) {
         throw Error('You should specify tags to filter scenarios if you use custom filter.');
       }
-      filter.applyCustomFilterToProject(project, tags, (err, project, scenarios) => {
+      filter.applyCustomFilterToProject(project, scenariosFilter.tags, (err, prj, scenarios) => {
         this.startSessionCallback(err, scenarios);
       });
     } else {
-      filter.applyFilterToProject(project, filter.getFilterByName(scope), (err, project, scenarios) => {
+      filter.applyFilterToProject(project, filter.getFilterByName(scenariosFilter.scope), (err, prj, scenarios) => {
         this.startSessionCallback(err, scenarios);
       });
     }
@@ -60,18 +58,42 @@ class Session {
     return this.sessionId;
   }
 
-  getStatistics() {
-    return 'In queue - ' + this.getScenariosCount(Session.STATE_IN_QUEUE)
-      + ', in progress - ' + this.getScenariosCount(Session.STATE_IN_PROGRESS)
-      + ', done - ' + this.getScenariosCount(Session.STATE_DONE);
+  getSessionDetails() {
+    return {
+      sessionId: this.sessionId,
+      startDate: this.startDate,
+      project: this.project,
+      scenariosFilter: this.scenariosFilter
+    };
   }
 
-  getDoneScenariosCount(filter) {
+  getBriefStatus() {
+    return {
+      queueCount: this.getScenariosCount(Session.STATE_QUEUE),
+      progressCount: this.getScenariosCount(Session.STATE_IN_PROGRESS),
+      doneCount: this.getScenariosCount(Session.STATE_DONE),
+      passedCount: this.getScenariosCount(Session.STATE_PASSED),
+      failedCount: this.getScenariosCount(Session.STATE_FAILED),
+      skippedCount: this.getScenariosCount(Session.STATE_SKIPPED),
+      totalCount: this.getScenariosCount()
+    };
+  }
+
+  getStatistics() {
+    const queueCount = this.getScenariosCount(Session.STATE_QUEUE);
+    const inProgressCount = this.getScenariosCount(Session.STATE_IN_PROGRESS);
+    const doneCount = this.getScenariosCount(Session.STATE_DONE);
+
+    return `In queue - ${queueCount}, in progress - ${inProgressCount}, done - ${doneCount}`;
+  }
+
+  getDoneScenariosCount(countFilter) {
     let resultCount = 0;
-    for (let doneFeature of Object.keys(this.doneScenarios)) {
-      if (filter) {
-        for (let scenario of this.doneScenarios[doneFeature]) {
-          if (filter.indexOf(scenario.result) > -1) {
+
+    for (const doneFeature of Object.keys(this.doneScenarios)) {
+      if (countFilter) {
+        for (const scenario of this.doneScenarios[doneFeature]) {
+          if (countFilter.indexOf(scenario.result) > -1) {
             resultCount++;
           }
         }
@@ -84,30 +106,35 @@ class Session {
 
   getScenariosCount(state) {
     if (!state) {
-      return this.getScenariosCount(Session.STATE_IN_QUEUE)
+      return this.getScenariosCount(Session.STATE_QUEUE)
         + this.getScenariosCount(Session.STATE_IN_PROGRESS)
         + this.getScenariosCount(Session.STATE_DONE);
     }
     switch (state) {
-      case Session.STATE_IN_QUEUE:
+      case Session.STATE_QUEUE:
         return this.scenarios ? this.scenarios.length : 0;
       case Session.STATE_IN_PROGRESS:
         return Object.keys(this.inProgressScenarios).length;
       case Session.STATE_DONE:
         return this.getDoneScenariosCount();
       case Session.STATE_PASSED:
-        return this.getDoneScenariosCount(['passed']);
+        return this.getDoneScenariosCount([
+          'passed'
+        ]);
       case Session.STATE_FAILED:
-        return this.getDoneScenariosCount(['failed']);
+        return this.getDoneScenariosCount([
+          'failed'
+        ]);
       case Session.STATE_SKIPPED:
         return this.getDoneScenariosCount(['skipped', 'undefined']);
       default:
-        throw Error('There is no such state - ' + state);
+        throw Error(`There is no such state - ${state}`);
     }
   }
 
   getNextScenario(executor) {
-    var next = this.scenarios.shift();
+    const next = this.scenarios.shift();
+
     if (next) {
       next.startTimestamp = Date.now();
       next.executor = executor;
@@ -140,55 +167,60 @@ class Session {
 
   storeExecutionResult(scenario) {
     Execution.update(
-      {scenarioId: scenario.getScenarioId()},
+      { scenarioId: scenario.getScenarioId() },
       {
         $push: {
           'executions': {
-            $each: [{startTimestamp: scenario.startTimestamp, result: scenario.result, executor: scenario.executor}],
+            $each: [
+              { startTimestamp: scenario.startTimestamp, result: scenario.result, executor: scenario.executor }
+            ],
             $slice: -100
           }
         }
       },
-      {safe: true, upsert: true},
+      { safe: true, upsert: true },
       (err) => {
         if (err) throw err;
-        log.info('Successfully stored execution result for scenario ' + scenario.getScenarioId());
+        log.info(`Successfully stored execution result for scenario ${scenario.getScenarioId()}`);
       }
     );
   }
 
   saveScenarioResult(scenarioId, scenarioReport, cb) {
-    log.debug('Saving scenario ' + scenarioId + ' result');
-    if (this.inProgressScenarios[scenarioId] == null) {
-      cb(new Error('Can\'t find in progress scenario for ID ' + scenarioId));
-    } else {
-      let featureName = this.inProgressScenarios[scenarioId].featureName;
-      if (!this.doneScenarios[featureName]) {
-        this.doneScenarios[featureName] = [];
-      }
-      var sc = this.inProgressScenarios[scenarioId];
-      sc.report = scenarioReport;
-      sc.result = Session.getScenarioState(scenarioReport);
-      if (sc.result !== 'skipped') {
-        this.storeExecutionResult(sc);
-      }
-      for (let i = 0; i < sc.report.length; i++) {
-        let elements = sc.report[i].elements;
-        if (elements) {
-          for (let j = 0; j < elements.length; j++) {
-            let tags = elements[j].tags;
-            if (tags) {
-              let newTag = JSON.parse(JSON.stringify(tags[0]));
-              newTag.name = '@' + sc.executor;
-              tags.push(newTag);
-            }
+    if (this.inProgressScenarios[scenarioId] === null) {
+      return cb(new Error(`Can\'t find in progress scenario for ID ${scenarioId}`));
+    }
+    const featureName = this.inProgressScenarios[scenarioId].featureName;
+
+    if (!this.doneScenarios[featureName]) {
+      this.doneScenarios[featureName] = [];
+    }
+    const sc = this.inProgressScenarios[scenarioId];
+
+    sc.report = scenarioReport;
+    sc.result = Session.getScenarioState(scenarioReport);
+    if (sc.result !== 'skipped') {
+      this.storeExecutionResult(sc);
+    }
+    for (let i = 0; i < sc.report.length; i++) {
+      const elements = sc.report[i].elements;
+
+      if (elements) {
+        for (let j = 0; j < elements.length; j++) {
+          const tags = elements[j].tags;
+
+          if (tags) {
+            const newTag = JSON.parse(JSON.stringify(tags[0]));
+
+            newTag.name = `@${sc.executor}`;
+            tags.push(newTag);
           }
         }
       }
-      this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
-      delete this.inProgressScenarios[scenarioId];
-      cb();
     }
+    this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
+    delete this.inProgressScenarios[scenarioId];
+    return cb();
   }
 
   getSessionState() {
@@ -196,8 +228,9 @@ class Session {
   }
 
   getStatus() {
-    var status = {queue: [], inProgress: [], done: {}, passed: [], failed: [], skipped: []};
-    for (let queueScenario of this.scenarios) {
+    const status = { queue: [], inProgress: [], done: {}, passed: [], failed: [], skipped: [] };
+
+    for (const queueScenario of this.scenarios) {
       status.queue.push({
         scenarioId: queueScenario._id,
         classpath: queueScenario.classpath,
@@ -207,20 +240,24 @@ class Session {
       });
     }
 
-    for (let inProgressScenarioId of Object.keys(this.inProgressScenarios)) {
-      let inProgressScenario = this.inProgressScenarios[inProgressScenarioId];
+    for (const inProgressScenarioId of Object.keys(this.inProgressScenarios)) {
+      const inProgressScenario = this.inProgressScenarios[inProgressScenarioId];
+
       status.inProgress.push({
         scenarioId: inProgressScenario._id,
         classpath: inProgressScenario.classpath,
         featureName: inProgressScenario.featureName,
         scenarioLine: inProgressScenario.scenarioLine,
-        scenarioName: inProgressScenario.scenarioName
+        scenarioName: inProgressScenario.scenarioName,
+        startTimestamp: inProgressScenario.startTimestamp,
+        executor: inProgressScenario.executor
       });
     }
 
-    for (let featureKey of Object.keys(this.doneScenarios)) {
-      let feature = this.doneScenarios[featureKey];
-      for (let scenario of feature) {
+    for (const featureKey of Object.keys(this.doneScenarios)) {
+      const feature = this.doneScenarios[featureKey];
+
+      for (const scenario of feature) {
         if (!status.done[featureKey]) {
           status.done[featureKey] = [];
         }
@@ -236,9 +273,45 @@ class Session {
     }
     return status;
   }
+
+  saveHistory() {
+    const scenarios = {};
+
+    for (const featureKey of Object.keys(this.doneScenarios)) {
+      const feature = this.doneScenarios[featureKey];
+
+      for (const scenario of feature) {
+        if (!scenarios[featureKey]) {
+          scenarios[featureKey] = [];
+        }
+        scenarios[featureKey].push({
+          scenarioId: scenario._id,
+          classpath: scenario.classpath,
+          scenarioLine: scenario.scenarioLine,
+          scenarioName: scenario.scenarioName,
+          result: scenario.result,
+          report: scenario.report
+        });
+      }
+    }
+    const history = new SessionHistory({
+      details: {
+        ...this.getSessionDetails(),
+        endDate: new Date()
+      },
+      briefStatus: this.getBriefStatus(),
+      scenarios
+    });
+
+    history.save((err) => {
+      if (err) {
+        log.error(err);
+      }
+    });
+  }
 }
 
-Session.pushScenarioToStatusList = function(resultObject,scenario) {
+Session.pushScenarioToStatusList = function pushScenarioToStatusList(resultObject, scenario) {
   resultObject[scenario.result].push({
     scenarioId: scenario._id,
     classpath: scenario.classpath,
@@ -248,19 +321,20 @@ Session.pushScenarioToStatusList = function(resultObject,scenario) {
   });
 };
 
-Session.getScenarioState = function (report) {
+Session.getScenarioState = function getScenarioState(report) {
   let result = 'passed';
-  for (let reportEntry of report) {
-    for (let element of reportEntry.elements) {
+
+  for (const reportEntry of report) {
+    for (const element of reportEntry.elements) {
       if (element.before) {
-        for (let before of element.before) {
+        for (const before of element.before) {
           if (before.result.status === 'failed') {
             result = 'failed';
             break;
           }
         }
       }
-      for (let step of element.steps) {
+      for (const step of element.steps) {
         if (step.result.status === 'failed') {
           result = 'failed';
           break;
@@ -275,74 +349,88 @@ Session.getScenarioState = function (report) {
   return result;
 };
 
-Session.trackSessionStateFunc = function (session) {
+Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
   if (session.getScenariosCount(Session.STATE_IN_PROGRESS)
-    + session.getScenariosCount(Session.STATE_IN_QUEUE) == 0) {
+    + session.getScenariosCount(Session.STATE_QUEUE) === 0) {
     clearInterval(session.trackInProgressTimeout);
-    log.debug(session.sessionId + ': Tests execution done');
+    log.debug(`${session.sessionId}: Tests execution done`);
     let haveReports = false;
+
     if (session.getScenariosCount(Session.STATE_DONE) > 0) {
-      log.debug(session.sessionId + ': Tests execution done. Preparing reports...');
-      for (let key of Object.keys(session.doneScenarios)) {
-        var combinedReport = null;
-        log.info('Processing feature ' + key + ' report');
-        var featureReports = session.doneScenarios[key];
-        for (let scenario of featureReports) {
+      log.debug(`${session.sessionId}: Tests execution done. Preparing reports...`);
+      for (const key of Object.keys(session.doneScenarios)) {
+        let combinedReport = null;
+
+        log.info(`Processing feature ${key} report`);
+        const featureReports = session.doneScenarios[key];
+
+        for (const scenario of featureReports) {
           if (!scenario.report) {
-            log.debug('No report for scenario ' + scenario.getScenarioId() + ' saved');
+            log.debug(`No report for scenario ${scenario.getScenarioId()} saved`);
             continue;
           }
-          var report = scenario.report[0];
+          const report = scenario.report[0];
+
           if (report) {
-            log.debug('Added report for scenario ' + report.elements[0].keyword
-              + ': ' + report.elements[0].name);
+            log.debug(`Added report for scenario ${report.elements[0].keyword}: ${report.elements[0].name}`);
             if (!combinedReport) {
               combinedReport = scenario.report;
             } else {
               combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
             }
           } else {
-            log.debug('Report for scenario ' + scenario.getScenarioId() + ' was not sent correctly');
+            log.debug(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
           }
         }
-        let filename = key.replace(/\W/g, '');
+        const filename = key.replace(/\W/g, '');
+
         if (combinedReport) {
-          fs.writeFileSync(session.sessionPath + '/' + filename + '.json', JSON.stringify(combinedReport, null, 4));
+          fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(combinedReport, null, 4));
           haveReports = true;
         }
       }
     }
 
     if (!haveReports) {
-      fs.writeFileSync(session.sessionPath + '/dummy.txt', '', {});
+      fs.writeFileSync(`${session.sessionPath}/dummy.txt`, '', {});
     }
-    util.zipDirectory(session.sessionPath, session.sessionPath + '/reports.zip');
+
+    session.saveHistory();
+
+    util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     clearInterval(session.trackSessionState);
     session.sessionState = Session.NOT_FOUND;
-    log.debug(session.sessionId + ': Session stopped');
+    log.debug(`${session.sessionId}: Session stopped`);
   }
 };
 
-Session.trackInProgressTimeoutFunc = function (session) {
+Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session) {
   if (!session.inProgressScenarios) {
-    log.debug(session.sessionId + ': There are no in progress scenarios at this moment');
+    log.debug(`${session.sessionId}: There are no in progress scenarios at this moment`);
     return;
   }
-  var inProgressScenariosIds = Object.keys(session.inProgressScenarios);
-  log.debug(session.sessionId + ': ' + session.getStatistics());
-  for (let scenarioId of inProgressScenariosIds) {
-    var inProgressScenario = session.inProgressScenarios[scenarioId];
-    var requestDate = inProgressScenario.startTimestamp;
-    if ((Date.now() - requestDate) / 1000 > session.TIMEOUT_SEC) {
-      log.error(session.sessionId + ': scenario execution were not finished in '
-        + session.TIMEOUT_SEC + ' seconds. Moving it back to scenarios queue');
+  const inProgressScenariosIds = Object.keys(session.inProgressScenarios);
+
+  log.debug(`${session.sessionId}: ${session.getStatistics()}`);
+  for (const scenarioId of inProgressScenariosIds) {
+    const inProgressScenario = session.inProgressScenarios[scenarioId];
+    const requestDate = inProgressScenario.startTimestamp;
+
+    if ((Date.now() - requestDate) / 1000 > Session.SCENARIO_TIMEOUT_SEC) {
+      log.error(
+        `${session.sessionId}: scenario execution were not finished in ${Session.SCENARIO_TIMEOUT_SEC} seconds.
+         Moving it back to scenarios queue`);
       session.scenarios.push(inProgressScenario);
       delete session.inProgressScenarios[scenarioId];
     }
   }
 };
 
-Session.STATE_IN_QUEUE = 'in queue';
+Session.sessions = {};
+
+Session.SCENARIO_TIMEOUT_SEC = 1800;
+
+Session.STATE_QUEUE = 'queue';
 Session.STATE_IN_PROGRESS = 'in progress';
 Session.STATE_DONE = 'done';
 Session.STATE_PASSED = 'passed';

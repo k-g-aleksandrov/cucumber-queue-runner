@@ -1,54 +1,58 @@
-'use strict';
+const log = require('libs/log')(module);
 
-let log = require('libs/log')(module);
-
-let Project = require('libs/mongoose').Project;
-let Scenario = require('libs/mongoose').Scenario;
-let Execution = require('libs/mongoose').Execution;
+const Project = require('libs/mongoose').Project;
+const Scenario = require('libs/mongoose').Scenario;
+const Execution = require('libs/mongoose').Execution;
 
 module.exports.development = {
   id: 'dev',
   displayName: 'Development',
-  executionRules: [{
-    result: 'passed',
-    number: 5,
-    mode: 'row',
-    inverted: true
-  }],
+  executionRules: [
+    {
+      result: 'passed',
+      number: 5,
+      mode: 'row',
+      inverted: true
+    }
+  ],
   description: 'Have less than 5 passed executions in a row'
 };
 
 module.exports.daily = {
   id: 'daily',
   displayName: 'Daily',
-  executionRules: [{
-    result: 'passed',
-    number: 5,
-    mode: 'row',
-    inverted: false
-  }, {
-    result: 'passed',
-    number: 1,
-    mode: 'last',
-    inverted: false
-  }],
+  executionRules: [
+    {
+      result: 'passed',
+      number: 5,
+      mode: 'row',
+      inverted: false
+    }, {
+      result: 'passed',
+      number: 1,
+      mode: 'last',
+      inverted: false
+    }
+  ],
   description: 'Have at least 5 passed executions in a row, and passed last execution'
 };
 
 module.exports.muted = {
   id: 'muted',
   displayName: 'Failed',
-  executionRules: [{
-    result: 'passed',
-    number: 5,
-    mode: 'row',
-    inverted: false
-  }, {
-    result: 'passed',
-    number: 1,
-    mode: 'last',
-    inverted: true
-  }],
+  executionRules: [
+    {
+      result: 'passed',
+      number: 5,
+      mode: 'row',
+      inverted: false
+    }, {
+      result: 'passed',
+      number: 1,
+      mode: 'last',
+      inverted: true
+    }
+  ],
   description: 'Have at least 5 passed executions in a row, and failed last execution'
 };
 
@@ -72,8 +76,9 @@ function validateExecutionsRowRule(scenario, rule) {
   let maxInARow = 0;
   let currentInARow = 0;
   let result = false;
+
   if (scenario.executions) {
-    for (let exec of scenario.executions) {
+    for (const exec of scenario.executions) {
       if (exec.result === rule.result) {
         currentInARow++;
       } else if (currentInARow > maxInARow) {
@@ -94,10 +99,12 @@ function validateExecutionsRowRule(scenario, rule) {
 
 function validateLastExecutionsRule(scenario, rule) {
   let result = false;
+
   if (scenario.executions) {
     let count = 0;
+
     for (let i = scenario.executions.length - 1; i >= 0; i--) {
-      if (scenario.executions[i].result == rule.result) {
+      if (scenario.executions[i].result === rule.result) {
         count++;
       } else {
         break;
@@ -115,46 +122,50 @@ function validateExecutionRule(scenario, rule) {
     return validateExecutionsRowRule(scenario, rule);
   } else if (rule.mode === 'last') {
     return validateLastExecutionsRule(scenario, rule);
-  } else {
-    return true;
   }
+  return true;
 }
 
 function checkProjectTag(scenario, projectTag) {
   return scenario.tags && scenario.tags.indexOf(projectTag) >= 0;
 }
 
-module.exports.getFilterByName = function (filter) {
-  if ('full' === filter) {
+module.exports.getFilterByName = function getFilterByName(filter) {
+  if (filter === 'full') {
     return this.full;
-  } else if ('dev' === filter) {
+  } else if (filter === 'dev') {
     return this.development;
-  } else if ('failed' === filter) {
+  } else if (filter === 'failed') {
     return this.muted;
-  } else if ('daily' === filter) {
+  } else if (filter === 'daily') {
     return this.daily;
-  } else if ('custom' === filter) {
+  } else if (filter === 'custom') {
     return this.custom;
   }
 };
 
-module.exports.applyCustomFilterToProject = function (projectId, tags, callback) {
-  Project.findOne({projectId: projectId}, (err, project) => {
-    if (err) {
-      log.error(err);
+module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(projectId, tags, callback) {
+  Project.findOne({ projectId }, (projectSearchError, project) => {
+    if (projectSearchError) {
+      log.error(projectSearchError);
     }
     if (!project) {
-      log.error('Failed to find project with id ' + projectId);
+      log.error(`Failed to find project with id ${projectId}`);
     }
-    let filteredScenarios = [];
-    log.debug('Found project ' + projectId + '. Search for scenarios related to this project...');
-    Scenario.find({project: project.projectId}, (err, scenarios) => {
+
+    const filteredScenarios = [];
+
+    log.debug(`Found project ${projectId}. Search for scenarios related to this project...`);
+    Scenario.find({ project: project.projectId }, (err, scenarios) => {
       if (err) {
         log.error(err);
       }
-      let scenarioPromises = scenarios.map((sc) => {
+      const scenarioPromises = scenarios.map((sc) => {
         return new Promise((scResolve) => {
-          Execution.findOne({scenarioId: sc.getScenarioId()}, (err, execution) => {
+          Execution.findOne({ scenarioId: sc.getScenarioId() }, (executionSearchError, execution) => {
+            if (executionSearchError) {
+              log.error(executionSearchError);
+            }
             sc.projectTag = project.tag;
             if (execution && execution.executions) {
               sc.executions = execution.executions;
@@ -166,6 +177,7 @@ module.exports.applyCustomFilterToProject = function (projectId, tags, callback)
           });
         });
       });
+
       Promise.all(scenarioPromises).then(() => {
         log.info(JSON.stringify(filteredScenarios));
         callback(null, project, filteredScenarios);
@@ -174,23 +186,28 @@ module.exports.applyCustomFilterToProject = function (projectId, tags, callback)
   });
 };
 
-module.exports.applyFilterToProject = function (projectId, filter, callback) {
-  Project.findOne({projectId: projectId}, (err, project) => {
-    if (err) {
-      log.error(err);
+module.exports.applyFilterToProject = function applyFilterToProject(projectId, filter, callback) {
+  Project.findOne({ projectId }, (projectSearchError, project) => {
+    if (projectSearchError) {
+      log.error(projectSearchError);
     }
     if (!project) {
-      log.error('Failed to find project with id ' + projectId);
+      log.error(`Failed to find project with id ${projectId}`);
     }
-    let filteredScenarios = [];
-    log.debug('Found project ' + projectId + '. Search for scenarios related to this project...');
-    Scenario.find({project: project.projectId}, (err, scenarios) => {
-      if (err) {
-        log.error(err);
+    const filteredScenarios = [];
+
+    log.debug(`Found project ${projectId}. Search for scenarios related to this project...`);
+    Scenario.find({ project: project.projectId }, (scenarioSearchError, scenarios) => {
+      if (scenarioSearchError) {
+        log.error(scenarioSearchError);
       }
-      let scenarioPromises = scenarios.map((sc) => {
+
+      const scenarioPromises = scenarios.map((sc) => {
         return new Promise((scResolve) => {
-          Execution.findOne({scenarioId: sc.getScenarioId()}, (err, execution) => {
+          Execution.findOne({ scenarioId: sc.getScenarioId() }, (executionSearchError, execution) => {
+            if (executionSearchError) {
+              log.error(executionSearchError);
+            }
             sc.projectTag = project.tag;
             if (execution && execution.executions) {
               sc.executions = execution.executions;
@@ -202,6 +219,7 @@ module.exports.applyFilterToProject = function (projectId, filter, callback) {
           });
         });
       });
+
       Promise.all(scenarioPromises).then(() => {
         log.info(JSON.stringify(filteredScenarios));
         callback(null, project, filteredScenarios);
@@ -210,19 +228,20 @@ module.exports.applyFilterToProject = function (projectId, filter, callback) {
   });
 };
 
-module.exports.applyFiltersToProject = function (projectId, filters, callback) {
-  Project.findOne({projectId: projectId}, (err, project) => {
-    if (err) {
-      log.error(err);
+module.exports.applyFiltersToProject = function applyFilterToProject(projectId, filters, callback) {
+  Project.findOne({ projectId }, (projectSearchError, project) => {
+    if (projectSearchError) {
+      log.error(projectSearchError);
     }
     if (!project) {
-      log.error('Failed to find project with id ' + projectId);
+      log.error(`Failed to find project with id ${projectId}`);
     }
-    let scenariosScopes = {};
-    for (let filter of filters) {
-      scenariosScopes[filter.id] = {filter: filter, scenarios: []};
+    const scenariosScopes = {};
+
+    for (const filter of filters) {
+      scenariosScopes[filter.id] = { filter, scenarios: [] };
     }
-    scenariosScopes['disabled'] = {
+    scenariosScopes.disabled = {
       filter: {
         id: 'disabled',
         displayName: 'Disabled',
@@ -230,34 +249,41 @@ module.exports.applyFiltersToProject = function (projectId, filters, callback) {
       }, scenarios: []
     };
 
-    Scenario.find({project: project.projectId}, (err, scenarios) => {
-      if (err) {
-        log.error(err);
+    Scenario.find({ project: project.projectId }, (scenarioSearchError, scenarios) => {
+      if (scenarioSearchError) {
+        log.error(scenarioSearchError);
       }
-      let scenarioPromises = scenarios.map((sc) => {
+      const scenarioPromises = scenarios.map((sc) => {
+        const scenarioObject = {
+          featureName: sc.featureName,
+          scenarioName: sc.scenarioName,
+          scenarioLine: sc.scenarioLine,
+          exampleParams: sc.exampleParams,
+          tags: sc.tags
+        };
+
         return new Promise((scResolve) => {
-          Execution.findOne({scenarioId: sc.getScenarioId()}, (err, execution) => {
-            sc.projectTag = project.tag;
+          Execution.findOne({ scenarioId: sc.getScenarioId() }, (err, execution) => {
+            scenarioObject.projectTag = project.tag;
             if (execution && execution.executions) {
-              sc.executions = execution.executions;
-            }
-            if (sc.executions) {
-              sc.executions = sc.executions;
+              scenarioObject.executions = execution.executions;
             }
             let inScopes = false;
-            for (let filter of filters) {
-              if (this.applyFilter(sc, filter)) {
-                scenariosScopes[filter.id].scenarios.push(sc);
+
+            for (const filter of filters) {
+              if (this.applyFilter(scenarioObject, filter)) {
+                scenariosScopes[filter.id].scenarios.push(scenarioObject);
                 inScopes = true;
               }
             }
             if (!inScopes) {
-              scenariosScopes['disabled'].scenarios.push(sc);
+              scenariosScopes.disabled.scenarios.push(scenarioObject);
             }
             scResolve();
           });
         });
       });
+
       Promise.all(scenarioPromises).then(() => {
         callback(null, project, scenariosScopes);
       }).catch(log.error);
@@ -265,8 +291,8 @@ module.exports.applyFiltersToProject = function (projectId, filters, callback) {
   });
 };
 
-module.exports.applyTags = function(scenario, tags) {
-  for (let tag of tags) {
+module.exports.applyTags = function applyTags(scenario, tags) {
+  for (const tag of tags) {
     if (checkProjectTag(scenario, tag)) {
       return true;
     }
@@ -274,15 +300,16 @@ module.exports.applyTags = function(scenario, tags) {
   return false;
 };
 
-module.exports.applyFilter = function (scenario, filter) {
+module.exports.applyFilter = function applyFilter(scenario, filter) {
   let result = true;
+
   if (filter.executionRules) {
-    for (let executionRule of filter.executionRules) {
-      result &= validateExecutionRule(scenario, executionRule);
+    for (const executionRule of filter.executionRules) {
+      result = result && validateExecutionRule(scenario, executionRule);
     }
   }
   if (!filter.ignoreProjectTag) {
-    result &= checkProjectTag(scenario, scenario.projectTag);
+    result = result && checkProjectTag(scenario, scenario.projectTag);
   }
   return result;
 };
