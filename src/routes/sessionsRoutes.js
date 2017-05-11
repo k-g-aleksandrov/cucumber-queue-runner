@@ -1,4 +1,7 @@
 import express from 'express';
+import mime from 'mime';
+import path from 'path';
+import fs from 'fs';
 
 import Session from 'libs/session';
 import util from 'libs/util';
@@ -49,12 +52,29 @@ router.get('/history', (req, res) => {
     }
     res.send(responseObject);
   });
-
-
 });
 
 router.get('/history/:sessionId', (req, res) => {
   res.send({ history: `history ${req.params.sessionId}` });
+});
+
+router.get('/history/:sessionId/zip', (req, res) => {
+  const file = `${__dirname}/../../public/results/${req.params.sessionId}/reports.zip`;
+
+  if (fs.existsSync(file)) {
+    const filename = path.basename(file);
+    const mimetype = mime.lookup(file);
+
+    res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-type', mimetype);
+
+    const fileStream = fs.createReadStream(file);
+
+    fileStream.pipe(res);
+  } else {
+    res.statusCode = 404;
+    res.send({ error: `not_found`, message: `no reports.zip for session ${req.params.sessionId}` });
+  }
 });
 
 router.get('/start', (req, res) => {

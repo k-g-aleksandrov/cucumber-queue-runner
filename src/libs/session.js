@@ -8,7 +8,6 @@ import filter from 'libs/filter';
 
 class Session {
   constructor(sessionId, project, scenariosFilter) {
-
     this.sessionId = sessionId;
     this.project = project;
     this.scenariosFilter = scenariosFilter;
@@ -357,6 +356,7 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
     let haveReports = false;
 
     if (session.getScenariosCount(Session.STATE_DONE) > 0) {
+      session.saveHistory();
       log.debug(`${session.sessionId}: Tests execution done. Preparing reports...`);
       for (const key of Object.keys(session.doneScenarios)) {
         let combinedReport = null;
@@ -394,8 +394,6 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
     if (!haveReports) {
       fs.writeFileSync(`${session.sessionPath}/dummy.txt`, '', {});
     }
-
-    session.saveHistory();
 
     util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     clearInterval(session.trackSessionState);
