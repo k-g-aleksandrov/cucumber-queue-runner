@@ -280,17 +280,19 @@ class Session {
       const feature = this.doneScenarios[featureKey];
 
       for (const scenario of feature) {
-        if (!scenarios[featureKey]) {
-          scenarios[featureKey] = [];
+        if (scenario.result === 'failed') {
+          if (!scenarios[featureKey]) {
+            scenarios[featureKey] = [];
+          }
+          scenarios[featureKey].push({
+            scenarioId: scenario._id,
+            classpath: scenario.classpath,
+            scenarioLine: scenario.scenarioLine,
+            scenarioName: scenario.scenarioName,
+            result: scenario.result,
+            report: scenario.report
+          });
         }
-        scenarios[featureKey].push({
-          scenarioId: scenario._id,
-          classpath: scenario.classpath,
-          scenarioLine: scenario.scenarioLine,
-          scenarioName: scenario.scenarioName,
-          result: scenario.result,
-          report: scenario.report
-        });
       }
     }
     const history = new SessionHistory({
