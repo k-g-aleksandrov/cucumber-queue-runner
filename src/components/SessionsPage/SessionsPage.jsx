@@ -32,7 +32,7 @@ class SessionsPage extends Component {
           <span style={{ fontWeight: 'bold' }}>Error: </span>
           Session
           <span style={{ fontWeight: 'bold' }}> {this.props.location.query.lost} </span>
-          was not started or does not exist
+          was finished or does not exist
         </Alert>}
         <h3 style={{ paddingBottom: '10px' }}>Current Sessions</h3>
         <SessionsTable/>

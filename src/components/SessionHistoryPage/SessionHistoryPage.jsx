@@ -12,6 +12,8 @@ import Grid from 'react-bootstrap/lib/Grid';
 import Spinner from 'components/Spinner';
 import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
 
+import { fetchSessionsHistory } from 'redux/actions/sessionsActions';
+
 let Doughnut;
 
 const propTypes = {
@@ -30,6 +32,11 @@ class SessionHistoryPage extends Component {
 
   componentDidMount() {
     Doughnut = require('react-chartjs-2').Doughnut;
+    this.fetchSessionsHistory();
+  }
+
+  fetchSessionsHistory() {
+    this.props.dispatch(fetchSessionsHistory());
   }
 
   render() {
@@ -37,10 +44,14 @@ class SessionHistoryPage extends Component {
 
     const { sessionsHistory } = this.props;
 
+    if (!sessionsHistory) {
+      return <Spinner/>;
+    }
+
     const session = sessionsHistory.find(o => o.details.sessionId === sessionId);
 
-    if (!session || !session.scenarios || !session.details) {
-      return <Spinner/>;
+    if (!session) {
+      this.props.router.push(`/sessions?lost=${sessionId}`);
     }
 
     const chartData = {

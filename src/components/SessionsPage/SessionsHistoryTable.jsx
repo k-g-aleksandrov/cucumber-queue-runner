@@ -17,9 +17,6 @@ class SessionsHistoryTable extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      sessionsHistory: null
-    };
   }
 
   componentDidMount() {
