@@ -60,6 +60,7 @@ class ProjectsPage extends Component {
     }
     return (
       <div>
+        <h3 style={{ paddingBottom: '10px' }}>Available Projects</h3>
         { (!availableProjects || availableProjects.length === 0) &&
         <Alert bsStyle='info'>No projects registered</Alert>}
         { availableProjects && availableProjects.length > 0 && <ProjectsTable availableProjects={availableProjects}/>}

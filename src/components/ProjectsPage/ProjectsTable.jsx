@@ -42,7 +42,9 @@ class ProjectsTable extends Component {
       <Table striped bordered style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }}>
         <tbody>
           <tr>
-            <th colSpan='3'>Available Projects</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>&nbsp;</th>
           </tr>
           {availableProjects.map((project, i) => {
             return <ProjectsTableRow key={i} project={project}/>;
