@@ -273,6 +273,16 @@ class Session {
     return status;
   }
 
+  removeEmbeddings(report) {
+    for (const prop in report) {
+      if (prop === 'embeddings') {
+        delete report[prop];
+      } else if (typeof report[prop] === 'object') {
+        this.removeEmbeddings(report[prop]);
+      }
+    }
+  }
+
   saveHistory() {
     const scenarios = {};
 
@@ -280,19 +290,20 @@ class Session {
       const feature = this.doneScenarios[featureKey];
 
       for (const scenario of feature) {
-        if (scenario.result === 'failed') {
-          if (!scenarios[featureKey]) {
-            scenarios[featureKey] = [];
-          }
-          scenarios[featureKey].push({
-            scenarioId: scenario._id,
-            classpath: scenario.classpath,
-            scenarioLine: scenario.scenarioLine,
-            scenarioName: scenario.scenarioName,
-            result: scenario.result,
-            report: scenario.report
-          });
+        if (!scenarios[featureKey]) {
+          scenarios[featureKey] = [];
         }
+        const report = scenario.report;
+
+        this.removeEmbeddings(report);
+        scenarios[featureKey].push({
+          scenarioId: scenario._id,
+          classpath: scenario.classpath,
+          scenarioLine: scenario.scenarioLine,
+          scenarioName: scenario.scenarioName,
+          result: scenario.result,
+          report
+        });
       }
     }
     const history = new SessionHistory({
