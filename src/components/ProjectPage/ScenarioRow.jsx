@@ -22,7 +22,7 @@ class ScenarioRow extends Component {
     const { scenario } = this.props;
 
     return (
-      <tr class='project-scenario-row'>
+      <tr className='project-scenario-row'>
         <td style={{ textAlign: 'center', verticalAlign: 'center' }}>
           {this.props.index + 1}
         </td>
