@@ -1,0 +1,7 @@
+tr.project-scenario-row td:first-child {
+    width: 3%;
+}
+tr.project-scenario-row td:last-child {
+    width: 1%;
+    white-space: nowrap;
+}

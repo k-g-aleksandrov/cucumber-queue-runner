@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { Panel, Grid } from 'react-bootstrap';
-
 import ScenarioRow from './ScenarioRow';
+
+import Table from 'react-bootstrap/lib/Table';
 
 const propTypes = {
   scope: PropTypes.any.isRequired
@@ -22,31 +22,45 @@ class ScopeDetails extends Component {
   render() {
     const { scope } = this.props;
 
-    const title = (
-      <div onClick={() => this.setState({ open: !this.state.open })}>
-        <h4>{scope.filter.displayName} - {scope.scenarios.length} scenarios</h4>
-        <span style={{ fontSize: 'small', fontStyle: 'italic' }}>{scope.filter.description}</span>
-      </div>
-    );
+    let body = null;
 
     if (scope.scenarios.length) {
-      return (
-        <Panel
-          style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }}
-          header={title}
-          bsStyle='info' collapsible
-          expanded={this.state.open}
-        >
-          <Grid fluid>
-            {scope.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
-          </Grid>
-        </Panel>
+      body = (
+        <tbody style={{ display: this.state.open ? 'block' : 'none' }}>
+          {scope.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
+        </tbody>
+      );
+    } else {
+      body = (
+        <tbody>
+          <tr>
+            <th>No scenarios found by filter '{scope.filter.displayName}'</th>
+          </tr>
+        </tbody>
       );
     }
+
+    const title = (
+      <thead style={{ backgroundColor: '#d9edf7', borderColor: '#bce8f1' }}
+        onClick={() => this.setState({ open: !this.state.open })}
+      >
+        <tr>
+          <th colSpan='3'>
+            <h4>{scope.filter.displayName} - {scope.scenarios.length} scenarios</h4>
+            <span
+              style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
+            >{scope.filter.description}</span>
+          </th>
+        </tr>
+      </thead>
+    );
+
+
     return (
-      <Panel header={title} bsStyle='default'>
-        <h4>No scenarios found by filter '{scope.filter.displayName}'</h4>
-      </Panel>
+      <Table style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }} striped bordered>
+        {title}
+        {body}
+      </Table>
     );
   }
 }
