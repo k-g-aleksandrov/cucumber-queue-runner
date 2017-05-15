@@ -180,7 +180,6 @@ class Session {
       { safe: true, upsert: true },
       (err) => {
         if (err) throw err;
-        log.info(`Successfully stored execution result for scenario ${scenario.getScenarioId()}`);
       }
     );
   }
@@ -377,25 +376,23 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
       for (const key of Object.keys(session.doneScenarios)) {
         let combinedReport = null;
 
-        log.info(`Processing feature ${key} report`);
         const featureReports = session.doneScenarios[key];
 
         for (const scenario of featureReports) {
           if (!scenario.report) {
-            log.debug(`No report for scenario ${scenario.getScenarioId()} saved`);
+            log.error(`No report for scenario ${scenario.getScenarioId()} saved`);
             continue;
           }
           const report = scenario.report[0];
 
           if (report) {
-            log.debug(`Added report for scenario ${report.elements[0].keyword}: ${report.elements[0].name}`);
             if (!combinedReport) {
               combinedReport = scenario.report;
             } else {
               combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
             }
           } else {
-            log.debug(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
+            log.error(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
           }
         }
         const filename = key.replace(/\W/g, '');
@@ -425,7 +422,6 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
   }
   const inProgressScenariosIds = Object.keys(session.inProgressScenarios);
 
-  log.debug(`${session.sessionId}: ${session.getStatistics()}`);
   for (const scenarioId of inProgressScenariosIds) {
     const inProgressScenario = session.inProgressScenarios[scenarioId];
     const requestDate = inProgressScenario.startTimestamp;

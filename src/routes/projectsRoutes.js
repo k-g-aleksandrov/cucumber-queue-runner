@@ -112,7 +112,6 @@ router.get('/:project/scan', (req, res) => {
           const gherkinDocument = parser.parse(buf);
           const feature = gherkinDocument.feature;
 
-          log.info(`Parsing feature ${feature.name}`);
           for (const child of feature.children) {
             if (child.type === 'ScenarioOutline') {
               const examples = child.examples;
@@ -124,7 +123,6 @@ router.get('/:project/scan', (req, res) => {
                   for (const exampleParam of example.cells) {
                     paramsString += `${exampleParam.value}:`;
                   }
-                  log.debug(`${feature.name} -> ${child.name}:${example.location.line} (${paramsString})`);
                   const scenarioObject = {
                     project,
                     classpath,
