@@ -23,7 +23,7 @@ class ScenarioRow extends Component {
 
     return (
       <Row className='show-grid'>
-        <Col md={1} style={{ textAlign: 'right', verticalAlign: 'center' }}>
+        <Col md={1} style={{ textAlign: 'left', verticalAlign: 'center', width: '4%' }}>
           {this.props.index + 1}
         </Col>
         <Col md={8}>

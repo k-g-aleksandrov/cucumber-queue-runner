@@ -15,7 +15,7 @@ class ScopeDetails extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      open: true
+      open: !this.props.scope.filter.hideInUi
     };
   }
 

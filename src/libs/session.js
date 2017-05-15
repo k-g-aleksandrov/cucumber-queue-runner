@@ -265,7 +265,8 @@ class Session {
           classpath: scenario.classpath,
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
-          result: scenario.result
+          result: scenario.result,
+          executor: scenario.executor
         });
         Session.pushScenarioToStatusList(status, scenario);
       }
@@ -302,7 +303,8 @@ class Session {
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
           result: scenario.result,
-          report
+          report,
+          executor: scenario.executor
         });
       }
     }
@@ -329,7 +331,8 @@ Session.pushScenarioToStatusList = function pushScenarioToStatusList(resultObjec
     classpath: scenario.classpath,
     scenarioLine: scenario.scenarioLine,
     scenarioName: scenario.scenarioName,
-    result: scenario.result
+    result: scenario.result,
+    executor: scenario.executor
   });
 };
 

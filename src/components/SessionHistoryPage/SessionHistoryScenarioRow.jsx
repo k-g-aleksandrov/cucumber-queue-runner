@@ -55,6 +55,7 @@ class SessionHistoryScenarioRow extends Component {
           <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
           {this.state.reportDisplayed && <Report report={scenario.report}/>}
         </td>
+        <td style={{ textAlign: 'center' }}>{scenario.executor}</td>
       </tr>
     );
   }
