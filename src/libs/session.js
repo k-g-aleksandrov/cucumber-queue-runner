@@ -293,7 +293,7 @@ class Session {
         if (!scenarios[featureKey]) {
           scenarios[featureKey] = [];
         }
-        const report = Object.assign({}, scenario.report);
+        const report = JSON.parse(JSON.stringify(scenario.report));
 
         this.removeEmbeddings(report);
         scenarios[featureKey].push({
