@@ -293,7 +293,7 @@ class Session {
         if (!scenarios[featureKey]) {
           scenarios[featureKey] = [];
         }
-        const report = scenario.report;
+        const report = Object.assign({}, scenario.report);
 
         this.removeEmbeddings(report);
         scenarios[featureKey].push({
