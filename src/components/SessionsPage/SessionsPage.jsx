@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import SessionsTable from './SessionsTable';
 import SessionsHistoryTable from './SessionsHistoryTable';
-
-
-import Alert from 'react-bootstrap/lib/Alert';
+import SessionLostPanel from './panels/SessionLostPanel';
 
 const propTypes = {
   params: PropTypes.object,
@@ -27,13 +25,7 @@ class SessionsPage extends Component {
     }
     return (
       <div>
-        {this.props.location.query.lost &&
-        <Alert bsStyle='danger'>
-          <span style={{ fontWeight: 'bold' }}>Error: </span>
-          Session
-          <span style={{ fontWeight: 'bold' }}> {this.props.location.query.lost} </span>
-          was finished or does not exist
-        </Alert>}
+        <SessionLostPanel sessionId={this.props.location.query.lost}/>
         <h3 style={{ paddingBottom: '10px' }}>Current Sessions</h3>
         <SessionsTable/>
         <h3 style={{ paddingBottom: '10px' }}>Sessions History</h3>

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import ScopeDetails from './ScopeDetails';
-import Spinner from 'components/Spinner';
+import Spinner from 'components/common/Spinner';
 
 import { fetchProjectFilters } from 'redux/actions/projectsActions';
 

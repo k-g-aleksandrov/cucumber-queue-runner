@@ -16,7 +16,7 @@ import Grid from 'react-bootstrap/lib/Grid';
 
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
-import Spinner from 'components/Spinner';
+import Spinner from 'components/common/Spinner';
 import DoneScenarioRow from './DoneScenarioRow';
 
 import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
