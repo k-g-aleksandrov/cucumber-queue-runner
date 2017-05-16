@@ -2,10 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Alert from 'react-bootstrap/lib/Alert';
 
-SessionLostPanel.propTypes = {
-  sessionId: PropTypes.string
-};
-
 class SessionLostPanel extends Component {
 
   constructor(props) {
@@ -29,5 +25,9 @@ class SessionLostPanel extends Component {
     );
   }
 }
+
+SessionLostPanel.propTypes = {
+  sessionId: PropTypes.string
+};
 
 export default SessionLostPanel;

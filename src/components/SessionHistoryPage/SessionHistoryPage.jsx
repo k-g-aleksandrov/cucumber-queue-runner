@@ -10,7 +10,7 @@ import Table from 'react-bootstrap/lib/Table';
 import Grid from 'react-bootstrap/lib/Grid';
 import Alert from 'react-bootstrap/lib/Alert';
 
-import Spinner from 'components/Spinner';
+import Spinner from 'components/common/Spinner';
 import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
 
 import { fetchSessionsHistory } from 'redux/actions/sessionsActions';
