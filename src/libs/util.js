@@ -21,38 +21,33 @@ module.exports.scanRepository = function scanRepository(dir, done) {
   let results = [];
 
   fs.readdir(dir, (err, list) => {
-      if (err) {
-        return done(err);
-      }
-
-      var i = 0;
-      (function next() {
-        let file = list[i++];
-        if (!file) return done(null, results);
-        file = `${dir}/${file}`;
-        fs.stat(file, (err, stat) => {
-          if (stat && stat.isDirectory()) {
-            scanRepository(file, (err, res) => {
-              results = results.concat(res);
-              next();
-            });
-          } else {
-            if (file.indexOf('src') > -1 && file.endsWith('.feature')) {
-              log.debug(file);
-              results.push(file);
-            }
-            return next();
-          }
-        });
-      })();
+    if (err) {
+      return done(err);
     }
-  )
-  ;
+    let i = 0;
+
+    (function next() {
+      let file = list[i++];
+      if (!file) return done(null, results);
+      file = `${dir}/${file}`;
+      fs.stat(file, (err, stat) => {
+        if (stat && stat.isDirectory()) {
+          scanRepository(file, (err, res) => {
+            results = results.concat(res);
+            next();
+          });
+        } else {
+          if (file.indexOf('src') > -1 && file.endsWith('.feature')) {
+            results.push(file);
+          }
+          return next();
+        }
+      });
+    })();
+  });
 };
-module.exports.removeDirectory = (dirPath, removeSelf) => {
-  if (removeSelf === undefined) {
-    removeSelf = true;
-  }
+
+module.exports.removeDirectory = (dirPath, removeSelf = true) => {
   let files;
 
   try {
