@@ -170,10 +170,14 @@ router.post('/:sessionId/reports', (req, res) => {
   currentSession.saveScenarioResult(scenarioId, scenarioReport, (err) => {
     if (err) {
       log.error(err);
-      return res.status(404).send(err);
+      return res.status(404).send({
+        error: {
+          message: 'Session finished or scenario was not executed in 20 minutes'
+        }
+      });
     }
   });
-  res.send(`Report for scenario ${scenarioId} successfully saved`);
+  res.send({ scenario: { scenarioId }, success: true });
 });
 
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {

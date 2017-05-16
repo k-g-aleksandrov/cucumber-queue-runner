@@ -186,9 +186,10 @@ class Session {
   }
 
   saveScenarioResult(scenarioId, scenarioReport, cb) {
-    if (this.inProgressScenarios[scenarioId] === null) {
+    if (!this.inProgressScenarios[scenarioId]) {
       return cb(new Error(`Can\'t find in progress scenario for ID ${scenarioId}`));
     }
+
     const featureName = this.inProgressScenarios[scenarioId].featureName;
 
     if (!this.doneScenarios[featureName]) {
