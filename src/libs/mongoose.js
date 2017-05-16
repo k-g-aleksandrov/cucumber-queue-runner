@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-const log = require('libs/log')(module);
+import logTemplate from 'libs/log';
+const log = logTemplate(module);
 
 mongoose.Promise = Promise;
 

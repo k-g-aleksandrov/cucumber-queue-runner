@@ -5,7 +5,8 @@ import filter from 'libs/filter';
 import gherkin from 'gherkin';
 import fs from 'fs';
 
-const log = require('libs/log')(module);
+import logTemplate from 'libs/log';
+const log = logTemplate(module);
 
 const router = express.Router();
 

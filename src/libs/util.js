@@ -1,5 +1,7 @@
 import fs from 'fs';
-const log = require('libs/log')(module);
+
+import logTemplate from 'libs/log';
+const log = logTemplate(module);
 
 module.exports.isGitUrl = function isGitUrl(str) {
   const re = /(?:git|ssh|https?|git@[\w.]+):(?:\/\/)?[\w.@:\/~_-]+\.git(?:\/?|#[\d\w.\-_]+?)$/;

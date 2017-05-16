@@ -1,9 +1,7 @@
-'use strict';
-
-var winston = require('winston');
+import winston from 'winston';
 
 function getLogger(module) {
-  var path = module.filename.split('/')
+  const path = module.filename.split('/')
     .slice(-2)
     .join('/');
 

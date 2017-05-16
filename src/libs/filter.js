@@ -1,4 +1,5 @@
-const log = require('libs/log')(module);
+import logTemplate from 'libs/log';
+const log = logTemplate(module);
 
 const Project = require('libs/mongoose').Project;
 const Scenario = require('libs/mongoose').Scenario;
