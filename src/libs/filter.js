@@ -156,7 +156,6 @@ module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(
 
     const filteredScenarios = [];
 
-    log.debug(`Found project ${projectId}. Search for scenarios related to this project...`);
     Scenario.find({ project: project.projectId }, (err, scenarios) => {
       if (err) {
         log.error(err);
@@ -180,7 +179,6 @@ module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(
       });
 
       Promise.all(scenarioPromises).then(() => {
-        log.info(JSON.stringify(filteredScenarios));
         callback(null, project, filteredScenarios);
       }).catch(log.error);
     });
@@ -197,7 +195,6 @@ module.exports.applyFilterToProject = function applyFilterToProject(projectId, f
     }
     const filteredScenarios = [];
 
-    log.debug(`Found project ${projectId}. Search for scenarios related to this project...`);
     Scenario.find({ project: project.projectId }, (scenarioSearchError, scenarios) => {
       if (scenarioSearchError) {
         log.error(scenarioSearchError);
@@ -222,7 +219,6 @@ module.exports.applyFilterToProject = function applyFilterToProject(projectId, f
       });
 
       Promise.all(scenarioPromises).then(() => {
-        log.info(JSON.stringify(filteredScenarios));
         callback(null, project, filteredScenarios);
       }).catch(log.error);
     });

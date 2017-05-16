@@ -321,6 +321,7 @@ class Session {
       if (err) {
         log.error(err);
       }
+      log.info(`History for session ${this.sessionId} successfully saved.`);
     });
   }
 }
