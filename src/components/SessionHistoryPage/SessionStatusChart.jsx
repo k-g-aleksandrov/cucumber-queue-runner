@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { Doughnut } from 'react-chartjs-2';
+let Doughnut;
 
 const propTypes = {
   sessionBriefStatus: PropTypes.any.isRequired
@@ -11,6 +11,7 @@ class SessionStatusChart extends Component {
 
   constructor(props) {
     super(props);
+    Doughnut = require('react-chartjs-2').Doughnut;
   }
 
   componentDidMount() {
@@ -46,6 +47,9 @@ class SessionStatusChart extends Component {
       ]
     };
 
+    if (Doughnut === undefined) {
+      return null;
+    }
     return <Doughnut data={chartData} height={70}/>;
   }
 }

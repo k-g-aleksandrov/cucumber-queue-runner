@@ -3,28 +3,41 @@ import PropTypes from 'prop-types';
 
 import Table from 'react-bootstrap/lib/Table';
 import Alert from 'react-bootstrap/lib/Alert';
+import Checkbox from 'react-bootstrap/lib/Checkbox';
 
 import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
 
 const propTypes = {
-  sessionScenarios: PropTypes.any,
-  onlyFailed: PropTypes.bool
+  sessionScenarios: PropTypes.any
 };
 
 class ScenariosHistoryTable extends Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      onlyFailed: false
+    };
+
+    this.handleOnlyFailedCheck = this.handleOnlyFailedCheck.bind(this);
+  }
+
+  handleOnlyFailedCheck() {
+    this.setState({ onlyFailed: !this.state.onlyFailed });
   }
 
   render() {
-    const { sessionScenarios, onlyFailed } = this.props;
+    const { sessionScenarios } = this.props;
 
     return (
       <Table style={{ marginBottom: '0px' }}>
         <thead>
           <tr>
-            <td colSpan={2}><h2>Session Scenarios</h2></td>
+            <td colSpan={2}>
+              <h2>Session Scenarios</h2>
+              <Checkbox onChange={this.handleOnlyFailedCheck} checked={this.state.onlyFailed}>Only failed</Checkbox>
+            </td>
           </tr>
         </thead>
         {sessionScenarios && Object.keys(sessionScenarios).map((feature, i) => {
@@ -34,7 +47,7 @@ class ScenariosHistoryTable extends Component {
                 <th>{feature}</th>
               </tr>
               {sessionScenarios[feature].map((scenario, j) => {
-                if (onlyFailed && scenario.result !== 'failed') {
+                if (this.state.onlyFailed && scenario.result !== 'failed') {
                   return null;
                 }
                 return <SessionHistoryScenarioRow key={j} scenario={scenario}/>;
