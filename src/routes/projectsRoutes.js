@@ -33,13 +33,13 @@ function saveScenario(scenario, callback) {
 }
 
 router.get('/', (req, res) => {
-  Project.find({}, (projectSearchError, projects) => {
-    if (projectSearchError) {
-      log.error(projectSearchError);
-      res.send({ error: 'project_not_found' });
-    }
-    res.send({ projects });
-  });
+  Project.find({}).exec()
+    .then((projects) => {
+      res.send({ projects });
+    })
+    .catch((err) => {
+      res.send({ error: 'Failed to get projects list from DB', originalError: err });
+    });
 });
 
 router.post('/add', (req, res) => {
@@ -196,13 +196,20 @@ router.get('/:project', (req, res) => {
   });
 });
 
+/**
+ * Delete project by specified project ID
+ */
 router.delete('/:project', (req, res) => {
-  Project.findOneAndRemove({ projectId: req.params.project }, (err) => {
-    if (err) {
-      res.send({ error: 'failed_to_delete', project: req.params.project });
-    }
-    res.send({ project: { projectId: req.params.project, success: true } });
-  });
+  Project.findOneAndRemove({ projectId: req.params.project }).exec()
+    .then((project) => {
+      if (!project) {
+        return res.status(404).send({ error: `Project '${req.params.project}' does not exist` });
+      }
+      res.send({ project: { projectId: req.params.project, success: true } });
+    })
+    .catch((err) => {
+      res.send({ error: `Failed to delete project '${req.params.project}'`, originalError: err });
+    });
 });
 
 export default router;
