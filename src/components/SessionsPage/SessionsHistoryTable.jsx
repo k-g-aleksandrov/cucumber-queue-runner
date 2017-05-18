@@ -23,7 +23,7 @@ class SessionsHistoryTable extends Component {
     this.fetchSessionsHistory();
     this.timerID = setInterval(
       () => this.fetchSessionsHistory(),
-      60000
+      15000
     );
   }
 
