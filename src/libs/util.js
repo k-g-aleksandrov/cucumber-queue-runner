@@ -49,30 +49,6 @@ module.exports.scanRepository = function scanRepository(dir, done) {
   });
 };
 
-module.exports.removeDirectory = (dirPath, removeSelf = true) => {
-  let files;
-
-  try {
-    files = fs.readdirSync(dirPath);
-  } catch (e) {
-    return;
-  }
-  if (files.length > 0) {
-    for (let i = 0; i < files.length; i++) {
-      const filePath = `${dirPath}/${files[i]}`;
-
-      if (fs.statSync(filePath).isFile()) {
-        fs.unlinkSync(filePath);
-      } else {
-        this.removeDirectory(filePath);
-      }
-    }
-  }
-  if (removeSelf) {
-    fs.rmdirSync(dirPath);
-  }
-};
-
 module.exports.zipDirectory = (dir, name) => {
   const execFileSync = require('child_process').execFileSync;
 
