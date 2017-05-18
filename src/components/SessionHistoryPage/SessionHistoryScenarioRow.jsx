@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import Report from './Report';
 
 const propTypes = {
-  session: PropTypes.any,
   scenario: PropTypes.any
 };
 
@@ -24,7 +23,7 @@ class SessionHistoryScenarioRow extends Component {
   }
 
   render() {
-    const { session, scenario } = this.props;
+    const { scenario } = this.props;
 
     let backgroundColor = 'white';
 
@@ -47,7 +46,7 @@ class SessionHistoryScenarioRow extends Component {
     }
     return (
       <tr onClick={() => {
-        this.handleGetScenarioReportClick(session.details.sessionId, scenario.scenarioId);
+        this.handleGetScenarioReportClick();
       }}
         style={{ backgroundColor }}
       >
@@ -55,7 +54,7 @@ class SessionHistoryScenarioRow extends Component {
           <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
           {this.state.reportDisplayed && <Report report={scenario.report}/>}
         </td>
-        <td style={{ textAlign: 'center' }}>{scenario.executor}</td>
+        <td style={{ textAlign: 'center', width: '1px', whiteSpace: 'nowrap' }}>{scenario.executor}</td>
       </tr>
     );
   }

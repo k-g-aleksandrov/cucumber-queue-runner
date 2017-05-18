@@ -4,17 +4,14 @@ import PropTypes from 'prop-types';
 
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
-import Table from 'react-bootstrap/lib/Table';
 import Grid from 'react-bootstrap/lib/Grid';
-import Alert from 'react-bootstrap/lib/Alert';
 
 import Spinner from 'components/common/Spinner';
 import SessionDetails from './SessionDetails';
 import SessionStatusChart from './SessionStatusChart';
-import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
+import ScenariosHistoryTable from './ScenariosHistoryTable';
 
 import { fetchSessionsHistory } from 'redux/actions/sessionsActions';
-
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   router: PropTypes.any,
@@ -65,33 +62,7 @@ class SessionHistoryPage extends Component {
         </Row>
         <Row>
           <Col sm={12}>
-            <Table style={{ marginBottom: '0px' }}>
-              <thead>
-                <tr>
-                  <td colSpan={2}><h2>Session Scenarios</h2></td>
-                </tr>
-              </thead>
-              {session.scenarios && Object.keys(session.scenarios).map((feature, i) => {
-                return (
-                  <tbody key={i}>
-                    <tr>
-                      <th>{feature}</th>
-                    </tr>
-                    {session.scenarios[feature].map((scenario, j) => {
-                      return <SessionHistoryScenarioRow key={j} session={session} scenario={scenario}/>;
-                    })}
-                  </tbody>
-                );
-              })}
-
-              {!session.scenarios &&
-              <tbody>
-                <tr>
-                  <Alert bsStyle='info'>No failed scenarios</Alert>
-                </tr>
-              </tbody>
-              }
-            </Table>
+            <ScenariosHistoryTable sessionScenarios={session.scenarios} onlyFailed={false}/>
           </Col>
         </Row>
       </Grid>
