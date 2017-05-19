@@ -55,8 +55,7 @@ router.post('/add', (req, res) => {
   newProject.save((err) => {
     if (err) {
       log.error(err);
-      res.statusCode = 500;
-      return res.send({ error: err });
+      return res.status(500).send({ error: err });
     }
     res.redirect('/projects');
   });
@@ -80,24 +79,18 @@ router.get('/:project/scan', (req, res) => {
       return res.send({ error: `Can\'t find project with id ${projectId}` });
     }
 
-    let workingCopyPath = project.workingCopyPath;
+    const workingCopyPath = req.query.path ? req.query.path : project.workingCopyPath;
 
-    if (req.query.path) {
-      log.debug(`Working copy path '${workingCopyPath}' will be overridden by query parameter to '${req.query.path}'`);
-      workingCopyPath = req.query.path;
-    }
     if (!workingCopyPath) {
-      res.statusCode = 400;
-      return res.send({ error: 'Repository path should be specified to scan feature files' });
+      return res.status(400).send({ error: 'Repository path should be specified to scan feature files' });
     }
 
     const featuresRoot = project.featuresRoot;
 
     util.scanRepository(workingCopyPath, (scanRepositoryError, results) => {
       if (scanRepositoryError) {
-        res.statusCode = 400;
         log.error(scanRepositoryError);
-        return res.send({ error: `Path not found: ${workingCopyPath}` });
+        return res.status(400).send({ error: `Path not found: ${workingCopyPath}` });
       }
 
       Scenario.remove({ project: projectId }, (removeScenariosError) => {
@@ -139,9 +132,8 @@ router.get('/:project/scan', (req, res) => {
                       if (saveScenarioError.message.indexOf('duplicate key') > -1) {
                         log.debug(`Scenario ${child.name} already exists in DB, skipped`);
                       } else {
-                        res.statusCode = 500;
                         log.error('Internal error(%d): %s', res.statusCode, saveScenarioError.message);
-                        return res.send({ error: 'Server error' });
+                        return res.status(500).send({ error: 'Server error' });
                       }
                     }
                   });
@@ -163,9 +155,8 @@ router.get('/:project/scan', (req, res) => {
                   if (saveScenarioError.message.indexOf('duplicate key') > -1) {
                     log.debug(`Scenario ${child.name} already exists in DB, skipped`);
                   } else {
-                    res.statusCode = 500;
                     log.error(`Internal error(${res.statusCode}): ${saveScenarioError.message}`);
-                    return res.send({ error: 'Server error' });
+                    return res.status(500).send({ error: 'Server error' });
                   }
                 }
               });

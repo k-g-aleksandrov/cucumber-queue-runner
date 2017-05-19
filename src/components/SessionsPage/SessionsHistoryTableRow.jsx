@@ -34,7 +34,8 @@ class SessionsHistoryTableRow extends Component {
           </span><br/>
           <Link to={`/sessions/history/${details.sessionId}`}>
             {details.sessionId}
-          </Link>
+          </Link>&nbsp;
+          {details.jenkinsLink && <span>(<a href={details.jenkinsLink} target='_blank'>in Jenkins</a>)</span>}
         </td>
         <td style={{ verticalAlign: 'center' }}>
           {moment(new Date()).to(moment(details.endDate))}

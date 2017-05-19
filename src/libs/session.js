@@ -63,7 +63,8 @@ class Session {
       sessionId: this.sessionId,
       startDate: this.startDate,
       project: this.project,
-      scenariosFilter: this.scenariosFilter
+      scenariosFilter: this.scenariosFilter,
+      jenkinsLink: this.jenkinsLink
     };
   }
 

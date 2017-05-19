@@ -56,7 +56,8 @@ class SessionRow extends Component {
           </span><br/>
           <Link to={`/sessions/${details.sessionId}`}>
             {details.sessionId}
-          </Link>
+          </Link>&nbsp;
+          {details.jenkinsLink && <span>(<a href={details.jenkinsLink} target='_blank'>in Jenkins</a>)</span>}
         </td>
         <td style={{ verticalAlign: 'center' }} rowSpan='2'>
           {moment(new Date()).to(moment(details.startDate))}
