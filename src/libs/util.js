@@ -1,7 +1,5 @@
-import fs from 'fs';
-
-import logTemplate from 'libs/log';
-const log = logTemplate(module);
+import dive from 'dive';
+import path from 'path';
 
 module.exports.isGitUrl = function isGitUrl(str) {
   const re = /(?:git|ssh|https?|git@[\w.]+):(?:\/\/)?[\w.@:\/~_-]+\.git(?:\/?|#[\d\w.\-_]+?)$/;
@@ -19,33 +17,36 @@ module.exports.generateGUID = function generateGUID() {
   return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
 };
 
-module.exports.scanRepository = function scanRepository(dir, done) {
-  let results = [];
+function recursiveDirectoryScan(filename, dir, callback, complete) {
+  const results = [];
 
-  fs.readdir(dir, (err, list) => {
+  return dive(dir, (err, file) => {
     if (err) {
-      return done(err);
+      return callback(err);
     }
-    let i = 0;
 
-    (function next() {
-      let file = list[i++];
-      if (!file) return done(null, results);
-      file = `${dir}/${file}`;
-      fs.stat(file, (err, stat) => {
-        if (stat && stat.isDirectory()) {
-          scanRepository(file, (err, res) => {
-            results = results.concat(res);
-            next();
-          });
-        } else {
-          if (file.indexOf('src') > -1 && file.endsWith('.feature')) {
-            results.push(file);
-          }
-          return next();
-        }
-      });
-    })();
+    const condition = filename.constructor.name === 'RegExp'
+      ? path.relative(dir, file).match(filename)
+      : path.relative(dir, file) === filename;
+
+    if (condition || filename === '*') {
+      results.push(file);
+      return callback(null, file);
+    }
+  }, () => {
+    return complete(results);
+  });
+}
+
+module.exports.scanRepository = function scanRepository(directory) {
+  return new Promise((resolve) => {
+    recursiveDirectoryScan(/src\/.+\/.+\.feature$/, directory, (err) => {
+      if (err) {
+        console.log(`directory ${directory} not found`);
+      }
+    }, (results) => {
+      return resolve(results);
+    });
   });
 };
 

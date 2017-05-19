@@ -63,8 +63,7 @@ router.post('/add', (req, res) => {
 
 router.get('/:project/scan', (req, res) => {
   if (!req.params.project) {
-    res.statusCode = 400;
-    return res.send({ error: 'Please specify project name' });
+    return res.status(400).send({ error: 'Project name was not specified' });
   }
 
   const projectId = req.params.project;
@@ -76,96 +75,98 @@ router.get('/:project/scan', (req, res) => {
     }
 
     if (!project) {
-      return res.send({ error: `Can\'t find project with id ${projectId}` });
+      return res.send({ error: `Project '${projectId}' was not found` });
     }
 
     const workingCopyPath = req.query.path ? req.query.path : project.workingCopyPath;
 
     if (!workingCopyPath) {
-      return res.status(400).send({ error: 'Repository path should be specified to scan feature files' });
+      return res.status(400).send({ error: 'Repository path not set for project' });
     }
 
     const featuresRoot = project.featuresRoot;
 
-    util.scanRepository(workingCopyPath, (scanRepositoryError, results) => {
-      if (scanRepositoryError) {
-        log.error(scanRepositoryError);
-        return res.status(400).send({ error: `Path not found: ${workingCopyPath}` });
-      }
+    util.scanRepository(workingCopyPath)
+      .then((features) => {
+        Scenario.remove({ project: projectId }, (removeScenariosError) => {
+          if (removeScenariosError) {
+            log.error(removeScenariosError);
+          }
+          for (const result of features) {
+            const parser = new gherkin.Parser();
+            const buf = fs.readFileSync(result, 'utf8');
+            const parts = result.split(featuresRoot);
+            const classpath = parts.pop();
+            const project = projectId;
+            const gherkinDocument = parser.parse(buf);
+            const feature = gherkinDocument.feature;
 
-      Scenario.remove({ project: projectId }, (removeScenariosError) => {
-        if (removeScenariosError) {
-          log.error(removeScenariosError);
-        }
-        for (const result of results) {
-          const parser = new gherkin.Parser();
-          const buf = fs.readFileSync(result, 'utf8');
-          const parts = result.split(featuresRoot);
-          const classpath = parts.pop();
-          const project = projectId;
-          const gherkinDocument = parser.parse(buf);
-          const feature = gherkinDocument.feature;
+            for (const child of feature.children) {
+              if (child.type === 'ScenarioOutline') {
+                const examples = child.examples;
 
-          for (const child of feature.children) {
-            if (child.type === 'ScenarioOutline') {
-              const examples = child.examples;
+                for (const examplesBlock of examples) {
+                  for (const example of examplesBlock.tableBody) {
+                    let paramsString = ':';
 
-              for (const examplesBlock of examples) {
-                for (const example of examplesBlock.tableBody) {
-                  let paramsString = ':';
-
-                  for (const exampleParam of example.cells) {
-                    paramsString += `${exampleParam.value}:`;
-                  }
-                  const scenarioObject = {
-                    project,
-                    classpath,
-                    featureName: feature.name,
-                    scenarioName: child.name,
-                    scenarioLine: example.location.line,
-                    exampleParams: paramsString,
-                    tags: child.tags.concat(examplesBlock.tags)
-                  };
-
-                  saveScenario(scenarioObject, (saveScenarioError, data) => {
-                    if (saveScenarioError) {
-                      if (saveScenarioError.message.indexOf('duplicate key') > -1) {
-                        log.debug(`Scenario ${child.name} already exists in DB, skipped`);
-                      } else {
-                        log.error('Internal error(%d): %s', res.statusCode, saveScenarioError.message);
-                        return res.status(500).send({ error: 'Server error' });
-                      }
+                    for (const exampleParam of example.cells) {
+                      paramsString += `${exampleParam.value}:`;
                     }
-                  });
-                }
-              }
-            } else if (child.type !== 'Background') {
-              const scenarioObject = {
-                project,
-                classpath,
-                featureName: feature.name,
-                scenarioName: child.name,
-                scenarioLine: child.location.line,
-                exampleParams: null,
-                tags: child.tags
-              };
+                    const scenarioObject = {
+                      project,
+                      classpath,
+                      featureName: feature.name,
+                      scenarioName: child.name,
+                      scenarioLine: example.location.line,
+                      exampleParams: paramsString,
+                      tags: child.tags.concat(examplesBlock.tags)
+                    };
 
-              saveScenario(scenarioObject, (saveScenarioError) => {
-                if (saveScenarioError) {
-                  if (saveScenarioError.message.indexOf('duplicate key') > -1) {
-                    log.debug(`Scenario ${child.name} already exists in DB, skipped`);
-                  } else {
-                    log.error(`Internal error(${res.statusCode}): ${saveScenarioError.message}`);
-                    return res.status(500).send({ error: 'Server error' });
+                    saveScenario(scenarioObject, (saveScenarioError) => {
+                      if (saveScenarioError) {
+                        if (saveScenarioError.message.indexOf('duplicate key') > -1) {
+                          log.debug(`Scenario ${child.name} already exists in DB, skipped`);
+                        } else {
+                          log.error('Internal error(%d): %s', res.statusCode, saveScenarioError.message);
+                          return res.status(500).send({ error: 'Server error' });
+                        }
+                      }
+                    });
                   }
                 }
-              });
+              } else if (child.type !== 'Background') {
+                const scenarioObject = {
+                  project,
+                  classpath,
+                  featureName: feature.name,
+                  scenarioName: child.name,
+                  scenarioLine: child.location.line,
+                  exampleParams: null,
+                  tags: child.tags
+                };
+
+                saveScenario(scenarioObject, (saveScenarioError) => {
+                  if (saveScenarioError) {
+                    if (saveScenarioError.message.indexOf('duplicate key') > -1) {
+                      log.debug(`Scenario ${child.name} already exists in DB, skipped`);
+                    } else {
+                      log.error(`Internal error(${res.statusCode}): ${saveScenarioError.message}`);
+                      return res.status(500).send({ error: 'Server error' });
+                    }
+                  }
+                });
+              }
             }
           }
+          res.send({ project: { projectId, features } });
+        });
+      })
+      .catch((err) => {
+        if (err) {
+          log.error(err);
+          return res.status(400).send({ error: `Path not found: ${workingCopyPath}` });
         }
-        res.send({ project: { projectId, results } });
       });
-    });
   });
 });
 
