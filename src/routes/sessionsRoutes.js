@@ -43,7 +43,7 @@ router.get('/history', (req, res) => {
   const histories = SessionHistory.find({}, null, { limit: 30, sort: { 'details.endDate': -1 } });
 
   histories.exec((err, sessions) => {
-    if (err) {
+    if (err || !sessions) {
       res.send({ error: 'no history' });
     }
     responseObject.sessionsHistory = [];
