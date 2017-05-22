@@ -2,6 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
+import Row from 'react-bootstrap/lib/Row';
+import Col from 'react-bootstrap/lib/Col';
+
 const propTypes = {
   step: PropTypes.any,
   type: PropTypes.any
@@ -39,20 +42,20 @@ function ReportStep(props) {
 
   const errorMessage = step.result.error_message
     ? (
-      <pre className='container-fluid' style={{ backgroundColor: '#eee', padding: 0, border: '1px solid #ccc' }}>
+      <pre className='container-fluid'
+        style={{ backgroundColor: '#eee', margin: '16px', border: '1px solid #ccc' }}
+      >
         {step.result.error_message}
       </pre>
     )
     : null;
 
   return (
-    <div className={`row ${stepClass}`} style={{ margin: 0 }}>
-      <div className='col-md-10'>
-        {rows}
-      </div>
-      <div className='col-md-2'>{stepDuration}</div>
+    <Row className={`${stepClass}`} style={{ margin: 0 }}>
+      <Col md={10}>{rows}</Col>
+      <Col md={2} style={{ textAlign: 'center' }}>{stepDuration}</Col>
       {errorMessage}
-    </div>
+    </Row>
   );
 }
 

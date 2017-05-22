@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import Table from 'react-bootstrap/lib/Table';
+import Grid from 'react-bootstrap/lib/Grid';
+import Row from 'react-bootstrap/lib/Row';
+import Col from 'react-bootstrap/lib/Col';
 import Alert from 'react-bootstrap/lib/Alert';
 
 import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
@@ -44,41 +46,43 @@ class ScenariosHistoryTable extends Component {
       }
     }
     return (
-      <Table style={{ marginBottom: '0px' }}>
-        <thead>
-          <tr>
-            <td colSpan={2}>
-              <h2 style={{ display: 'inline' }}>
-                {this.state.onlyFailed ? 'Failed Scenarios' : 'All Scenarios'}
-              </h2>&nbsp;
-              (<a onClick={this.handleOnlyFailedCheck}>{this.state.onlyFailed ? 'Show all' : 'Show failed'}</a>)
-            </td>
-          </tr>
-        </thead>
-        {sessionScenariosToRender && Object.keys(sessionScenariosToRender).map((feature, i) => {
-          return (
-            <tbody key={i}>
-              <tr>
-                <th>{feature}</th>
-              </tr>
-              {sessionScenariosToRender[feature].map((scenario, j) => {
-                if (this.state.onlyFailed && scenario.result !== 'failed') {
-                  return null;
-                }
-                return <SessionHistoryScenarioRow key={j} scenario={scenario}/>;
-              })}
-            </tbody>
-          );
-        })}
+      <Grid fluid>
+        <Row>
+          <Col>
+            <h2 style={{ display: 'inline' }}>
+              {this.state.onlyFailed ? 'Failed Scenarios' : 'All Scenarios'}
+            </h2>&nbsp;
+            (<a onClick={this.handleOnlyFailedCheck}>{this.state.onlyFailed ? 'Show all' : 'Show failed'}</a>)
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            {sessionScenariosToRender && Object.keys(sessionScenariosToRender).map((feature, i) => {
+              return (
+                <Grid fluid key={i}>
+                  <Row>
+                    <Col><h4>{feature}</h4></Col>
+                  </Row>
+                  {sessionScenariosToRender[feature].map((scenario, j) => {
+                    if (this.state.onlyFailed && scenario.result !== 'failed') {
+                      return null;
+                    }
+                    return <SessionHistoryScenarioRow key={j} scenario={scenario}/>;
+                  })}
+                </Grid>
+              );
+            })}
+          </Col>
+        </Row>
 
-        {!sessionScenarios &&
-        <tbody>
-          <tr>
+        {!sessionScenariosToRender || !Object.keys(sessionScenariosToRender).length &&
+        <Row>
+          <Col>
             <Alert bsStyle='info'>No failed scenarios</Alert>
-          </tr>
-        </tbody>
+          </Col>
+        </Row>
         }
-      </Table>
+      </Grid>
     );
   }
 }
