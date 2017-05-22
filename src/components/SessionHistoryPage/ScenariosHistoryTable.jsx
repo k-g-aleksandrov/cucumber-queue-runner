@@ -35,8 +35,10 @@ class ScenariosHistoryTable extends Component {
         <thead>
           <tr>
             <td colSpan={2}>
-              <h2>Session Scenarios</h2>
-              <Checkbox onChange={this.handleOnlyFailedCheck} checked={this.state.onlyFailed}>Only failed</Checkbox>
+              <h2 style={{ display: 'inline' }}>
+                {this.state.onlyFailed ? 'Failed Scenarios History' : 'Scenarios History'}
+              </h2>&nbsp;
+              (<a onClick={this.handleOnlyFailedCheck}>{this.state.onlyFailed ? 'Show all' : 'Only failed'}</a>)
             </td>
           </tr>
         </thead>
