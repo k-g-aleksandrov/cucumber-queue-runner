@@ -40,18 +40,19 @@ router.get('/', (req, res) => {
 
 router.get('/history', (req, res) => {
   const responseObject = {};
-  const histories = SessionHistory.find({}, null, { limit: 30, sort: { 'details.endDate': -1 } });
+  const histories = SessionHistory.find({}).sort({ 'details.endDate': -1 }).limit(10);
 
-  histories.exec((err, sessions) => {
-    if (err || !sessions) {
-      res.send({ error: 'no history' });
-    }
-    responseObject.sessionsHistory = [];
-    for (const session of sessions) {
-      responseObject.sessionsHistory.push(session);
-    }
-    res.send(responseObject);
-  });
+  histories.exec()
+    .then((sessions) => {
+      responseObject.sessionsHistory = [];
+      for (const session of sessions) {
+        responseObject.sessionsHistory.push(session);
+      }
+      res.send(responseObject);
+    })
+    .catch((err) => {
+      log.error(err);
+    });
 });
 
 router.get('/history/:sessionId/zip', (req, res) => {
