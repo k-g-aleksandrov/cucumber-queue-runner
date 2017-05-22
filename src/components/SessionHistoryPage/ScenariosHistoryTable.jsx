@@ -47,7 +47,7 @@ class ScenariosHistoryTable extends Component {
     }
     return (
       <Grid fluid>
-        <Row>
+        <Row style={{ paddingBottom: '4px' }}>
           <Col>
             <h2 style={{ display: 'inline' }}>
               {this.state.onlyFailed ? 'Failed Scenarios' : 'All Scenarios'}
@@ -59,8 +59,8 @@ class ScenariosHistoryTable extends Component {
           <Col>
             {sessionScenariosToRender && Object.keys(sessionScenariosToRender).map((feature, i) => {
               return (
-                <Grid fluid key={i}>
-                  <Row>
+                <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
+                  <Row style={{ margin: '2px' }}>
                     <Col><h4>{feature}</h4></Col>
                   </Row>
                   {sessionScenariosToRender[feature].map((scenario, j) => {
