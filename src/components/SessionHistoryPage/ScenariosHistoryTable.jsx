@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import Table from 'react-bootstrap/lib/Table';
 import Alert from 'react-bootstrap/lib/Alert';
-import Checkbox from 'react-bootstrap/lib/Checkbox';
 
 import SessionHistoryScenarioRow from './SessionHistoryScenarioRow';
 
@@ -30,25 +29,39 @@ class ScenariosHistoryTable extends Component {
   render() {
     const { sessionScenarios } = this.props;
 
+    let sessionScenariosToRender = sessionScenarios;
+
+    if (this.state.onlyFailed) {
+      sessionScenariosToRender = {};
+      for (const feature of Object.keys(sessionScenarios)) {
+        const featureScenarios = sessionScenarios[feature].filter((scenario) => {
+          return scenario.result === 'failed';
+        });
+
+        if (featureScenarios && featureScenarios.length) {
+          sessionScenariosToRender[feature] = featureScenarios;
+        }
+      }
+    }
     return (
       <Table style={{ marginBottom: '0px' }}>
         <thead>
           <tr>
             <td colSpan={2}>
               <h2 style={{ display: 'inline' }}>
-                {this.state.onlyFailed ? 'Failed Scenarios History' : 'Scenarios History'}
+                {this.state.onlyFailed ? 'Failed Scenarios' : 'All Scenarios'}
               </h2>&nbsp;
-              (<a onClick={this.handleOnlyFailedCheck}>{this.state.onlyFailed ? 'Show all' : 'Only failed'}</a>)
+              (<a onClick={this.handleOnlyFailedCheck}>{this.state.onlyFailed ? 'Show all' : 'Show failed'}</a>)
             </td>
           </tr>
         </thead>
-        {sessionScenarios && Object.keys(sessionScenarios).map((feature, i) => {
+        {sessionScenariosToRender && Object.keys(sessionScenariosToRender).map((feature, i) => {
           return (
             <tbody key={i}>
               <tr>
                 <th>{feature}</th>
               </tr>
-              {sessionScenarios[feature].map((scenario, j) => {
+              {sessionScenariosToRender[feature].map((scenario, j) => {
                 if (this.state.onlyFailed && scenario.result !== 'failed') {
                   return null;
                 }
