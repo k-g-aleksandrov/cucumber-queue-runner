@@ -34,13 +34,13 @@ class SessionStatusChart extends Component {
             sessionBriefStatus.skippedCount
           ],
           backgroundColor: [
-            'lightgreen',
-            'tomato',
+            '#92DD96',
+            '#F2928C',
             'lightgray'
           ],
           hoverBackgroundColor: [
-            'lightgreen',
-            'tomato',
+            '#92DD96',
+            '#F2928C',
             'lightgray'
           ]
         }

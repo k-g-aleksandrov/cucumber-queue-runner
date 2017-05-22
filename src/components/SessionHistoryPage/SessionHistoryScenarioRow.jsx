@@ -32,9 +32,9 @@ class SessionHistoryScenarioRow extends Component {
     let backgroundColor = 'white';
 
     if (scenario.result === 'passed') {
-      backgroundColor = 'lightgreen';
+      backgroundColor = '#92DD96';
     } else if (scenario.result === 'failed') {
-      backgroundColor = 'tomato';
+      backgroundColor = '#F2928C';
     } else if (scenario.result === 'skipped') {
       backgroundColor = 'lightgray';
     }

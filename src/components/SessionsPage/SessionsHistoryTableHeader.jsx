@@ -8,8 +8,8 @@ class SessionsHistoryTableHeader extends Component {
         <th>Session</th>
         <th>Finished On</th>
         <th>Duration</th>
-        <th style={{ textAlign: 'center', backgroundColor: 'lightgreen' }}>Passed</th>
-        <th style={{ textAlign: 'center', backgroundColor: 'tomato' }}>Failed</th>
+        <th style={{ textAlign: 'center', backgroundColor: '#92DD96' }}>Passed</th>
+        <th style={{ textAlign: 'center', backgroundColor: '#F2928C' }}>Failed</th>
         <th style={{ textAlign: 'center', backgroundColor: 'lightgray' }}>Skipped</th>
         <th style={{ textAlign: 'center' }}>Pass Rate</th>
       </tr>

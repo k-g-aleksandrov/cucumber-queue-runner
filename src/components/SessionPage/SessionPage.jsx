@@ -98,15 +98,15 @@ class SessionPage extends Component {
           backgroundColor: [
             '#8AF',
             '#F5F28F',
-            'lightgreen',
-            'tomato',
+            '#92DD96',
+            '#F2928C',
             'lightgray'
           ],
           hoverBackgroundColor: [
             '#8AF',
             '#F5F28F',
-            'lightgreen',
-            'tomato',
+            '#92DD96',
+            '#F2928C',
             'lightgray'
           ]
         }
