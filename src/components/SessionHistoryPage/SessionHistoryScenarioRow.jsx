@@ -42,7 +42,7 @@ class SessionHistoryScenarioRow extends Component {
     if (scenario.result === 'skipped') {
       return (
         <Row style={{ backgroundColor }}>
-          <Col>
+          <Col style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}>
             <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
           </Col>
         </Row>
@@ -51,15 +51,22 @@ class SessionHistoryScenarioRow extends Component {
     return (
       <Row onClick={() => {
         this.handleGetScenarioReportClick();
-      }} style={{ backgroundColor, padding: '4px' }}
+      }} style={{ backgroundColor, padding: 0 }}
       >
         <Col>
           <Grid fluid>
-            <Row>
-              <Col md={10}>
+            <Row style={{ padding: 0 }}>
+              <Col md={10} style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}>
                 <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
               </Col>
-              <Col md={2} style={{ textAlign: 'center' }}>{scenario.executor}</Col>
+              <Col md={2}
+                style={{
+                  textAlign: 'center',
+                  padding: '8px',
+                  borderTop: '1px solid #ddd',
+                  borderLeft: '1px solid #ddd'
+                }}
+              >{scenario.executor}</Col>
             </Row>
             {this.state.reportDisplayed && <Report report={scenario.report}/>}
           </Grid>

@@ -31,7 +31,7 @@ function Report(props) {
           }
 
           return (
-            <Grid fluid style={{ paddingTop: '4px' }} key={i}
+            <Grid fluid style={{ paddingTop: '4px', paddingBottom: '8px' }} key={i}
               onClick={(e) => e.stopPropagation()}
             >
               {rep.elements[scenarioElementsIndex].before.map((before, j) => {

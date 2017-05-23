@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Report from './Report';
+import Report from 'components/SessionHistoryPage/Report';
+
+import Grid from 'react-bootstrap/lib/Grid';
+import Row from 'react-bootstrap/lib/Row';
+import Col from 'react-bootstrap/lib/Col';
 
 const propTypes = {
   session: PropTypes.any,
@@ -50,25 +54,38 @@ class DoneScenarioRow extends Component {
 
     if (scenario.result === 'skipped') {
       return (
-        <tr style={{ backgroundColor }}>
-          <td>
+        <Row style={{ backgroundColor }}>
+          <Col style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}>
             <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
-          </td>
-        </tr>
+          </Col>
+        </Row>
       );
     }
     return (
-      <tr onClick={() => {
+      <Row onClick={() => {
         this.handleGetScenarioReportClick(session.details.sessionId, scenario.scenarioId);
       }}
         style={{ backgroundColor }}
       >
-        <td>
-          <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
-          {this.state.reportDisplayed && <Report report={this.state.report}/>}
-        </td>
-        <td style={{ textAlign: 'center' }}>{scenario.executor}</td>
-      </tr>
+        <Col>
+          <Grid fluid>
+            <Row style={{ padding: 0 }}>
+              <Col md={10} style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}>
+                <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
+              </Col>
+              <Col md={2}
+                style={{
+                  textAlign: 'center',
+                  padding: '8px',
+                  borderTop: '1px solid #ddd',
+                  borderLeft: '1px solid #ddd'
+                }}
+              >{scenario.executor}</Col>
+            </Row>
+            {this.state.reportDisplayed && <Report report={this.state.report}/>}
+          </Grid>
+        </Col>
+      </Row>
     );
   }
 }

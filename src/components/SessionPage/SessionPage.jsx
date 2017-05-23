@@ -79,7 +79,7 @@ class SessionPage extends Component {
     const activeTab = queryParams.tab ? queryParams.tab : 'queue';
 
     return (
-      <Grid fluid>
+      <Grid fluid style={{ paddingBottom: '20px' }}>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
           <Col md={4}>
             <Table>
@@ -196,20 +196,24 @@ class SessionPage extends Component {
                       </Table>
                     </Tab.Pane>
                     <Tab.Pane eventKey='done'>
-                      <Table bordered style={{ marginBottom: '0px' }}>
-                        {Object.keys(session.status.done).map((feature, i) => {
-                          return (
-                            <tbody key={i}>
-                              <tr>
-                                <th>{feature}</th>
-                              </tr>
-                              {session.status.done[feature].map((scenario, j) => {
-                                return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
-                              })}
-                            </tbody>
-                          );
-                        })}
-                      </Table>
+                      <Grid fluid>
+                        <Row>
+                          <Col>
+                            {session.status.done && Object.keys(session.status.done).map((feature, i) => {
+                              return (
+                                <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
+                                  <Row style={{ margin: '2px' }}>
+                                    <Col><h4>{feature}</h4></Col>
+                                  </Row>
+                                  {session.status.done[feature].map((scenario, j) => {
+                                    return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
+                                  })}
+                                </Grid>
+                              );
+                            })}
+                          </Col>
+                        </Row>
+                      </Grid>
                     </Tab.Pane>
                   </Tab.Content>
                 </Col>
