@@ -80,14 +80,6 @@ class Session {
     };
   }
 
-  getStatistics() {
-    const queueCount = this.getScenariosCount(Session.STATE_QUEUE);
-    const inProgressCount = this.getScenariosCount(Session.STATE_IN_PROGRESS);
-    const doneCount = this.getScenariosCount(Session.STATE_DONE);
-
-    return `In queue - ${queueCount}, in progress - ${inProgressCount}, done - ${doneCount}`;
-  }
-
   getDoneScenariosCount(countFilter) {
     let resultCount = 0;
 

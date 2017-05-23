@@ -22,6 +22,8 @@ class SessionStatusChart extends Component {
 
     const chartData = {
       labels: [
+        `Queue (${sessionBriefStatus.queueCount})`,
+        `Progress (${sessionBriefStatus.progressCount})`,
         `Passed (${sessionBriefStatus.passedCount})`,
         `Failed (${sessionBriefStatus.failedCount})`,
         `Skipped (${sessionBriefStatus.skippedCount})`
@@ -29,16 +31,22 @@ class SessionStatusChart extends Component {
       datasets: [
         {
           data: [
+            sessionBriefStatus.queueCount,
+            sessionBriefStatus.progressCount,
             sessionBriefStatus.passedCount,
             sessionBriefStatus.failedCount,
             sessionBriefStatus.skippedCount
           ],
           backgroundColor: [
+            '#8AF',
+            '#F5F28F',
             '#92DD96',
             '#F2928C',
             'lightgray'
           ],
           hoverBackgroundColor: [
+            '#8AF',
+            '#F5F28F',
             '#92DD96',
             '#F2928C',
             'lightgray'

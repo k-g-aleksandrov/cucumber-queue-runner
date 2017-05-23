@@ -17,11 +17,11 @@ import Grid from 'react-bootstrap/lib/Grid';
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
 import Spinner from 'components/common/Spinner';
+import SessionStatusChart from 'components/common/SessionStatusChart';
+
 import DoneScenarioRow from './DoneScenarioRow';
 
 import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
-
-let Doughnut;
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -40,8 +40,6 @@ class SessionPage extends Component {
   }
 
   componentDidMount() {
-    Doughnut = require('react-chartjs-2').Doughnut;
-
     this.fetchSessionDetails();
 
     this.timerID = setInterval(
@@ -77,41 +75,6 @@ class SessionPage extends Component {
     if (!session || !session.status || !session.details) {
       return <Spinner/>;
     }
-
-    const chartData = {
-      labels: [
-        `Queue (${session.status.queue.length})`,
-        `In Progress (${session.status.inProgress.length})`,
-        `Passed (${session.status.passed.length})`,
-        `Failed (${session.status.failed.length})`,
-        `Skipped (${session.status.skipped.length})`
-      ],
-      datasets: [
-        {
-          data: [
-            session.status.queue.length,
-            session.status.inProgress.length,
-            session.status.passed.length,
-            session.status.failed.length,
-            session.status.skipped.length
-          ],
-          backgroundColor: [
-            '#8AF',
-            '#F5F28F',
-            '#92DD96',
-            '#F2928C',
-            'lightgray'
-          ],
-          hoverBackgroundColor: [
-            '#8AF',
-            '#F5F28F',
-            '#92DD96',
-            '#F2928C',
-            'lightgray'
-          ]
-        }
-      ]
-    };
 
     const activeTab = queryParams.tab ? queryParams.tab : 'queue';
 
@@ -157,7 +120,7 @@ class SessionPage extends Component {
           </Col>
           <Col md={8}>
             <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
-            {Doughnut !== undefined && <Doughnut data={chartData} height={70}/>}
+            <SessionStatusChart sessionBriefStatus={session.briefStatus}/>
           </Col>
         </Row>
         <Row>

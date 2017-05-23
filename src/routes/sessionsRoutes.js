@@ -61,8 +61,10 @@ router.get('/history/:sessionId/zip', (req, res) => {
   fs.stat(file, (err) => {
     if (err) {
       if (err.code === 'ENOENT') {
-        res.statusCode = 404;
-        return res.send({ error: 'not_found', message: `no reports.zip for session ${req.params.sessionId}` });
+        return res.status(404).send({
+          error: 'not_found',
+          message: `no reports.zip for session ${req.params.sessionId}`
+        });
       }
 
       throw err;
@@ -82,13 +84,11 @@ router.get('/history/:sessionId/zip', (req, res) => {
 
 router.get('/start', (req, res) => {
   if (!req.query.project) {
-    res.statusCode = 400;
-    return res.send({ error: 'no_project_specified' });
+    return res.status(400).send({ error: 'no_project_specified' });
   }
 
   if (!req.query.scope) {
-    res.statusCode = 400;
-    return res.send({ error: 'no_scope_specified' });
+    return res.status(400).send({ error: 'no_scope_specified' });
   }
 
   const filter = {};
@@ -97,8 +97,7 @@ router.get('/start', (req, res) => {
 
   if (req.query.scope === 'custom') {
     if (!req.query.tags) {
-      res.statusCode = 400;
-      return res.send({ error: 'no_custom_tags_specified' });
+      return res.status(400).send({ error: 'no_custom_tags_specified' });
     }
     filter.tags = req.query.tags.split(',');
   }
@@ -218,9 +217,10 @@ router.get('/:sessionId', (req, res) => {
 
   if (currentSession) {
     const details = currentSession.getSessionDetails();
+    const briefStatus = currentSession.getBriefStatus();
     const status = currentSession.getStatus();
 
-    res.send({ session: { sessionId: req.params.sessionId, details, status } });
+    res.send({ session: { sessionId: req.params.sessionId, details, briefStatus, status } });
   } else {
     res.send(getSessionLostObject(req.params.sessionId));
   }

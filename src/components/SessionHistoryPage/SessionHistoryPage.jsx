@@ -8,7 +8,7 @@ import Grid from 'react-bootstrap/lib/Grid';
 
 import Spinner from 'components/common/Spinner';
 import SessionDetails from './SessionDetails';
-import SessionStatusChart from './SessionStatusChart';
+import SessionStatusChart from '../common/SessionStatusChart';
 import ScenariosHistoryTable from './ScenariosHistoryTable';
 
 import { fetchSessionsHistory } from 'redux/actions/sessionsActions';

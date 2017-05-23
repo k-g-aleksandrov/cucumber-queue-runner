@@ -44,6 +44,7 @@ export default function (state = initialState, action) {
           [action.meta.sessionId]: {
             ...state.availableSessions[action.meta.sessionId],
             details: action.payload.session.details,
+            briefStatus: action.payload.session.briefStatus,
             status: action.payload.session.status,
             error: action.payload.session.error
           }
