@@ -17,6 +17,7 @@ import Grid from 'react-bootstrap/lib/Grid';
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
 import Spinner from 'components/common/Spinner';
+import SessionDetails from 'components/common/SessionDetails';
 import SessionStatusChart from 'components/common/SessionStatusChart';
 
 import DoneScenarioRow from './DoneScenarioRow';
@@ -82,41 +83,7 @@ class SessionPage extends Component {
       <Grid fluid style={{ paddingBottom: '20px' }}>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
           <Col md={4}>
-            <Table>
-              <thead>
-                <tr>
-                  <td colSpan={2}><h2>Session Details</h2></td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>Project</th>
-                  <td>{session.details.project}</td>
-                </tr>
-                <tr>
-                  <th>Started</th>
-                  <td>
-                    {moment(new Date()).to(moment(session.details.startDate))}
-                    <br/>
-                    <span style={{ fontSize: '90%', fontStyle: 'italic' }}>
-                      {moment(session.details.startDate).format('DD.MM.YYYY HH:mm:ss')}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <th>Session ID</th>
-                  <td>{session.details.sessionId}</td>
-                </tr>
-                <tr>
-                  <th>Scope</th>
-                  <td>
-                    {session.details.scenariosFilter.scope === 'custom'
-                      ? `custom - ${session.details.scenariosFilter.tags}`
-                      : session.details.scenariosFilter.scope}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
+            <SessionDetails sessionDetails={session.details} history={false}/>
           </Col>
           <Col md={8}>
             <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
@@ -170,30 +137,34 @@ class SessionPage extends Component {
                       </Table>
                     </Tab.Pane>
                     <Tab.Pane eventKey='progress'>
-                      <Table bordered style={{ marginBottom: '0px' }}>
-                        <thead>
-                          <tr>
-                            <th>Scenario</th>
-                            <th>Taken By</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {session.status.inProgress.map((inProgressItem, i) => {
-                            return (
-                              <tr key={i} style={{ backgroundColor: 'lightgray' }}>
-                                <td>
-                                  <span style={{ fontWeight: 'bold' }}>{inProgressItem.featureName}:&nbsp;</span>
-                                  <span>{`${inProgressItem.scenarioName} (:${inProgressItem.scenarioLine})`}</span>
-                                </td>
-                                <td>
-                                  {inProgressItem.executor}
-                                  &nbsp;({moment(new Date()).to(moment(inProgressItem.startTimestamp))})
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </Table>
+                      <Grid fluid style={{ border: '1px solid #ddd' }}>
+                        <Row>
+                          <Col md={10}
+                            style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                          >Scenario</Col>
+                          <Col md={2}
+                            style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                          >Taken By</Col>
+                        </Row>
+                        {session.status.inProgress.map((inProgressItem, i) => {
+                          return (
+                            <Row key={i} style={{ backgroundColor: 'lightgray' }}>
+                              <Col md={10}
+                                style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                              >
+                                <span style={{ fontWeight: 'bold' }}>{inProgressItem.featureName}:&nbsp;</span>
+                                <span>{`${inProgressItem.scenarioName} (:${inProgressItem.scenarioLine})`}</span>
+                              </Col>
+                              <Col md={2}
+                                style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                              >
+                                {inProgressItem.executor}
+                                &nbsp;({moment(new Date()).to(moment(inProgressItem.startTimestamp))})
+                              </Col>
+                            </Row>
+                          );
+                        })}
+                      </Grid>
                     </Tab.Pane>
                     <Tab.Pane eventKey='done'>
                       <Grid fluid>

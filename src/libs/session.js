@@ -8,7 +8,7 @@ import { Execution, SessionHistory } from 'libs/mongoose';
 import filter from 'libs/filter';
 
 class Session {
-  constructor(sessionId, project, scenariosFilter) {
+  constructor(sessionId, project, scenariosFilter, iterations) {
     this.sessionId = sessionId;
     this.project = project;
     this.scenariosFilter = scenariosFilter;
@@ -18,6 +18,8 @@ class Session {
     this.doneScenarios = {};
     this.sessionState = Session.NOT_FOUND;
     this.sessionPath = `public/results/${this.sessionId}`;
+
+    this.iterations = iterations;
 
     fs.mkdirSync(this.sessionPath);
 
@@ -29,29 +31,47 @@ class Session {
         throw Error('You should specify tags to filter scenarios if you use custom filter.');
       }
       filter.applyCustomFilterToProject(project, scenariosFilter.tags, (err, prj, scenarios) => {
-        this.startSessionCallback(err, scenarios);
+        this.finalizeSessionInit(err, scenarios, iterations);
       });
     } else {
       filter.applyFilterToProject(project, filter.getFilterByName(scenariosFilter.scope), (err, prj, scenarios) => {
-        this.startSessionCallback(err, scenarios);
+        this.finalizeSessionInit(err, scenarios, iterations);
       });
     }
+  }
 
-    this.trackInProgressTimeout = setInterval(() => {
-      Session.trackInProgressTimeoutFunc(this);
-    }, 10000);
+  finalizeSessionInit(err, scenarios, iterations) {
+    let scenariosArray = [];
 
-    this.trackSessionState = setInterval(() => {
-      Session.trackSessionStateFunc(this);
-    }, 10000);
+    for (let i = 0; i < iterations; i++) {
+      scenariosArray = scenariosArray.concat(scenarios);
+    }
+    this.startSessionCallback(err, scenariosArray, iterations)
+      .then(() => {
+        this.trackInProgressTimeout = setInterval(() => {
+          Session.trackInProgressTimeoutFunc(this);
+        }, 10000);
+
+        this.trackSessionState = setInterval(() => {
+          Session.trackSessionStateFunc(this);
+        }, 10000);
+      })
+      .catch((error) => {
+        throw error;
+      });
   }
 
   startSessionCallback(err, scenarios) {
-    if (err) {
-      log.error(err);
-    }
-    this.scenarios = util.shuffleArray(scenarios);
-    this.sessionState = Session.OK;
+    return new Promise((resolve, reject) => {
+      if (err) {
+        log.error(err);
+        reject();
+      }
+
+      this.scenarios = util.shuffleArray(scenarios);
+      this.sessionState = Session.OK;
+      resolve();
+    });
   }
 
   getSessionId() {

@@ -7,11 +7,12 @@ import Col from 'react-bootstrap/lib/Col';
 import Grid from 'react-bootstrap/lib/Grid';
 
 import Spinner from 'components/common/Spinner';
-import SessionDetails from './SessionDetails';
-import SessionStatusChart from '../common/SessionStatusChart';
+import SessionDetails from 'components/common/SessionDetails';
+import SessionStatusChart from 'components/common/SessionStatusChart';
 import ScenariosHistoryTable from './ScenariosHistoryTable';
 
 import { fetchSessionsHistory } from 'redux/actions/sessionsActions';
+
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   router: PropTypes.any,
@@ -53,7 +54,7 @@ class SessionHistoryPage extends Component {
       <Grid fluid>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
           <Col md={4}>
-            <SessionDetails sessionDetails={session.details}/>
+            <SessionDetails sessionDetails={session.details} history/>
           </Col>
           <Col md={8}>
             <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
