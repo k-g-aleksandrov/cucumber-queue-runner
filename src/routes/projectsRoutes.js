@@ -1,5 +1,5 @@
 import express from 'express';
-import { Project, Scenario } from 'libs/mongoose';
+import { Project, Scenario, Execution } from 'libs/mongoose';
 import util from 'libs/util';
 import filter from 'libs/filter';
 import gherkin from 'gherkin';
@@ -39,6 +39,58 @@ router.get('/', (req, res) => {
     })
     .catch((err) => {
       res.send({ error: 'Failed to get projects list from DB', originalError: err });
+    });
+});
+
+router.get('/cleanExecutions', (req, res) => {
+  Execution.find({}).exec()
+    .then((executions) => {
+      const removed = [];
+
+      const executionPromises = executions.map((execution) => {
+        return new Promise((execResolve) => {
+          const matches = execution.scenarioId.match(/^(.*?)(?: -> )(.*)\(((?::.*:)|(?:null))\)$/);
+
+          if (execution.scenarioId !== `${matches[1]} -> ${matches[2]}(${matches[3]})`) {
+            console.log(`Scenario: ${execution.scenarioId}`);
+            console.log(`Parsed: ${JSON.stringify(matches)}`);
+          } else {
+            let searchQuery;
+
+            if (matches[3] === 'null') {
+              searchQuery = {
+                featureName: matches[1],
+                scenarioName: matches[2]
+              };
+            } else {
+              searchQuery = {
+                featureName: matches[1],
+                scenarioName: matches[2],
+                exampleParams: matches[3]
+              };
+            }
+
+            Scenario.findOne(searchQuery).exec()
+              .then((scenario) => {
+                if (!scenario) {
+                  Execution.findOneAndRemove({ _id: execution._id }).exec()
+                    .then(() => {
+                      removed.push(`${searchQuery.featureName} -> ${searchQuery.scenarioName}(${searchQuery.exampleParams})`);
+                    });
+                }
+                execResolve();
+              });
+          }
+        });
+      });
+
+      Promise.all(executionPromises).then(() => {
+        res.send({ success: true, removed });
+      }).catch(log.error);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send(err);
     });
 });
 
