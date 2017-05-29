@@ -43,7 +43,7 @@ class ProjectPage extends Component {
       <div>
         <h2>{projectDetails.name}</h2>
         {Object.keys(projectDetails.scopes).map((scope, i) => {
-          return <ScopeDetails scope={projectDetails.scopes[scope]} key={i}/>;
+          return <ScopeDetails scope={projectDetails.scopes[scope]} project={this.props.params.project} key={i}/>;
         })}
       </div>
     );

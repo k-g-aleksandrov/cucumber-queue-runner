@@ -6,6 +6,8 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
+  let result;
+
   switch (action.type) {
     case 'project/REQUEST':
     case 'project/scan/REQUEST':
@@ -28,6 +30,14 @@ export default function (state = initialState, action) {
     case 'project/scan/FAILURE':
     case 'project/delete/FAILURE':
       return Object.assign({}, state, { loading: false, errors: action.errors });
+    case 'project/filters/REQUEST':
+      return state;
+    case 'project/filters/SUCCESS':
+      result = Object.assign({}, state);
+      result.projectDetails.scopes[action.payload.filter].scenarios = action.payload.scenarios;
+      return result;
+    case 'project/filters/FAILURE':
+      return state;
     default:
       return state;
   }

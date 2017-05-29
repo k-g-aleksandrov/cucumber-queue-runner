@@ -284,7 +284,7 @@ router.get('/:project/filters/:filter', (req, res) => {
     }
   }).exec()
     .then((scenarios) => {
-      res.send(scenarios);
+      res.send({ filter: req.params.filter, scenarios });
     })
     .catch((err) => {
       console.log(err);

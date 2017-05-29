@@ -20,6 +20,16 @@ export function fetchProjectFilters(projectId) {
   };
 }
 
+export function fetchScopeScenarios(projectId, filterId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/projects/${projectId}/filters/${filterId}`,
+      method: 'GET',
+      types: ['project/filters/REQUEST', 'project/filters/SUCCESS', 'project/filters/FAILURE']
+    }
+  };
+}
+
 export function scanProject(projectId) {
   return {
     [CALL_API]: {

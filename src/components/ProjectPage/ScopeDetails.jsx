@@ -6,8 +6,13 @@ import ScenarioRow from './ScenarioRow';
 
 import Table from 'react-bootstrap/lib/Table';
 
+import { fetchScopeScenarios } from 'redux/actions/projectsActions';
+
 const propTypes = {
-  scope: PropTypes.any.isRequired
+  dispatch: PropTypes.func.isRequired,
+  scope: PropTypes.any.isRequired,
+  project: PropTypes.string.isRequired,
+  scopes: PropTypes.any
 };
 
 class ScopeDetails extends Component {
@@ -17,17 +22,27 @@ class ScopeDetails extends Component {
     this.state = {
       open: !this.props.scope.filter.hideInUi
     };
+
+    this.fetchScopeScenarios = this.fetchScopeScenarios.bind(this);
+  }
+
+  componentDidMount() {
+    this.fetchScopeScenarios();
+  }
+
+  fetchScopeScenarios() {
+    this.props.dispatch(fetchScopeScenarios(this.props.project, this.props.scope.filter.id));
   }
 
   render() {
-    const { scope } = this.props;
+    const { scope, scopes } = this.props;
 
     let body = null;
 
-    if (scope.scenarios.length) {
+    if (scopes[scope.id].scenarios.length) {
       body = (
         <tbody style={{ display: this.state.open ? 'block' : 'none' }}>
-          {scope.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
+          {scopes.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
         </tbody>
       );
     } else {
@@ -46,7 +61,7 @@ class ScopeDetails extends Component {
       >
         <tr>
           <th colSpan='3'>
-            <h4>{scope.filter.displayName} - {scope.scenarios.length} scenarios</h4>
+            <h4>{scope.filter.displayName} - {scopes.scenarios.length} scenarios</h4>
             <span
               style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
             >{scope.filter.description}</span>
@@ -65,6 +80,12 @@ class ScopeDetails extends Component {
   }
 }
 
+function mapStateToProps(state) {
+  const { scopes } = state.project.projectDetails;
+
+  return { scopes };
+}
+
 ScopeDetails.propTypes = propTypes;
 
-export default connect()(ScopeDetails);
+export default connect(mapStateToProps)(ScopeDetails);
