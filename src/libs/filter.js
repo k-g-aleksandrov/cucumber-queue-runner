@@ -65,6 +65,12 @@ module.exports.full = {
   hideInUi: true
 };
 
+module.exports.disabled = {
+  id: 'disabled',
+  displayName: 'Disabled',
+  description: 'Scenarios that didn\'t pass any filters'
+};
+
 module.exports.custom = {
   id: 'custom',
   displayName: 'Custom Scope',
@@ -251,40 +257,30 @@ module.exports.applyFiltersToProject = function applyFilterToProject(projectId, 
       if (scenarioSearchError) {
         log.error(scenarioSearchError);
       }
-      const scenarioPromises = scenarios.map((sc) => {
+      for (const scenario of scenarios) {
         const scenarioObject = {
-          featureName: sc.featureName,
-          scenarioName: sc.scenarioName,
-          scenarioLine: sc.scenarioLine,
-          exampleParams: sc.exampleParams,
-          tags: sc.tags
+          featureName: scenario.featureName,
+          scenarioName: scenario.scenarioName,
+          scenarioLine: scenario.scenarioLine,
+          exampleParams: scenario.exampleParams,
+          tags: scenario.tags,
+          executions: scenario.executions,
+          projectTag: project.tag
         };
+        let inScopes = false;
 
-        return new Promise((scResolve) => {
-          Execution.findOne({ scenarioId: sc.getScenarioId() }, (err, execution) => {
-            scenarioObject.projectTag = project.tag;
-            if (execution && execution.executions) {
-              scenarioObject.executions = execution.executions;
-            }
-            let inScopes = false;
+        for (const filter of filters) {
+          if (this.applyFilter(scenarioObject, filter)) {
+            scenariosScopes[filter.id].scenarios.push(scenarioObject);
+            inScopes = true;
+          }
+        }
+        if (!inScopes) {
+          scenariosScopes.disabled.scenarios.push(scenarioObject);
+        }
+      }
 
-            for (const filter of filters) {
-              if (this.applyFilter(scenarioObject, filter)) {
-                scenariosScopes[filter.id].scenarios.push(scenarioObject);
-                inScopes = true;
-              }
-            }
-            if (!inScopes) {
-              scenariosScopes.disabled.scenarios.push(scenarioObject);
-            }
-            scResolve();
-          });
-        });
-      });
-
-      Promise.all(scenarioPromises).then(() => {
-        callback(null, project, scenariosScopes);
-      }).catch(log.error);
+      return callback(null, project, scenariosScopes);
     });
   });
 };
@@ -310,4 +306,31 @@ module.exports.applyFilter = function applyFilter(scenario, filter) {
     result = result && checkProjectTag(scenario, scenario.projectTag);
   }
   return result;
+};
+
+module.exports.getScenarioFilters = function getScenarioFilters(scenario, projectTag) {
+  const filters = [this.full, this.development, this.daily, this.muted];
+
+  const appliedFilters = [];
+
+  for (const filter of filters) {
+    let result = true;
+
+    if (filter.executionRules) {
+      for (const executionRule of filter.executionRules) {
+        result = result && validateExecutionRule(scenario, executionRule);
+      }
+    }
+    if (!filter.ignoreProjectTag) {
+      result = result && checkProjectTag(scenario, projectTag);
+    }
+    if (result) {
+      appliedFilters.push(filter.id);
+    }
+  }
+
+  if (appliedFilters.length === 0) {
+    appliedFilters.push('disabled');
+  }
+  return appliedFilters;
 };
