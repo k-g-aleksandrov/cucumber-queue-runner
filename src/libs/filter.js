@@ -228,10 +228,11 @@ module.exports.applyFilterToProject = function applyFilterToProject(projectId, f
 module.exports.applyFiltersToProject = function applyFilterToProject(projectId, filters, callback) {
   Project.findOne({ projectId }, (projectSearchError, project) => {
     if (projectSearchError) {
-      log.error(projectSearchError);
+      return callback(projectSearchError);
     }
     if (!project) {
       log.error(`Failed to find project with id ${projectId}`);
+      return callback(Error(`Project ${projectId} was not found`));
     }
     const scenariosScopes = {};
 

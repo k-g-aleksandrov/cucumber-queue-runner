@@ -227,7 +227,7 @@ router.get('/:project', (req, res) => {
 
   filter.applyFiltersToProject(req.params.project, scenarioFilters, (applyFiltersError, project, scenariosScopes) => {
     if (applyFiltersError) {
-      throw applyFiltersError;
+      return res.status(404).send({ error: applyFiltersError });
     }
     res.send({
       project: {
