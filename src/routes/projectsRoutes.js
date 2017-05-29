@@ -253,21 +253,25 @@ router.get('/:project/scan', (req, res) => {
 });
 
 router.get('/:project', (req, res) => {
-  const scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
+  const scenariosScopes = {};
 
-  filter.applyFiltersToProject(req.params.project, scenarioFilters, (applyFiltersError, project, scenariosScopes) => {
-    if (applyFiltersError) {
-      return res.status(404).send({ error: applyFiltersError });
-    }
-    res.send({
-      project: {
-        id: project.projectId,
-        name: project.name,
-        description: project.description,
-        scopes: scenariosScopes
-      }
+  for (const scenariosFilter of [filter.development, filter.daily, filter.muted, filter.full, filter.disabled]) {
+    scenariosScopes[scenariosFilter.id] = { filter: scenariosFilter, scenarios: [] };
+  }
+  Project.findOne({ projectId: req.params.project }).exec()
+    .then((project) => {
+      res.send({
+        project: {
+          id: project.projectId,
+          name: project.name,
+          description: project.description,
+          scopes: scenariosScopes
+        }
+      });
+    })
+    .catch((err) => {
+      console.log(err);
     });
-  });
 });
 
 router.get('/:project/filters/:filter', (req, res) => {
