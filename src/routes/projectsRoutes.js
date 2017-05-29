@@ -270,6 +270,23 @@ router.get('/:project', (req, res) => {
   });
 });
 
+router.get('/:project/filters/:filter', (req, res) => {
+  Scenario.find({
+    project: req.params.project,
+    filters: {
+      $in: [
+        req.params.filter
+      ]
+    }
+  }).exec()
+    .then((scenarios) => {
+      res.send(scenarios);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 /**
  * Delete project by specified project ID
  */
