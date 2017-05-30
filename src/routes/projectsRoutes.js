@@ -282,6 +282,11 @@ router.get('/:project', (req, res) => {
   Promise.all(scopePromises).then(() => {
     Project.findOne({ projectId: req.params.project }).exec()
       .then((project) => {
+        if (!project) {
+          return res.send({
+            project: { error: 'no project' }
+          });
+        }
         res.send({
           project: {
             id: project.projectId,
