@@ -3,7 +3,7 @@ const log = logTemplate(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Execution, SessionHistory } from 'libs/mongoose';
+import { Execution, SessionHistory, Scenario } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
@@ -34,9 +34,20 @@ class Session {
         this.finalizeSessionInit(err, scenarios, iterations);
       });
     } else {
-      filter.applyFilterToProject(project, filter.getFilterByName(scenariosFilter.scope), (err, prj, scenarios) => {
-        this.finalizeSessionInit(err, scenarios, iterations);
-      });
+      Scenario.find({
+        project,
+        filters: {
+          $in: [
+            filter.getFilterByName(scenariosFilter.scope).id
+          ]
+        }
+      }).exec()
+        .then((scenarios) => {
+          this.finalizeSessionInit(null, scenarios, iterations);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }
 
