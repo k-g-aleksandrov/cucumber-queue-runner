@@ -29,15 +29,14 @@ export default function (state = initialState, action) {
     case 'project/FAILURE':
     case 'project/scan/FAILURE':
     case 'project/delete/FAILURE':
-      return Object.assign({}, state, { loading: false, errors: action.errors });
-    case 'project/filters/REQUEST':
-      return state;
-    case 'project/filters/SUCCESS':
-      result = Object.assign({}, state);
-      result.projectDetails.scopes[action.payload.filter].scenarios = action.payload.scenarios;
-      return result;
     case 'project/filters/FAILURE':
-      return state;
+      return Object.assign({}, state, { loading: false, errors: action.errors });
+    case 'project/filters/SUCCESS':
+      result = Object.assign({}, state, { loading: false, errors: null });
+      result.projectDetails.scopes[action.payload.filter].scenarios = action.payload.scenarios;
+      result.projectDetails.scopes[action.payload.filter].loaded = true;
+      return result;
+    case 'project/filters/REQUEST':
     default:
       return state;
   }

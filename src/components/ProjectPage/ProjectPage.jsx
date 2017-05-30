@@ -30,11 +30,8 @@ class ProjectPage extends Component {
   }
 
   render() {
-    if (this.props.loading) {
+    if (this.props.loading || !this.props.projectDetails || !this.props.projectDetails.name) {
       return <Spinner/>;
-    }
-    if (!this.props.projectDetails || !this.props.projectDetails.name) {
-      return <div>{this.props.projectDetails}</div>;
     }
 
     const { projectDetails } = this.props;
@@ -43,7 +40,13 @@ class ProjectPage extends Component {
       <div>
         <h2>{projectDetails.name}</h2>
         {Object.keys(projectDetails.scopes).map((scope, i) => {
-          return <ScopeDetails scope={projectDetails.scopes[scope]} project={this.props.params.project} key={i}/>;
+          return (
+            <ScopeDetails
+              filter={projectDetails.scopes[scope].filter}
+              project={this.props.params.project}
+              key={i}
+            />
+          );
         })}
       </div>
     );

@@ -10,8 +10,8 @@ import { fetchScopeScenarios } from 'redux/actions/projectsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
-  scope: PropTypes.any.isRequired,
-  project: PropTypes.string.isRequired,
+  filter: PropTypes.any.isRequired,
+  project: PropTypes.any.isRequired,
   scopes: PropTypes.any
 };
 
@@ -20,7 +20,7 @@ class ScopeDetails extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      open: !this.props.scope.filter.hideInUi
+      open: !this.props.filter.hideInUi
     };
 
     this.fetchScopeScenarios = this.fetchScopeScenarios.bind(this);
@@ -31,18 +31,39 @@ class ScopeDetails extends Component {
   }
 
   fetchScopeScenarios() {
-    this.props.dispatch(fetchScopeScenarios(this.props.project, this.props.scope.filter.id));
+    this.props.dispatch(fetchScopeScenarios(this.props.project, this.props.filter.id));
   }
 
   render() {
-    const { scope, scopes } = this.props;
+    const { scopes, filter } = this.props;
 
+    const scope = scopes[filter.id];
+
+    console.log(scope);
     let body = null;
 
-    if (scopes[scope.id].scenarios.length) {
+    if (!scope.loaded) {
+      return (
+        <Table style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }} striped bordered>
+          <thead style={{ backgroundColor: '#d9edf7', borderColor: '#bce8f1' }}>
+            <tr>
+              <th colSpan='3'>
+                <h4>
+                  {scope.filter.displayName} - loading scenarios...
+                </h4>
+                <span
+                  style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
+                >{scope.filter.description}</span>
+              </th>
+            </tr>
+          </thead>
+        </Table>
+      );
+    }
+    if (scope.scenarios.length) {
       body = (
         <tbody style={{ display: this.state.open ? 'block' : 'none' }}>
-          {scopes.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
+          {scope.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
         </tbody>
       );
     } else {
@@ -61,7 +82,7 @@ class ScopeDetails extends Component {
       >
         <tr>
           <th colSpan='3'>
-            <h4>{scope.filter.displayName} - {scopes.scenarios.length} scenarios</h4>
+            <h4>{scope.filter.displayName} - {scope.scenarios.length} scenarios</h4>
             <span
               style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
             >{scope.filter.description}</span>
