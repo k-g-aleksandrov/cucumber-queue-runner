@@ -258,37 +258,43 @@ router.get('/:project', (req, res) => {
   for (const scenariosFilter of [filter.development, filter.daily, filter.muted, filter.full, filter.disabled]) {
     scenariosScopes[scenariosFilter.id] = { filter: scenariosFilter, scenarios: [] };
   }
-  Project.findOne({ projectId: req.params.project }).exec()
-    .then((project) => {
-      res.send({
-        project: {
-          id: project.projectId,
-          name: project.name,
-          description: project.description,
-          scopes: scenariosScopes
-        }
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
 
-router.get('/:project/filters/:filter', (req, res) => {
-  Scenario.find({
-    project: req.params.project,
-    filters: {
-      $in: [
-        req.params.filter
-      ]
-    }
-  }).exec()
-    .then((scenarios) => {
-      res.send({ filter: req.params.filter, scenarios });
-    })
-    .catch((err) => {
-      console.log(err);
+  const scopePromises = Object.keys(scenariosScopes).map((scope) => {
+    return new Promise((resolve) => {
+      Scenario.find({
+        project: req.params.project,
+        filters: {
+          $in: [
+            scenariosScopes[scope].filter.id
+          ]
+        }
+      }).exec()
+        .then((scenarios) => {
+          scenariosScopes[scope].scenarios = scenarios;
+          resolve();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     });
+  });
+
+  Promise.all(scopePromises).then(() => {
+    Project.findOne({ projectId: req.params.project }).exec()
+      .then((project) => {
+        res.send({
+          project: {
+            id: project.projectId,
+            name: project.name,
+            description: project.description,
+            scopes: scenariosScopes
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }).catch(log.error);
 });
 
 /**

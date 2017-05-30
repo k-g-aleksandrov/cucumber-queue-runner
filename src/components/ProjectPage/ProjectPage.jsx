@@ -42,7 +42,7 @@ class ProjectPage extends Component {
         {Object.keys(projectDetails.scopes).map((scope, i) => {
           return (
             <ScopeDetails
-              filter={projectDetails.scopes[scope].filter}
+              scope={projectDetails.scopes[scope]}
               project={this.props.params.project}
               key={i}
             />
