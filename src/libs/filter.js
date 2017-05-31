@@ -16,7 +16,8 @@ module.exports.development = {
       inverted: true
     }
   ],
-  description: 'Have less than 5 passed executions in a row'
+  description: 'Have less than 5 passed executions in a row',
+  chartColor: '#F5F28F'
 };
 
 module.exports.daily = {
@@ -35,7 +36,8 @@ module.exports.daily = {
       inverted: false
     }
   ],
-  description: 'Have at least 5 passed executions in a row, and passed last execution'
+  description: 'Have at least 5 passed executions in a row, and passed last execution',
+  chartColor: '#92DD96'
 };
 
 module.exports.muted = {
@@ -54,7 +56,8 @@ module.exports.muted = {
       inverted: true
     }
   ],
-  description: 'Have at least 5 passed executions in a row, and failed last execution'
+  description: 'Have at least 5 passed executions in a row, and failed last execution',
+  chartColor: '#F2928C'
 };
 
 module.exports.full = {
@@ -68,7 +71,8 @@ module.exports.full = {
 module.exports.disabled = {
   id: 'disabled',
   displayName: 'Disabled',
-  description: 'Scenarios that didn\'t pass any filters'
+  description: 'Scenarios that didn\'t pass any filters',
+  chartColor: 'lightgray'
 };
 
 module.exports.custom = {

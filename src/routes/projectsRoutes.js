@@ -289,9 +289,13 @@ router.get('/:project', (req, res) => {
         }
         res.send({
           project: {
-            id: project.projectId,
-            name: project.name,
-            description: project.description,
+            details: {
+              id: project.projectId,
+              name: project.name,
+              description: project.description,
+              tag: project.tag,
+              workingCopyPath: project.workingCopyPath
+            },
             scopes: scenariosScopes
           }
         });

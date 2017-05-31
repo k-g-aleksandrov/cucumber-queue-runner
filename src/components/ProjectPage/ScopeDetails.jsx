@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import ScenarioRow from './ScenarioRow';
 
-import Table from 'react-bootstrap/lib/Table';
+import { Tab, Table } from 'react-bootstrap';
 
 const propTypes = {
   scope: PropTypes.any.isRequired,
@@ -14,9 +14,6 @@ class ScopeDetails extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      open: !this.props.scope.filter.hideInUi
-    };
   }
 
   render() {
@@ -26,7 +23,7 @@ class ScopeDetails extends Component {
 
     if (scenarios.length) {
       body = (
-        <tbody style={{ display: this.state.open ? 'block' : 'none' }}>
+        <tbody>
           {scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
         </tbody>
       );
@@ -41,12 +38,9 @@ class ScopeDetails extends Component {
     }
 
     const title = (
-      <thead style={{ backgroundColor: '#d9edf7', borderColor: '#bce8f1' }}
-        onClick={() => this.setState({ open: !this.state.open })}
-      >
+      <thead style={{ backgroundColor: '#d9edf7', borderColor: '#bce8f1' }}>
         <tr>
           <th colSpan='3'>
-            <h4>{filter.displayName} - {scenarios.length} scenarios</h4>
             <span
               style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
             >{filter.description}</span>
@@ -57,10 +51,12 @@ class ScopeDetails extends Component {
 
 
     return (
-      <Table style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }} striped bordered>
-        {title}
-        {body}
-      </Table>
+      <Tab.Pane eventKey={filter.id}>
+        <Table striped bordered>
+          {title}
+          {body}
+        </Table>
+      </Tab.Pane>
     );
   }
 }
