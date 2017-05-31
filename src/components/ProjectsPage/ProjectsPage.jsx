@@ -11,6 +11,7 @@ import { fetchProjects } from 'redux/actions/projectsActions';
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
+  location: PropTypes.any,
   availableProjects: PropTypes.array,
   params: PropTypes.object,
   children: PropTypes.node
@@ -60,6 +61,14 @@ class ProjectsPage extends Component {
     }
     return (
       <div>
+        {this.props.location.query.lost &&
+        <Alert bsStyle='danger'>
+          <span style={{ fontWeight: 'bold' }}>Error: </span>
+          Project
+          <span style={{ fontWeight: 'bold' }}> {this.props.location.query.lost} </span>
+          does not exist
+        </Alert>
+        }
         <h3 style={{ paddingBottom: '10px' }}>Available Projects</h3>
         { (!availableProjects || availableProjects.length === 0) &&
         <Alert bsStyle='info'>No projects registered</Alert>}

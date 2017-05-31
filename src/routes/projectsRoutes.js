@@ -10,28 +10,61 @@ const log = logTemplate(module);
 
 const router = express.Router();
 
-function saveScenario(scenario, callback) {
-  const tagsList = [];
+function saveScenarios(scenarios, projectTag, callback) {
+  const savePromises = scenarios.map((scenario) => {
+    return new Promise((resolve) => {
+      const tagsList = [];
 
-  if (scenario.tags) {
-    for (const tag of scenario.tags) {
-      tagsList.push(tag.name);
-    }
-  }
+      if (scenario.tags) {
+        for (const tag of scenario.tags) {
+          tagsList.push(tag.name);
+        }
+      }
 
-  const scenarioDbObject = new Scenario({
-    project: scenario.project,
-    classpath: scenario.classpath,
-    featureName: scenario.featureName,
-    scenarioName: scenario.scenarioName,
-    scenarioLine: scenario.scenarioLine,
-    exampleParams: scenario.exampleParams,
-    tags: tagsList
+      const scenarioDbObject = new Scenario({
+        project: scenario.project,
+        classpath: scenario.classpath,
+        featureName: scenario.featureName,
+        scenarioName: scenario.scenarioName,
+        scenarioLine: scenario.scenarioLine,
+        exampleParams: scenario.exampleParams,
+        tags: tagsList,
+        executions: []
+      });
+
+      Execution.findOne({ scenarioId: `${scenario.featureName} -> ${scenario.scenarioName}(${scenario.exampleParams})` }).exec()
+        .then((execution) => {
+          if (execution) {
+            scenarioDbObject.executions = execution.executions;
+          }
+          scenarioDbObject.filters = filter.getScenarioFilters(scenarioDbObject, projectTag);
+          scenarioDbObject.save()
+            .then(() => {
+              resolve();
+            })
+            .catch((err) => {
+              if (err.message.indexOf('duplicate key') > -1) {
+                log.error(`Failed to save scenario '${scenario.scenarioName}. Error: ${err}`);
+                resolve();
+              } else {
+                throw err;
+              }
+            });
+        })
+        .catch((err) => {
+          log.error(err);
+        });
+    });
   });
 
-  scenarioDbObject.save(callback);
+  Promise.all(savePromises).then(() => {
+    callback();
+  });
 }
 
+/**
+ * List all projects
+ */
 router.get('/', (req, res) => {
   Project.find({}).exec()
     .then((projects) => {
@@ -120,124 +153,153 @@ router.get('/:project/scan', (req, res) => {
 
   const projectId = req.params.project;
 
-  Project.findOne({ projectId }, (findProjectError, project) => {
-    if (findProjectError) {
-      log.error(findProjectError);
-      res.send({ error: findProjectError });
-    }
+  let featuresRoot;
+  let featuresList;
+  let scenariosCount = 0;
+  let projectTag;
 
-    if (!project) {
-      return res.send({ error: `Project '${projectId}' was not found` });
-    }
+  Project.findOne({ projectId }).exec()
+    .then((project) => {
+      if (!project) {
+        return res.send({ error: `Can\'t find project with id ${projectId}` });
+      }
 
-    const workingCopyPath = req.query.path ? req.query.path : project.workingCopyPath;
+      const workingCopyPath = req.query.path ? req.query.path : project.workingCopyPath;
 
-    if (!workingCopyPath) {
-      return res.status(400).send({ error: 'Repository path not set for project' });
-    }
+      if (!workingCopyPath) {
+        return res.status(400).send({ error: 'Repository path not set for project' });
+      }
 
-    const featuresRoot = project.featuresRoot;
+      featuresRoot = project.featuresRoot;
+      projectTag = project.tag;
 
-    util.scanRepository(workingCopyPath)
-      .then((features) => {
-        Scenario.remove({ project: projectId }, (removeScenariosError) => {
-          if (removeScenariosError) {
-            log.error(removeScenariosError);
-          }
-          for (const result of features) {
-            const parser = new gherkin.Parser();
-            const buf = fs.readFileSync(result, 'utf8');
-            const parts = result.split(featuresRoot);
-            const classpath = parts.pop();
-            const project = projectId;
-            const gherkinDocument = parser.parse(buf);
-            const feature = gherkinDocument.feature;
+      return util.scanRepository(workingCopyPath);
+    })
+    .then((features) => {
+      featuresList = features;
+      return Scenario.remove({ project: projectId }).exec();
+    })
+    .then(() => {
+      const featuresScanPromises = featuresList.map((featureFile) => {
+        return new Promise((resolve, reject) => {
+          const parser = new gherkin.Parser();
+          const buf = fs.readFileSync(featureFile, 'utf8');
+          const parts = featureFile.split(featuresRoot);
+          const classpath = parts.pop();
+          const project = projectId;
+          const gherkinDocument = parser.parse(buf);
+          const feature = gherkinDocument.feature;
 
-            for (const child of feature.children) {
-              if (child.type === 'ScenarioOutline') {
-                const examples = child.examples;
+          const scenarioObjects = [];
 
-                for (const examplesBlock of examples) {
-                  for (const example of examplesBlock.tableBody) {
-                    let paramsString = ':';
+          for (const child of feature.children) {
+            if (child.type === 'Background') {
+              continue;
+            }
+            if (child.type === 'ScenarioOutline') {
+              const examples = child.examples;
 
-                    for (const exampleParam of example.cells) {
-                      paramsString += `${exampleParam.value}:`;
-                    }
-                    const scenarioObject = {
-                      project,
-                      classpath,
-                      featureName: feature.name,
-                      scenarioName: child.name,
-                      scenarioLine: example.location.line,
-                      exampleParams: paramsString,
-                      tags: child.tags.concat(examplesBlock.tags)
-                    };
+              for (const examplesBlock of examples) {
+                for (const example of examplesBlock.tableBody) {
+                  let paramsString = ':';
 
-                    saveScenario(scenarioObject, (saveScenarioError) => {
-                      if (saveScenarioError) {
-                        if (saveScenarioError.message.indexOf('duplicate key') > -1) {
-                          log.debug(`Scenario ${child.name} already exists in DB, skipped`);
-                        } else {
-                          log.error('Internal error(%d): %s', res.statusCode, saveScenarioError.message);
-                          return res.status(500).send({ error: 'Server error' });
-                        }
-                      }
-                    });
+                  for (const exampleParam of example.cells) {
+                    paramsString += `${exampleParam.value}:`;
                   }
+
+                  scenarioObjects.push({
+                    project,
+                    classpath,
+                    featureName: feature.name,
+                    scenarioName: child.name,
+                    scenarioLine: example.location.line,
+                    exampleParams: paramsString,
+                    tags: child.tags.concat(examplesBlock.tags)
+                  });
                 }
-              } else if (child.type !== 'Background') {
-                const scenarioObject = {
-                  project,
-                  classpath,
-                  featureName: feature.name,
-                  scenarioName: child.name,
-                  scenarioLine: child.location.line,
-                  exampleParams: null,
-                  tags: child.tags
-                };
-
-                saveScenario(scenarioObject, (saveScenarioError) => {
-                  if (saveScenarioError) {
-                    if (saveScenarioError.message.indexOf('duplicate key') > -1) {
-                      log.debug(`Scenario ${child.name} already exists in DB, skipped`);
-                    } else {
-                      log.error(`Internal error(${res.statusCode}): ${saveScenarioError.message}`);
-                      return res.status(500).send({ error: 'Server error' });
-                    }
-                  }
-                });
               }
+            } else if (child.type !== 'Background') {
+              scenarioObjects.push({
+                project,
+                classpath,
+                featureName: feature.name,
+                scenarioName: child.name,
+                scenarioLine: child.location.line,
+                exampleParams: null,
+                tags: child.tags
+              });
             }
           }
-          res.send({ project: { projectId, features } });
+          saveScenarios(scenarioObjects, projectTag, (saveScenarioError) => {
+            scenariosCount += scenarioObjects.length;
+            if (saveScenarioError) {
+              log.error('Internal error(%d): %s', res.statusCode, saveScenarioError.message);
+              res.status(500).send({ error: 'Server error' });
+              return reject();
+            }
+            resolve();
+          });
         });
-      })
-      .catch((err) => {
-        if (err) {
-          log.error(err);
-          return res.status(400).send({ error: `Path not found: ${workingCopyPath}` });
-        }
       });
-  });
+
+      Promise.all(featuresScanPromises).then(() => {
+        return res.send({ project: { projectId, scenariosCount } });
+      });
+    })
+    .catch((err) => {
+      log.error(err);
+      res.send({ error: err });
+    });
 });
 
 router.get('/:project', (req, res) => {
-  const scenarioFilters = [filter.development, filter.daily, filter.muted, filter.full];
+  const scenariosScopes = {};
 
-  filter.applyFiltersToProject(req.params.project, scenarioFilters, (applyFiltersError, project, scenariosScopes) => {
-    if (applyFiltersError) {
-      return res.status(404).send({ error: applyFiltersError });
-    }
-    res.send({
-      project: {
-        id: project.projectId,
-        name: project.name,
-        description: project.description,
-        scopes: scenariosScopes
-      }
+  for (const scenariosFilter of [filter.development, filter.daily, filter.muted, filter.full, filter.disabled]) {
+    scenariosScopes[scenariosFilter.id] = { filter: scenariosFilter, scenarios: [] };
+  }
+
+  const scopePromises = Object.keys(scenariosScopes).map((scope) => {
+    return new Promise((resolve) => {
+      Scenario.find({
+        project: req.params.project,
+        filters: {
+          $in: [
+            scenariosScopes[scope].filter.id
+          ]
+        }
+      }).exec()
+        .then((scenarios) => {
+          scenariosScopes[scope].scenarios = scenarios;
+          resolve();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     });
   });
+
+  Promise.all(scopePromises).then(() => {
+    Project.findOne({ projectId: req.params.project }).exec()
+      .then((project) => {
+        if (!project) {
+          return res.send({
+            project: { error: 'no project' }
+          });
+        }
+        res.send({
+          project: {
+            id: project.projectId,
+            name: project.name,
+            description: project.description,
+            scopes: scenariosScopes
+          }
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }).catch(log.error);
 });
 
 /**

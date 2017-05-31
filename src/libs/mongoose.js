@@ -60,7 +60,9 @@ const ScenarioSchema = new Schema({
   scenarioName: String,
   exampleParams: String,
   scenarioLine: Number,
-  tags: Array
+  tags: Array,
+  executions: Array,
+  filters: Array
 });
 
 ScenarioSchema.index({

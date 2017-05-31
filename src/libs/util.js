@@ -1,6 +1,8 @@
 import dive from 'dive';
 import path from 'path';
 
+import { Scenario, Execution } from 'libs/mongoose';
+
 module.exports.isGitUrl = function isGitUrl(str) {
   const re = /(?:git|ssh|https?|git@[\w.]+):(?:\/\/)?[\w.@:\/~_-]+\.git(?:\/?|#[\d\w.\-_]+?)$/;
 
@@ -74,4 +76,30 @@ module.exports.shuffleArray = function shuffleArray(array) {
   }
 
   return array;
+};
+
+module.exports.populateProjectScenarios = function populateProjectScenarios(projectId) {
+  Scenario.find({ project: projectId }).exec()
+    .then((scenarios) => {
+      for (const scenario of scenarios) {
+        Execution.findOne({ scenarioId: scenario.getScenarioId() }).exec()
+          .then((executions) => {
+            if (executions) {
+              console.log(`Processing ${JSON.stringify(scenario)} - ${JSON.stringify(executions)}`);
+              Scenario.findOneAndUpdate({ _id: scenario._id }, { executions: executions.executions }, (err, doc) => {
+                if (err) {
+                  console.log(err);
+                }
+                console.log(`successfully updated ${JSON.stringify(doc)}`);
+              });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

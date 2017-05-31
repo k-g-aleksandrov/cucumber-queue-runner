@@ -8,6 +8,7 @@ import { fetchProjectFilters } from 'redux/actions/projectsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
+  router: PropTypes.any,
   loading: PropTypes.bool.isRequired,
   projectDetails: PropTypes.any,
   params: PropTypes.object
@@ -30,20 +31,29 @@ class ProjectPage extends Component {
   }
 
   render() {
-    if (this.props.loading) {
-      return <Spinner/>;
-    }
-    if (!this.props.projectDetails || !this.props.projectDetails.name) {
-      return <div>{this.props.projectDetails}</div>;
-    }
+    const projectId = this.props.params.project;
 
     const { projectDetails } = this.props;
+
+    if (projectDetails && projectDetails.error) {
+      this.props.router.push(`/projects?lost=${projectId}`);
+    }
+
+    if (this.props.loading || !projectDetails || !projectDetails.name) {
+      return <Spinner/>;
+    }
 
     return (
       <div>
         <h2>{projectDetails.name}</h2>
         {Object.keys(projectDetails.scopes).map((scope, i) => {
-          return <ScopeDetails scope={projectDetails.scopes[scope]} key={i}/>;
+          return (
+            <ScopeDetails
+              scope={projectDetails.scopes[scope]}
+              project={this.props.params.project}
+              key={i}
+            />
+          );
         })}
       </div>
     );

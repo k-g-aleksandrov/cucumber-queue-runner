@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import ScenarioRow from './ScenarioRow';
 
 import Table from 'react-bootstrap/lib/Table';
 
 const propTypes = {
-  scope: PropTypes.any.isRequired
+  scope: PropTypes.any.isRequired,
+  project: PropTypes.any.isRequired
 };
 
 class ScopeDetails extends Component {
@@ -20,21 +20,21 @@ class ScopeDetails extends Component {
   }
 
   render() {
-    const { scope } = this.props;
+    const { scenarios, filter } = this.props.scope;
 
     let body = null;
 
-    if (scope.scenarios.length) {
+    if (scenarios.length) {
       body = (
         <tbody style={{ display: this.state.open ? 'block' : 'none' }}>
-          {scope.scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
+          {scenarios.map((scenario, sI) => <ScenarioRow key={sI} index={sI} scenario={scenario}/>)}
         </tbody>
       );
     } else {
       body = (
         <tbody>
           <tr>
-            <th>No scenarios found by filter '{scope.filter.displayName}'</th>
+            <th>No scenarios found by filter '{filter.displayName}'</th>
           </tr>
         </tbody>
       );
@@ -46,10 +46,10 @@ class ScopeDetails extends Component {
       >
         <tr>
           <th colSpan='3'>
-            <h4>{scope.filter.displayName} - {scope.scenarios.length} scenarios</h4>
+            <h4>{filter.displayName} - {scenarios.length} scenarios</h4>
             <span
               style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
-            >{scope.filter.description}</span>
+            >{filter.description}</span>
           </th>
         </tr>
       </thead>
@@ -67,4 +67,4 @@ class ScopeDetails extends Component {
 
 ScopeDetails.propTypes = propTypes;
 
-export default connect()(ScopeDetails);
+export default ScopeDetails;
