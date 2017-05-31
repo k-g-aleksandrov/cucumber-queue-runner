@@ -209,6 +209,28 @@ class Session {
     );
   }
 
+  storeScenarioExecutionResult(scenario) {
+    scenario.executions.push({
+      startTimeStamp: scenario.startTimestamp,
+      result: scenario.result,
+      executor: scenario.executor
+    });
+    scenario.executions = scenario.executions.slice(-100);
+    scenario.filters = filter.getScenarioFilters(scenario);
+    Scenario.update(
+      { _id: scenario._id },
+      {
+        executions: scenario.executions,
+        filters: scenario.filters
+      },
+      { safe: true, upsert: true }).exec()
+      .then(() => {
+      })
+      .catch((err) => {
+        throw err;
+      });
+  }
+
   saveScenarioResult(scenarioId, scenarioReport, cb) {
     if (!this.inProgressScenarios[scenarioId]) {
       return cb(new Error(`Can\'t find in progress scenario for ID ${scenarioId}`));
@@ -225,6 +247,7 @@ class Session {
     sc.result = Session.getScenarioState(scenarioReport);
     if (sc.result !== 'skipped') {
       this.storeExecutionResult(sc);
+      this.storeScenarioExecutionResult(sc);
     }
     for (let i = 0; i < sc.report.length; i++) {
       const elements = sc.report[i].elements;
@@ -319,7 +342,14 @@ class Session {
         if (!scenarios[featureKey]) {
           scenarios[featureKey] = [];
         }
-        const report = JSON.parse(JSON.stringify(scenario.report));
+
+        let report;
+
+        try {
+          report = JSON.parse(JSON.stringify(scenario.report));
+        } catch (e) {
+          console.log(e);
+        }
 
         this.removeEmbeddings(report);
         scenarios[featureKey].push({

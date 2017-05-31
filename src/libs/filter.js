@@ -191,100 +191,6 @@ module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(
   });
 };
 
-module.exports.applyFilterToProject = function applyFilterToProject(projectId, filter, callback) {
-  Project.findOne({ projectId }, (projectSearchError, project) => {
-    if (projectSearchError) {
-      log.error(projectSearchError);
-    }
-    if (!project) {
-      log.error(`Failed to find project with id ${projectId}`);
-    }
-    const filteredScenarios = [];
-
-    Scenario.find({ project: project.projectId }, (scenarioSearchError, scenarios) => {
-      if (scenarioSearchError) {
-        log.error(scenarioSearchError);
-      }
-
-      const scenarioPromises = scenarios.map((sc) => {
-        return new Promise((scResolve) => {
-          Execution.findOne({ scenarioId: sc.getScenarioId() }, (executionSearchError, execution) => {
-            if (executionSearchError) {
-              log.error(executionSearchError);
-            }
-            sc.projectTag = project.tag;
-            if (execution && execution.executions) {
-              sc.executions = execution.executions;
-            }
-            if (this.applyFilter(sc, filter)) {
-              filteredScenarios.push(sc);
-            }
-            scResolve();
-          });
-        });
-      });
-
-      Promise.all(scenarioPromises).then(() => {
-        callback(null, project, filteredScenarios);
-      }).catch(log.error);
-    });
-  });
-};
-
-module.exports.applyFiltersToProject = function applyFilterToProject(projectId, filters, callback) {
-  Project.findOne({ projectId }, (projectSearchError, project) => {
-    if (projectSearchError) {
-      return callback(projectSearchError);
-    }
-    if (!project) {
-      log.error(`Failed to find project with id ${projectId}`);
-      return callback(Error(`Project ${projectId} was not found`));
-    }
-    const scenariosScopes = {};
-
-    for (const filter of filters) {
-      scenariosScopes[filter.id] = { filter, scenarios: [] };
-    }
-    scenariosScopes.disabled = {
-      filter: {
-        id: 'disabled',
-        displayName: 'Disabled',
-        description: 'Scenarios that didn\'t pass any filters'
-      }, scenarios: []
-    };
-
-    Scenario.find({ project: project.projectId }, (scenarioSearchError, scenarios) => {
-      if (scenarioSearchError) {
-        log.error(scenarioSearchError);
-      }
-      for (const scenario of scenarios) {
-        const scenarioObject = {
-          featureName: scenario.featureName,
-          scenarioName: scenario.scenarioName,
-          scenarioLine: scenario.scenarioLine,
-          exampleParams: scenario.exampleParams,
-          tags: scenario.tags,
-          executions: scenario.executions,
-          projectTag: project.tag
-        };
-        let inScopes = false;
-
-        for (const filter of filters) {
-          if (this.applyFilter(scenarioObject, filter)) {
-            scenariosScopes[filter.id].scenarios.push(scenarioObject);
-            inScopes = true;
-          }
-        }
-        if (!inScopes) {
-          scenariosScopes.disabled.scenarios.push(scenarioObject);
-        }
-      }
-
-      return callback(null, project, scenariosScopes);
-    });
-  });
-};
-
 module.exports.applyTags = function applyTags(scenario, tags) {
   for (const tag of tags) {
     if (checkProjectTag(scenario, tag)) {
@@ -292,20 +198,6 @@ module.exports.applyTags = function applyTags(scenario, tags) {
     }
   }
   return false;
-};
-
-module.exports.applyFilter = function applyFilter(scenario, filter) {
-  let result = true;
-
-  if (filter.executionRules) {
-    for (const executionRule of filter.executionRules) {
-      result = result && validateExecutionRule(scenario, executionRule);
-    }
-  }
-  if (!filter.ignoreProjectTag) {
-    result = result && checkProjectTag(scenario, scenario.projectTag);
-  }
-  return result;
 };
 
 module.exports.getScenarioFilters = function getScenarioFilters(scenario, projectTag) {
@@ -321,7 +213,7 @@ module.exports.getScenarioFilters = function getScenarioFilters(scenario, projec
         result = result && validateExecutionRule(scenario, executionRule);
       }
     }
-    if (!filter.ignoreProjectTag) {
+    if (projectTag && !filter.ignoreProjectTag) {
       result = result && checkProjectTag(scenario, projectTag);
     }
     if (result) {
