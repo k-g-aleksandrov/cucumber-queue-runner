@@ -24,12 +24,12 @@ class SessionsHistoryTableRow extends Component {
 
     return (
       <tr>
-        <td style={{ verticalAlign: 'center' }}>
+        <td style={{ verticalAlign: 'center', width: '50%' }}>
           {details.project}&nbsp;
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3', maxWidth: '50%' }}>
             (scope:&nbsp;
             {details.scenariosFilter.scope === 'custom'
-              ? `custom - ${details.scenariosFilter.tags}`
+              ? `custom - ${details.scenariosFilter.tags.join(', ')}`
               : details.scenariosFilter.scope})
           </span><br/>
           <Link to={`/sessions/history/${details.sessionId}`}>

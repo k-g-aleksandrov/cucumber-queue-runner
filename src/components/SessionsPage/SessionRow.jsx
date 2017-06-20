@@ -46,12 +46,12 @@ class SessionRow extends Component {
     }
     return (
       <tr style={{ backgroundColor: this.state.isFinishing ? 'lightgray' : 'white' }}>
-        <td style={{ verticalAlign: 'center' }} rowSpan='2'>
+        <td style={{ verticalAlign: 'center', width: '50%' }} rowSpan='2'>
           {details.project}&nbsp;
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>
             (scope:&nbsp;
             {details.scenariosFilter.scope === 'custom'
-              ? `custom - ${details.scenariosFilter.tags}`
+              ? `custom - ${details.scenariosFilter.tags.join(', ')}`
               : details.scenariosFilter.scope})
           </span><br/>
           <Link to={`/sessions/${details.sessionId}`}>

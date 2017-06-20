@@ -78,7 +78,7 @@ class SessionDetails extends Component {
             <th>Scope</th>
             <td>
               {sessionDetails.scenariosFilter.scope === 'custom'
-                ? `custom - ${sessionDetails.scenariosFilter.tags}`
+                ? `custom - ${sessionDetails.scenariosFilter.tags.join(', ')}`
                 : sessionDetails.scenariosFilter.scope}
             </td>
           </tr>
