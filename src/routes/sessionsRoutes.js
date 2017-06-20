@@ -6,7 +6,7 @@ import fs from 'fs';
 import Session from 'libs/session';
 import util from 'libs/util';
 
-import { SessionHistory } from 'libs/mongoose';
+import { SessionHistory, HistoryScenarios } from 'libs/mongoose';
 
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
@@ -40,14 +40,29 @@ router.get('/', (req, res) => {
 
 router.get('/history', (req, res) => {
   const responseObject = {};
-  const histories = SessionHistory.find({}).sort({ 'details.endDate': -1 }).limit(10);
+  const histories = SessionHistory.find({}).sort({ 'details.endDate': -1 }).limit(30);
 
   histories.exec()
     .then((sessions) => {
-      responseObject.sessionsHistory = [];
+      responseObject.sessionsHistory = {};
       for (const session of sessions) {
-        responseObject.sessionsHistory.push(session);
+        responseObject.sessionsHistory[session.details.sessionId] = session;
       }
+      res.send(responseObject);
+    })
+    .catch((err) => {
+      log.error(err);
+    });
+});
+
+router.get('/history/:sessionId', (req, res) => {
+  const sessionId = req.params.sessionId;
+  const responseObject = {};
+  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId }).populate('historyScenarios');
+
+  histories.exec()
+    .then((history) => {
+      responseObject[history.details.sessionId] = history;
       res.send(responseObject);
     })
     .catch((err) => {

@@ -23,7 +23,7 @@ class SessionDetails extends Component {
 
     if (this.props.history) {
       timeAndDuration.push(
-        <tr>
+        <tr key='finished'>
           <th>Finished</th>
           <td>
             {moment(new Date()).to(moment(sessionDetails.endDate))}
@@ -35,7 +35,7 @@ class SessionDetails extends Component {
         </tr>
       );
       timeAndDuration.push(
-        <tr>
+        <tr key='duration'>
           <th>Duration</th>
           <td>
             {moment(sessionDetails.endDate).to(moment(sessionDetails.startDate), true)}

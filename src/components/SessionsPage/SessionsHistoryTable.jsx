@@ -50,8 +50,8 @@ class SessionsHistoryTable extends Component {
       <Table style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }} striped bordered>
         <tbody>
           <SessionsHistoryTableHeader/>
-          {sessionsHistory.map((session, i) => {
-            return <SessionsHistoryTableRow key={i} session={session}/>;
+          {Object.keys(sessionsHistory).map((session, i) => {
+            return <SessionsHistoryTableRow key={i} session={sessionsHistory[session]}/>;
           })}
         </tbody>
       </Table>

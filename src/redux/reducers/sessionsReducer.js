@@ -52,6 +52,18 @@ export default function (state = initialState, action) {
       };
     case 'session/FAILURE':
       return Object.assign({}, state);
+    case 'session/history/REQUEST':
+      return Object.assign({}, state);
+    case 'session/history/SUCCESS':
+      return {
+        ...state,
+        sessionsHistory: {
+          ...state.sessionsHistory,
+          [action.meta.sessionId]: action.payload[action.meta.sessionId]
+        }
+      };
+    case 'session/history/FAILURE':
+      return Object.assign({}, state);
     default:
       return state;
   }

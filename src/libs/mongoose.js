@@ -79,6 +79,11 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
 const SessionHistorySchema = new Schema({
   details: Schema.Types.Mixed,
   briefStatus: Schema.Types.Mixed,
+  scenarios: Schema.Types.Mixed,
+  historyScenarios: { type: Schema.Types.ObjectId, ref: 'HistoryScenarios' }
+});
+
+const HistoryScenariosSchema = new Schema({
   scenarios: Schema.Types.Mixed
 });
 
@@ -86,8 +91,10 @@ const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
 const Execution = mongoose.model('Execution', ExecutionSchema);
 const SessionHistory = mongoose.model('SessionHistory', SessionHistorySchema);
+const HistoryScenarios = mongoose.model('HistoryScenarios', HistoryScenariosSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
 module.exports.Execution = Execution;
 module.exports.SessionHistory = SessionHistory;
+module.exports.HistoryScenarios = HistoryScenarios;

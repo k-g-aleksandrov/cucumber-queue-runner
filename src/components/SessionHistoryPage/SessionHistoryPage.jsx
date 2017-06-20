@@ -5,13 +5,14 @@ import PropTypes from 'prop-types';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 import Grid from 'react-bootstrap/lib/Grid';
+import Alert from 'react-bootstrap/lib/Alert';
 
 import Spinner from 'components/common/Spinner';
 import SessionDetails from 'components/common/SessionDetails';
 import SessionStatusChart from 'components/common/SessionStatusChart';
 import ScenariosHistoryTable from './ScenariosHistoryTable';
 
-import { fetchSessionsHistory } from 'redux/actions/sessionsActions';
+import { fetchSessionHistory } from 'redux/actions/sessionsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -32,7 +33,7 @@ class SessionHistoryPage extends Component {
   }
 
   fetchSessionsHistory() {
-    this.props.dispatch(fetchSessionsHistory());
+    this.props.dispatch(fetchSessionHistory(this.props.params.session));
   }
 
   render() {
@@ -44,7 +45,7 @@ class SessionHistoryPage extends Component {
       return <Spinner/>;
     }
 
-    const session = sessionsHistory.find(o => o.details.sessionId === sessionId);
+    const session = sessionsHistory[sessionId];
 
     if (!session) {
       this.props.router.push(`/sessions?lost=${sessionId}`);
@@ -61,11 +62,19 @@ class SessionHistoryPage extends Component {
             <SessionStatusChart sessionBriefStatus={session.briefStatus}/>
           </Col>
         </Row>
+        {session.historyScenarios &&
         <Row>
           <Col sm={12}>
-            <ScenariosHistoryTable sessionScenarios={session.scenarios} onlyFailed={false}/>
+            <ScenariosHistoryTable sessionScenarios={session.historyScenarios.scenarios} onlyFailed={false}/>
           </Col>
         </Row>
+        }
+        {!session.historyScenarios &&
+        <Row>
+          <Col>
+            <Alert bsStyle='info'>No scenarios history</Alert>
+          </Col>
+        </Row>}
       </Grid>
     );
   }
@@ -76,7 +85,6 @@ function mapStateToProps(state) {
 
   return { sessionsHistory };
 }
-
 
 SessionHistoryPage.propTypes = propTypes;
 

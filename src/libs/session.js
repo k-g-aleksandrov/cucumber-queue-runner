@@ -3,7 +3,7 @@ const log = logTemplate(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Execution, SessionHistory, Scenario } from 'libs/mongoose';
+import { Execution, SessionHistory, Scenario, HistoryScenarios } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
@@ -368,15 +368,26 @@ class Session {
         ...this.getSessionDetails(),
         endDate: new Date()
       },
-      briefStatus: this.getBriefStatus(),
+      briefStatus: this.getBriefStatus()
+    });
+
+    const scenariosHistory = new HistoryScenarios({
       scenarios
     });
 
-    history.save((err) => {
-      if (err) {
-        log.error(err);
+    scenariosHistory.save((saveScenariosErr) => {
+      if (saveScenariosErr) {
+        log.error(saveScenariosErr);
+      } else {
+        history.historyScenarios = scenariosHistory._id;
+        history.save((saveHistoryErr) => {
+          if (saveHistoryErr) {
+            log.error(saveHistoryErr);
+          } else {
+            log.info(`History for session ${this.sessionId} successfully saved.`);
+          }
+        });
       }
-      log.info(`History for session ${this.sessionId} successfully saved.`);
     });
   }
 }

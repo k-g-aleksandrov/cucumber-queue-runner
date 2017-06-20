@@ -26,7 +26,7 @@ class SessionsHistoryTableRow extends Component {
       <tr>
         <td style={{ verticalAlign: 'center' }}>
           {details.project}&nbsp;
-          <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3' }}>
+          <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3', maxWidth: '50%' }}>
             (scope:&nbsp;
             {details.scenariosFilter.scope === 'custom'
               ? `custom - ${details.scenariosFilter.tags}`

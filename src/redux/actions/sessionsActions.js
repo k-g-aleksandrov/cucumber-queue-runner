@@ -63,3 +63,17 @@ export function fetchSessionsHistory() {
     }
   };
 }
+
+export function fetchSessionHistory(sessionId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/sessions/history/${sessionId}`,
+      method: 'GET',
+      types: [
+        { type: 'session/history/REQUEST', meta: { sessionId } },
+        { type: 'session/history/SUCCESS', meta: { sessionId } },
+        { type: 'session/history/FAILURE', meta: { sessionId } }
+      ]
+    }
+  };
+}
