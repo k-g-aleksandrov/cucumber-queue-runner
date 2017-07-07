@@ -39,3 +39,13 @@ export function deleteProject(projectId) {
     }
   };
 }
+
+export function fetchTestRailMap() {
+  return {
+    [CALL_API]: {
+      endpoint: '/api/projects/testrail-map',
+      method: 'GET',
+      types: ['projects/testrail-map/REQUEST', 'projects/testrail-map/SUCCESS', 'projects/testrail-map/FAILURE']
+    }
+  };
+}
