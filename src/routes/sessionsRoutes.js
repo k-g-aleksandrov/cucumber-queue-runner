@@ -6,7 +6,7 @@ import fs from 'fs';
 import Session from 'libs/session';
 import util from 'libs/util';
 
-import { SessionHistory, HistoryScenarios } from 'libs/mongoose';
+import { SessionHistory } from 'libs/mongoose';
 
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
@@ -64,6 +64,20 @@ router.get('/history/:sessionId', (req, res) => {
     .then((history) => {
       responseObject[history.details.sessionId] = history;
       res.send(responseObject);
+    })
+    .catch((err) => {
+      log.error(err);
+    });
+});
+
+router.get('/history/:sessionId/percent', (req, res) => {
+  const sessionId = req.params.sessionId;
+  const history = SessionHistory.findOne({ 'details.sessionId': sessionId });
+
+  history.exec()
+    .then((historyObject) => {
+      const { passedCount, skippedCount, doneCount } = historyObject.briefStatus;
+      res.send(((passedCount / (doneCount - skippedCount)) * 100).toString());
     })
     .catch((err) => {
       log.error(err);
