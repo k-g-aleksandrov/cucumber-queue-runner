@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { Grid, Row } from 'react-bootstrap';
+import { Grid, Row, Col } from 'react-bootstrap';
 
 const propTypes = {
   testCase: PropTypes.any
@@ -19,8 +19,10 @@ class TestCasePanel extends Component {
     return (
       <Row>
         <Grid fluid>
-          <Row>{JSON.stringify(testCase)}</Row>
-
+          <Row>
+            <Col md={testCase.scenarios ? 4 : 12}>{testCase.title}</Col>
+            {testCase.scenarios.length > 0 && <Col md={8}>{JSON.stringify(testCase.scenarios)}</Col>}
+          </Row>
         </Grid>
       </Row>
     );

@@ -12,25 +12,25 @@ class TestRailMapper {
   }
 
   rescanTestRailIDs() {
-    console.log('Started TestRail map scan');
+    console.log('Testrail Map: scan started...');
     let suitesList;
     let sectionsList;
     let casesList;
 
     this.getTestRailSuites()
       .then((suitesListTemp) => {
-        console.log('Loading test suites');
+        console.log('Testrail Map: loading suites');
         this.mapperState = TestRailMapper.STATE_TESTRAIL_GET_SUITES;
         suitesList = suitesListTemp;
         return this.getTestRailSections(suitesList);
       })
       .then((sectionsListTemp) => {
-        console.log('Loading test sections');
+        console.log('Testrail Map: loading sections');
         sectionsList = sectionsListTemp;
         return this.getTestRailCases(suitesList);
       })
       .then((casesListTemp) => {
-        console.log('Loading test cases');
+        console.log('Testrail Map: loading cases');
         this.mapperState = TestRailMapper.STATE_TESTRAIL_GET_CASES;
         casesList = casesListTemp;
         for (const caseId of Object.keys(casesList)) {
@@ -39,13 +39,14 @@ class TestRailMapper {
           testCase.suite = suitesList[testCase.suite_id].name;
           testCase.section = sectionsList[testCase.section_id].name;
         }
-        console.log('Mapping cases to features');
+        console.log('Testrail Map: mapping scenarios');
         return this.compareWithFeatures(suitesList, sectionsList, casesList);
       })
       .then((testRailMap) => {
         this.mapperState = TestRailMapper.STATE_COMPARISON;
         this.testRailMap = testRailMap;
         this.mapperState = TestRailMapper.STATE_IDLE;
+        console.log('Testrail Map: done mapping');
       });
   }
 

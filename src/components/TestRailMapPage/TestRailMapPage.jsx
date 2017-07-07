@@ -41,8 +41,6 @@ class TestRailMapPage extends Component {
       return <Spinner/>;
     }
 
-    console.log(testRailMap);
-
     return (
       <Grid fluid style={{ paddingBottom: '20px' }}>
         {Object.keys(testRailMap.testRailMap).map((suite, i) => {
