@@ -19,9 +19,11 @@ class SuitePanel extends Component {
     const { suite } = this.props;
 
     return (
-      <Row>
+      <Row style={{ paddingBottom: '20px', boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }}>
         <Grid fluid>
-          <Row>{suite.name}</Row>
+          <Row style={{ padding: '8px', border: '1px solid #ddd' }}>
+            <h4>{suite.name}</h4>
+          </Row>
           {Object.keys(suite.sections).map((sectionName, i) => {
             return <SectionPanel key={i} section={suite.sections[sectionName]}/>;
           })}

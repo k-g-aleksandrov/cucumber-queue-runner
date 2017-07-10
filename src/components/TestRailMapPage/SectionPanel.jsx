@@ -21,7 +21,9 @@ class SectionPanel extends Component {
     return (
       <Row>
         <Grid fluid>
-          <Row>{section.name}</Row>
+          <Row style={{ padding: '8px', paddingLeft: '10px', border: '1px solid #ddd' }}>
+            <h5>→&nbsp;{section.name}</h5>
+          </Row>
           {Object.keys(section.cases).map((caseTitle, i) => {
             return <TestCasePanel key={i} testCase={section.cases[caseTitle]}/>;
           })}

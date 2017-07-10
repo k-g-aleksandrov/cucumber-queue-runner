@@ -40,10 +40,10 @@ class TestRailMapper {
           testCase.section = sectionsList[testCase.section_id].name;
         }
         console.log('Testrail Map: mapping scenarios');
+        this.mapperState = TestRailMapper.STATE_COMPARISON;
         return this.compareWithFeatures(suitesList, sectionsList, casesList);
       })
       .then((testRailMap) => {
-        this.mapperState = TestRailMapper.STATE_COMPARISON;
         this.testRailMap = testRailMap;
         this.mapperState = TestRailMapper.STATE_IDLE;
         console.log('Testrail Map: done mapping');
@@ -237,7 +237,7 @@ TestRailMapper.STATE_COMPARISON = 'comparison';
 TestRailMapper.AUTHORIZATION_STRING =
         `Basic ${new Buffer(`${config.get('testrail:login')}:${config.get('testrail:password')}`).toString('base64')}`;
 
-TestRailMapper.PROJECT_ID = 13;
+TestRailMapper.PROJECT_ID = config.get('testrail:projectId');
 
 TestRailMapper.mapper = new TestRailMapper();
 
