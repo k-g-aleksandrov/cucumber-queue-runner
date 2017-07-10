@@ -10,6 +10,7 @@ import projectsRoutes from './routes/projectsRoutes';
 import favicon from 'serve-favicon';
 import path from 'path';
 import bodyParser from 'body-parser';
+import config from 'config';
 
 const app = express();
 
@@ -76,7 +77,7 @@ function renderHTML(componentHTML, initialState) {
   `;
 }
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || config.get('port');
 
 app.listen(PORT, () => {
   console.log(`Server listening on: ${PORT}`);

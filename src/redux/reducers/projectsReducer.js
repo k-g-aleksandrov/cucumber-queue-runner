@@ -10,11 +10,23 @@ export default function (state = initialState, action) {
       return Object.assign({}, state, { loading: true, errors: null });
     case 'projects/SUCCESS':
       return {
+        ...state,
         loading: false,
         errors: null,
         availableProjects: action.payload.projects
       };
     case 'projects/FAILURE':
+      return Object.assign({}, state, { loading: false, errors: action.errors });
+    case 'projects/testrail-map/REQUEST':
+      return Object.assign({}, state, { loading: false, errors: null });
+    case 'projects/testrail-map/SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        errors: null,
+        testRailMapperDetails: action.payload
+      };
+    case 'projects/testrail-map/FAILURE':
       return Object.assign({}, state, { loading: false, errors: action.errors });
     default:
       return state;

@@ -29,6 +29,9 @@ class App extends Component {
               <LinkContainer to='/projects'>
                 <NavItem>Projects</NavItem>
               </LinkContainer>
+              <LinkContainer to='/testrail-map'>
+                <NavItem>TestRail Map</NavItem>
+              </LinkContainer>
             </Nav>
             <Navbar.Text>
               <Navbar.Link href='http://fluix-auto.od.readdle.com' target='_blank'>Open Jenkins</Navbar.Link>

@@ -44,7 +44,7 @@ class SessionDetails extends Component {
       );
     } else {
       timeAndDuration.push(
-        <tr>
+        <tr key='started'>
           <th>Started</th>
           <td>
             {moment(new Date()).to(moment(sessionDetails.startDate))}

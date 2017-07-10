@@ -5,6 +5,8 @@ import filter from 'libs/filter';
 import gherkin from 'gherkin';
 import fs from 'fs';
 
+import mapper from 'libs/testrail';
+
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
 
@@ -73,6 +75,14 @@ router.get('/', (req, res) => {
     .catch((err) => {
       res.send({ error: 'Failed to get projects list from DB', originalError: err });
     });
+});
+
+router.get('/testrail-map', (req, res) => {
+  res.send(mapper.getCurrentState());
+});
+router.get('/testrail-map/scan', (req, res) => {
+  mapper.rescanTestRailMap();
+  res.send(mapper.getCurrentState());
 });
 
 router.get('/cleanExecutions', (req, res) => {

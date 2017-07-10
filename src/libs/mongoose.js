@@ -87,14 +87,22 @@ const HistoryScenariosSchema = new Schema({
   scenarios: Schema.Types.Mixed
 });
 
+const TestRailMapSchema = new Schema({
+  mappingDate: Schema.Types.Date,
+  featuresToTestRailMap: Schema.Types.Mixed,
+  testRailToFeaturesMap: Schema.Types.Mixed
+});
+
 const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
 const Execution = mongoose.model('Execution', ExecutionSchema);
 const SessionHistory = mongoose.model('SessionHistory', SessionHistorySchema);
 const HistoryScenarios = mongoose.model('HistoryScenarios', HistoryScenariosSchema);
+const TestRailMap = mongoose.model('TestRailMap', TestRailMapSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
 module.exports.Execution = Execution;
 module.exports.SessionHistory = SessionHistory;
 module.exports.HistoryScenarios = HistoryScenarios;
+module.exports.TestRailMap = TestRailMap;
