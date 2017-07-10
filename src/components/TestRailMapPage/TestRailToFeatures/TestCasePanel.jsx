@@ -25,7 +25,20 @@ class TestCasePanel extends Component {
   getColor(value) {
     const hue = (value * 120).toString(10);
 
-    return [ `hsl(${hue},100%,70%)` ].join('');
+    return [ `hsl(${hue},100%,76%)` ].join('');
+  }
+
+  getSimilarityColor(testCase) {
+    let similarity = 1;
+    let color = this.getColor(similarity);
+
+    for (const scenario of testCase.scenarios) {
+      const newSimilarity = stringSimilarity.compareTwoStrings(testCase.title, scenario.scenarioName);
+
+      similarity = newSimilarity < similarity ? newSimilarity : similarity;
+      color = this.getColor(similarity);
+    }
+    return color;
   }
 
   render() {
@@ -34,18 +47,17 @@ class TestCasePanel extends Component {
     let row = null;
 
     if (testCase.scenarios && testCase.scenarios.length > 0) {
-      let similarity = 1;
-      let color = this.getColor(similarity);
-
-      for (const scenario of testCase.scenarios) {
-        const newSimilarity = stringSimilarity.compareTwoStrings(testCase.title, scenario.scenarioName);
-
-        similarity = newSimilarity < similarity ? newSimilarity : similarity;
-        color = this.getColor(similarity);
-      }
+      const color = this.getSimilarityColor(testCase);
 
       row = (
-        <Row style={{ padding: '8px', paddingLeft: '10px', border: '1px solid #ddd', backgroundColor: color }}>
+        <Row style={{
+          padding: '8px',
+          paddingLeft: '10px',
+          borderTop: '1px solid #ddd',
+          borderLeft: '1px solid #ddd',
+          backgroundColor: color
+        }}
+        >
           <Col md={4} key='title'>{testCase.title}</Col>
           <ScenariosColumn scenarios={testCase.scenarios}/>
         </Row>

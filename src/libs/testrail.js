@@ -8,7 +8,6 @@ class TestRailMapper {
 
   constructor() {
     this.mapperState = TestRailMapper.STATE_IDLE;
-    this.startDate = new Date();
   }
 
   rescanTestRailIDs() {
@@ -44,10 +43,52 @@ class TestRailMapper {
         return this.compareWithFeatures(suitesList, sectionsList, casesList);
       })
       .then((testRailMap) => {
+        console.log('Testrail Map: reverse mapping');
         this.testRailMap = testRailMap;
+        return this.compareFeaturesWithTestRail(suitesList, sectionsList, casesList);
+      })
+      .then((reverseMap) => {
+        this.reverseMap = reverseMap;
+        this.endScanDate = new Date();
         this.mapperState = TestRailMapper.STATE_IDLE;
         console.log('Testrail Map: done mapping');
       });
+  }
+
+  compareFeaturesWithTestRail(suitesList, sectionsList, casesList) {
+    return new Promise((resolve) => {
+      const reverseMap = {};
+
+      Scenario.find({}, {
+        executions: 0,
+        __v:0,
+        _id: 0,
+        classpath:0
+      }).exec()
+        .then((scenarios) => {
+          for (let scenario of scenarios) {
+            scenario = scenario.toObject();
+
+            if (!reverseMap[scenario.project]) {
+              reverseMap[scenario.project] = { name: scenario.project, features: {} };
+            }
+            if (!reverseMap[scenario.project].features[scenario.featureName]) {
+              reverseMap[scenario.project].features[scenario.featureName] = { name: scenario.featureName, scenarios: {} };
+            }
+            scenario.testCases = [];
+            for (const tag of scenario.tags.filter((t) => t.startsWith('@id'))) {
+              const testCase = casesList[tag.replace('@id', '')];
+
+              console.log(testCase);
+              if (testCase) {
+                scenario.testCases.push(testCase);
+              }
+            }
+            reverseMap[scenario.project].features[scenario.featureName].scenarios[scenario.scenarioName] = scenario;
+          }
+          resolve(reverseMap);
+        });
+    });
   }
 
   compareWithFeatures(suitesList, sectionsList, casesList) {
@@ -221,9 +262,9 @@ class TestRailMapper {
     }
     return {
       state: this.mapperState,
-      startDate: this.startDate,
-      currentDate: new Date(),
-      testRailMap: this.testRailMap
+      endScanDate: this.endScanDate,
+      testRailMap: this.testRailMap,
+      reverseMap: this.reverseMap
     };
   }
 }

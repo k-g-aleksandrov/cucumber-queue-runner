@@ -34,6 +34,11 @@ class ScenariosColumn extends Component {
               );
             })}
           </Row>
+          {scenarios.length > 1 &&
+            <Row>
+              <Col style={{ fontWeight: 'bold' }}>Warning: more than 1 scenario with same tag found</Col>
+            </Row>
+          }
         </Grid>
       </Col>
     );
