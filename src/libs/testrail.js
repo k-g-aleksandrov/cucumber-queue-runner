@@ -74,10 +74,7 @@ class TestRailMapper {
           .then(() => {
             console.log('TestRail Map: saved object to DB');
           });
-      })
-      .catch((err) => {
-        console.log(err);
-      })
+      });
   }
 
   compareFeaturesWithTestRail(suitesList, sectionsList, casesList) {
@@ -91,9 +88,11 @@ class TestRailMapper {
         classpath:0
       }).exec()
         .then((scenarios) => {
+          console.log('TestRail Map: received list of scenarios');
           for (let scenario of scenarios) {
             scenario = scenario.toObject();
 
+            console.log(`Processing ${scenario.scenarioName}`);
             if (!reverseMap[scenario.project]) {
               reverseMap[scenario.project] = { name: scenario.project, features: {} };
             }
@@ -113,6 +112,10 @@ class TestRailMapper {
                     .scenarios[scenario.scenarioName.replace(/\./g, '_')] = scenario;
           }
           resolve(reverseMap);
+        })
+        .catch((err) => {
+          console.log(err);
+          resolve({});
         });
     });
   }
