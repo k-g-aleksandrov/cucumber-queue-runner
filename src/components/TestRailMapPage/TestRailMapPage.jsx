@@ -75,6 +75,21 @@ class TestRailMapPage extends Component {
               Features → TestRail Cases&nbsp;
             </h2>
             (<Link to={'/testrail-map?mode=testrail'}>TestRail Cases → Features</Link>)
+            <div style={{ float: 'right' }}>
+              <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>
+            </div>
+            <span
+              style={{
+                float: 'right',
+                fontStyle: 'italic',
+                fontSize: '12px',
+                paddingRight: '10px',
+                color: '#777'
+              }}
+            >
+              Last scan: {moment(new Date()).to(moment(testRailMapperDetails.mappingDate))}<br/>
+              Current state: {testRailMapperDetails.state}
+            </span>
           </div>
           <div style={{ align: 'right' }}>
             <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>
