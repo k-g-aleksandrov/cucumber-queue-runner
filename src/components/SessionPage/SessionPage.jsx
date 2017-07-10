@@ -79,6 +79,21 @@ class SessionPage extends Component {
 
     const activeTab = queryParams.tab ? queryParams.tab : 'queue';
 
+    let failedScenarios = null;
+
+    if (activeTab === 'failed') {
+      failedScenarios = {};
+      for (const feature of Object.keys(session.status.done)) {
+        const featureScenarios = session.status.done[feature].filter((scenario) => {
+          return scenario.result === 'failed';
+        });
+
+        if (featureScenarios && featureScenarios.length) {
+          failedScenarios[feature] = featureScenarios;
+        }
+      }
+    }
+
     return (
       <Grid fluid style={{ paddingBottom: '20px' }}>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
@@ -109,6 +124,11 @@ class SessionPage extends Component {
                     <LinkContainer to={`/sessions/${sessionId}?tab=done`}>
                       <NavItem eventKey='done'>
                         Done
+                      </NavItem>
+                    </LinkContainer>
+                    <LinkContainer to={`/sessions/${sessionId}?tab=failed`}>
+                      <NavItem eventKey='failed'>
+                        Failed
                       </NavItem>
                     </LinkContainer>
                   </Nav>
@@ -178,6 +198,29 @@ class SessionPage extends Component {
                                   </Row>
                                   {session.status.done[feature].map((scenario, j) => {
                                     return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
+                                  })}
+                                </Grid>
+                              );
+                            })}
+                          </Col>
+                        </Row>
+                      </Grid>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey='failed'>
+                      <Grid fluid>
+                        <Row>
+                          <Col>
+                            {failedScenarios && Object.keys(failedScenarios).map((feature, i) => {
+                              return (
+                                <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
+                                  <Row style={{ margin: '2px' }}>
+                                    <Col><h4>{feature}</h4></Col>
+                                  </Row>
+                                  {failedScenarios[feature].map((scenario, j) => {
+                                    if (scenario.result === 'failed') {
+                                      return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
+                                    }
+                                    return null;
                                   })}
                                 </Grid>
                               );
