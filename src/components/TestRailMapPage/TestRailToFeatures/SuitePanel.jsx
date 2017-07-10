@@ -21,7 +21,14 @@ class SuitePanel extends Component {
     return (
       <Row style={{ marginBottom: '20px', boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)', border: '1px solid #ddd' }}>
         <Grid fluid>
-          <Row style={{ padding: '8px' }}>
+          <Row
+            style={{
+              backgroundColor: '#d9edf7',
+              padding: '8px',
+              paddingLeft: '16px',
+              cursor: 'pointer'
+            }}
+          >
             <h4>{suite.name}</h4>
           </Row>
           {Object.keys(suite.sections).map((sectionName, i) => {

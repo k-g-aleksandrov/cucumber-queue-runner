@@ -64,7 +64,7 @@ class TestCasePanel extends Component {
       );
     } else if (doShowNotCovered) {
       row = (
-        <Row style={{ padding: '8px', paddingLeft: '10px', border: '1px solid #ddd', backgroundColor: 'lightgray' }}>
+        <Row style={{ padding: '8px', paddingLeft: '10px', border: '1px solid #ddd', backgroundColor: '#ddd' }}>
           <Col md={12} key='title'>{testCase.title}</Col>
         </Row>
       );

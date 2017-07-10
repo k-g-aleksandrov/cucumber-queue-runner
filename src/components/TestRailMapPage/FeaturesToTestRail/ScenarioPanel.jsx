@@ -44,15 +44,15 @@ class ScenarioPanel extends Component {
           style={{
             padding: '8px',
             paddingLeft: '10px',
-            borderTop: '1px solid #ddd',
-            borderLeft: '1px solid #ddd',
+            borderTop: '1px solid #ccc',
+            borderLeft: '1px solid #ccc',
             backgroundColor: color
           }}
         >
           <Col md={4} key='title'>
             {
               scenario.filters.includes('disabled')
-              && <span style={{ fontColor: 'red', fontWeight: 'bold' }}>[disabled]&nbsp;</span>
+              && <span style={{ color: 'red', fontWeight: 'bold' }}>[disabled]&nbsp;</span>
             }
             {scenario.scenarioName}
           </Col>
@@ -71,7 +71,7 @@ class ScenarioPanel extends Component {
       );
     } else {
       row = (
-        <Row style={{ padding: '8px', paddingLeft: '10px', border: '1px solid #ddd', backgroundColor: 'lightgray' }}>
+        <Row style={{ padding: '8px', paddingLeft: '10px', border: '1px solid #ddd', backgroundColor: '#ccc' }}>
           <Col md={12} key='title'>{scenario.scenarioName}</Col>
         </Row>
       );

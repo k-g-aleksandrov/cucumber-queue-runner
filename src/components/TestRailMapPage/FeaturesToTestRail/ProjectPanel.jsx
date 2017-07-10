@@ -19,9 +19,22 @@ class ProjectPanel extends Component {
     const { project } = this.props;
 
     return (
-      <Row style={{ marginBottom: '20px', boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)', border: '1px solid #ddd' }}>
+      <Row
+        style={{
+          marginBottom: '20px',
+          boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)',
+          border: '1px solid #ddd'
+        }}
+      >
         <Grid fluid>
-          <Row style={{ backgroundColor: '#8AF', padding: '8px', paddingLeft: '16px' }}>
+          <Row
+            style={{
+              backgroundColor: '#d9edf7',
+              padding: '8px',
+              paddingLeft: '16px',
+              cursor: 'pointer'
+            }}
+          >
             <h4>{project.name}</h4>
           </Row>
           {Object.keys(project.features).map((featureName, i) => {
