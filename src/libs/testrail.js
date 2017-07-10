@@ -74,7 +74,10 @@ class TestRailMapper {
           .then(() => {
             console.log('TestRail Map: saved object to DB');
           });
-      });
+      })
+      .catch((err) => {
+        console.log(err);
+      })
   }
 
   compareFeaturesWithTestRail(suitesList, sectionsList, casesList) {
