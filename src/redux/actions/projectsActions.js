@@ -49,3 +49,13 @@ export function fetchTestRailMap() {
     }
   };
 }
+
+export function rescanTestRailMap() {
+  return {
+    [CALL_API]: {
+      endpoint: '/api/projects/testrail-map/scan',
+      method: 'GET',
+      types: ['projects/testrail-map/REQUEST', 'projects/testrail-map/SUCCESS', 'projects/testrail-map/FAILURE']
+    }
+  };
+}

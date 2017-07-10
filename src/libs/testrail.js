@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import { Scenario } from 'libs/mongoose';
+import { TestRailMap, Scenario } from 'libs/mongoose';
 
 import config from 'config';
 
@@ -8,9 +8,21 @@ class TestRailMapper {
 
   constructor() {
     this.mapperState = TestRailMapper.STATE_IDLE;
+    this.testRailMap = {};
+    TestRailMap.findOne({}, { __v:0, _id: 0 }).limit(1).exec()
+      .then((testRailMap) => {
+        if (testRailMap) {
+          this.testRailMap = testRailMap.toObject();
+        }
+      });
   }
 
-  rescanTestRailIDs() {
+  rescanTestRailMap() {
+    if (this.mapperState !== TestRailMapper.STATE_IDLE) {
+      console.log('Mapping already started.');
+      return;
+    }
+    this.mapperState = TestRailMap.STATE_STARTED;
     console.log('Testrail Map: scan started...');
     let suitesList;
     let sectionsList;
@@ -42,16 +54,26 @@ class TestRailMapper {
         this.mapperState = TestRailMapper.STATE_COMPARISON;
         return this.compareWithFeatures(suitesList, sectionsList, casesList);
       })
-      .then((testRailMap) => {
+      .then((testRailToFeaturesMap) => {
+        this.testRailMap.testRailToFeaturesMap = testRailToFeaturesMap;
         console.log('Testrail Map: reverse mapping');
-        this.testRailMap = testRailMap;
         return this.compareFeaturesWithTestRail(suitesList, sectionsList, casesList);
       })
-      .then((reverseMap) => {
-        this.reverseMap = reverseMap;
-        this.endScanDate = new Date();
+      .then((featuresToTestRailMap) => {
+        this.testRailMap.featuresToTestRailMap = featuresToTestRailMap;
+        this.testRailMap.mappingDate = new Date();
         this.mapperState = TestRailMapper.STATE_IDLE;
         console.log('Testrail Map: done mapping');
+        const map = new TestRailMap({
+          mappingDate: this.testRailMap.mappingDate,
+          featuresToTestRailMap: this.testRailMap.featuresToTestRailMap,
+          testRailToFeaturesMap: this.testRailMap.testRailToFeaturesMap
+        });
+
+        map.save()
+          .then(() => {
+            console.log('TestRail Map: saved object to DB');
+          });
       });
   }
 
@@ -79,12 +101,13 @@ class TestRailMapper {
             for (const tag of scenario.tags.filter((t) => t.startsWith('@id'))) {
               const testCase = casesList[tag.replace('@id', '')];
 
-              console.log(testCase);
               if (testCase) {
                 scenario.testCases.push(testCase);
               }
             }
-            reverseMap[scenario.project].features[scenario.featureName].scenarios[scenario.scenarioName] = scenario;
+            reverseMap[scenario.project]
+                    .features[scenario.featureName]
+                    .scenarios[scenario.scenarioName.replace(/\./g, '_')] = scenario;
           }
           resolve(reverseMap);
         });
@@ -122,10 +145,12 @@ class TestRailMapper {
           if (!testRailMap[testCase.suite]) {
             testRailMap[testCase.suite] = { ...suitesList[testCase.suite_id], sections: {} };
           }
-          if (!testRailMap[testCase.suite].sections[testCase.section]) {
-            testRailMap[testCase.suite].sections[testCase.section] = { ...sectionsList[testCase.section_id], cases: {} };
+          if (!testRailMap[testCase.suite].sections[testCase.section.replace(/\./g, '_')]) {
+            testRailMap[testCase.suite]
+                  .sections[testCase.section.replace(/\./g, '_')] = { ...sectionsList[testCase.section_id], cases: {} };
           }
-          testRailMap[testCase.suite].sections[testCase.section].cases[testCase.title] = testCase;
+          testRailMap[testCase.suite]
+                  .sections[testCase.section.replace(/\./g, '_')].cases[testCase.title.replace(/\./g, '_')] = testCase;
         }
         resolve(testRailMap);
       });
@@ -256,15 +281,9 @@ class TestRailMapper {
   }
 
   getCurrentState() {
-    if (this.mapperState === TestRailMapper.STATE_IDLE && !this.testRailMap) {
-      this.mapperState = TestRailMapper.STATE_STARTED;
-      this.rescanTestRailIDs();
-    }
     return {
       state: this.mapperState,
-      endScanDate: this.endScanDate,
-      testRailMap: this.testRailMap,
-      reverseMap: this.reverseMap
+      ...this.testRailMap
     };
   }
 }

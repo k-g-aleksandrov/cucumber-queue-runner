@@ -3,21 +3,25 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Spinner from 'components/common/Spinner';
 
-import { Button } from 'react-bootstrap';
+import Button from 'react-bootstrap-button-loader';
 import { Grid } from 'react-bootstrap';
 import { Link } from 'react-router';
 
-import { fetchTestRailMap } from 'redux/actions/projectsActions';
+import { fetchTestRailMap, rescanTestRailMap } from 'redux/actions/projectsActions';
 
 import SuitePanel from './TestRailToFeatures/SuitePanel';
 import ProjectPanel from './FeaturesToTestRail/ProjectPanel';
+
+import moment from 'moment';
+
+import './NotScannedPanel.css';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   router: PropTypes.any,
   location: PropTypes.any,
   loading: PropTypes.bool.isRequired,
-  testRailMap: PropTypes.any,
+  testRailMapperDetails: PropTypes.any,
   params: PropTypes.object
 };
 
@@ -33,26 +37,35 @@ class TestRailMapPage extends Component {
     this.fetchTestRailMap();
   }
 
+  handleRescanClick() {
+    if (!this.testRailMapperDetails || this.testRailMapperDetails.state === 'idle') {
+      this.props.dispatch(rescanTestRailMap());
+    } else {
+      this.props.dispatch(fetchTestRailMap());
+    }
+  }
+
   fetchTestRailMap() {
     this.props.dispatch(fetchTestRailMap());
   }
 
   render() {
-    const { testRailMap } = this.props;
+    const { testRailMapperDetails } = this.props;
     const queryParams = this.props.location.query;
 
-    if (this.props.loading || !testRailMap) {
+    if (this.props.loading || !testRailMapperDetails) {
       return <Spinner/>;
     }
 
     const activeMode = queryParams.mode ? queryParams.mode : 'testrail';
 
     if (activeMode === 'features') {
-      if (testRailMap && !testRailMap.reverseMap) {
+      if (testRailMapperDetails && !testRailMapperDetails.featuresToTestRailMap) {
         return (
-          <Grid fluid>
-            <Button>Scan</Button>
-          </Grid>
+          <div id='initialScanDialog'>
+            <h3>Project was never scanned</h3>
+            <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Do First Scan</Button>
+          </div>
         );
       }
       return (
@@ -63,14 +76,22 @@ class TestRailMapPage extends Component {
             </h2>
             (<Link to={'/testrail-map?mode=testrail'}>TestRail Cases → Features</Link>)
           </div>
-          {Object.keys(testRailMap.reverseMap).map((project, i) => {
-            return <ProjectPanel key={i} project={testRailMap.reverseMap[project]}/>;
+          <div style={{ align: 'right' }}>
+            <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>
+          </div>
+          {Object.keys(testRailMapperDetails.featuresToTestRailMap).map((project, i) => {
+            return <ProjectPanel key={i} project={testRailMapperDetails.featuresToTestRailMap[project]}/>;
           })}
         </Grid>
       );
     }
-    if (testRailMap && !testRailMap.testRailMap) {
-      return <Grid fluid>Loading TestRail Map</Grid>;
+    if (testRailMapperDetails && !testRailMapperDetails.testRailToFeaturesMap) {
+      return (
+        <div id='initialScanDialog'>
+          <h3>Project was never scanned</h3>
+          <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Do First Scan</Button>
+        </div>
+      );
     }
     return (
       <Grid fluid style={{ paddingBottom: '20px' }}>
@@ -79,9 +100,25 @@ class TestRailMapPage extends Component {
             TestRail Cases → Features&nbsp;
           </h2>
           (<Link to={'/testrail-map?mode=features'}>Features → TestRail Cases</Link>)
+          <div style={{ float: 'right' }}>
+            <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>
+          </div>
+          <span
+            style={{
+              float: 'right',
+              fontStyle: 'italic',
+              fontSize: '12px',
+              paddingRight: '10px',
+              color: '#777'
+            }}
+          >
+            Last scan: {moment(new Date()).to(moment(testRailMapperDetails.mappingDate))}<br/>
+            Current state: {testRailMapperDetails.state}
+          </span>
         </div>
-        {Object.keys(testRailMap.testRailMap).map((suite, i) => {
-          return <SuitePanel key={i} suite={testRailMap.testRailMap[suite]}/>;
+
+        {Object.keys(testRailMapperDetails.testRailToFeaturesMap).map((suite, i) => {
+          return <SuitePanel key={i} suite={testRailMapperDetails.testRailToFeaturesMap[suite]}/>;
         })}
       </Grid>
     );
@@ -89,9 +126,9 @@ class TestRailMapPage extends Component {
 }
 
 function mapStateToProps(state) {
-  const { loading, testRailMap } = state.projects;
+  const { loading, testRailMapperDetails } = state.projects;
 
-  return { loading, testRailMap };
+  return { loading, testRailMapperDetails };
 }
 
 TestRailMapPage.propTypes = propTypes;
