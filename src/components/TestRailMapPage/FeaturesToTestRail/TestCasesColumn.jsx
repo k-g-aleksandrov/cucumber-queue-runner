@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Grid, Row, Col } from 'react-bootstrap';
 
 const propTypes = {
-  testCases: PropTypes.array
+  scenario: PropTypes.any
 };
 
 class TestCasesColumn extends Component {
@@ -14,24 +14,42 @@ class TestCasesColumn extends Component {
   }
 
   render() {
-    const { testCases } = this.props;
+    const { scenario } = this.props;
+
+    let testCasesRow = null;
+
+    if (scenario.testCases) {
+      testCasesRow = (
+        <Row>
+          {scenario.testCases.map((testCase, i) => {
+            return (
+              <Col md={12} key={i}>
+                <span>
+                  <b>C{testCase.id} > {testCase.suite}</b>&nbsp;→&nbsp;
+                  <b>{testCase.section}:&nbsp;</b>
+                  {testCase.title}<br/>
+                </span>
+              </Col>
+            );
+          })}
+        </Row>
+      );
+    }
+
+    const noTagsWarningRow = (scenario.noTagsWarning)
+      ? <Row><Col md={12}><span><b>No ID tags</b></span></Col></Row>
+      : null;
+
+    const incorrectTagsRow = (scenario.incorrectTags)
+      ? <Row><Col md={12}><span><b>Missing cases: {scenario.incorrectTags.join(', ')}</b></span></Col></Row>
+      : null;
 
     return (
       <Col md={8}>
         <Grid fluid>
-          <Row>
-            {testCases.map((testCase, i) => {
-              return (
-                <Col md={12} key={i}>
-                  <span>
-                    <b>{testCase.suite}</b>&nbsp;→&nbsp;
-                    <b>{testCase.section}</b>:&nbsp;
-                    {testCase.title}<br/>
-                  </span>
-                </Col>
-              );
-            })}
-          </Row>
+          {testCasesRow}
+          {noTagsWarningRow}
+          {incorrectTagsRow}
         </Grid>
       </Col>
     );

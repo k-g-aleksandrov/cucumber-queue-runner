@@ -15,7 +15,7 @@ class SuitePanel extends Component {
     super(props);
 
     this.state = {
-      showSections: false
+      showSections: true
     };
   }
 

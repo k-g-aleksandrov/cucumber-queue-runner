@@ -36,7 +36,9 @@ class ScenariosColumn extends Component {
           </Row>
           {scenarios.length > 1 &&
             <Row>
-              <Col style={{ fontWeight: 'bold' }}>Warning: more than 1 scenario with same tag found</Col>
+              <Col md={12} style={{ fontWeight: 'bold' }}>
+                <span><b>Warning:&nbsp;</b>more than 1 scenario with same tag found</span>
+              </Col>
             </Row>
           }
         </Grid>

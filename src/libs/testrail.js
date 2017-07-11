@@ -92,21 +92,34 @@ class TestRailMapper {
           for (let scenario of scenarios) {
             scenario = scenario.toObject();
 
-            console.log(`Processing ${scenario.scenarioName}`);
             if (!reverseMap[scenario.project]) {
               reverseMap[scenario.project] = { name: scenario.project, features: {} };
             }
             if (!reverseMap[scenario.project].features[scenario.featureName]) {
               reverseMap[scenario.project].features[scenario.featureName] = { name: scenario.featureName, scenarios: {} };
             }
-            scenario.testCases = [];
-            for (const tag of scenario.tags.filter((t) => t.startsWith('@id'))) {
-              const testCase = casesList[tag.replace('@id', '')];
+            const idTags = scenario.tags.filter((t) => t.startsWith('@id')).map((t) => t.replace('@id', ''));
 
-              if (testCase) {
-                scenario.testCases.push(testCase);
+            if (idTags.length === 0) {
+              scenario.noTagsWarning = true;
+            } else {
+              for (const idTag of idTags) {
+                const testCase = casesList[idTag];
+
+                if (testCase) {
+                  if (!scenario.testCases) {
+                    scenario.testCases = [];
+                  }
+                  scenario.testCases.push(testCase);
+                } else {
+                  if (!scenario.incorrectTags) {
+                    scenario.incorrectTags = [];
+                  }
+                  scenario.incorrectTags.push(`C${idTag}`);
+                }
               }
             }
+
             reverseMap[scenario.project]
                     .features[scenario.featureName]
                     .scenarios[scenario.scenarioName.replace(/\./g, '_')] = scenario;
@@ -193,6 +206,8 @@ class TestRailMapper {
     return new Promise((scanResolve) => {
       const sectionsList = {};
       const promises = Object.keys(suitesList).map((suiteId) => {
+        const suite = suitesList[suiteId];
+
         return new Promise((suiteResolve) => {
           fetch(`https://${config.get('testrail:url')}/index.php?/api/v2/get_sections/${TestRailMapper.PROJECT_ID}&suite_id=${suiteId}`,
             {
@@ -214,6 +229,11 @@ class TestRailMapper {
                   parentId: section.parent_id
                 };
               }
+              suiteResolve();
+            })
+            .catch((err) => {
+              suite.error = { error: err };
+              console.log(err);
               suiteResolve();
             });
         });
@@ -275,6 +295,11 @@ class TestRailMapper {
 
                 casesList[testCase.id] = testCase;
               }
+              sectionResolve();
+            })
+            .catch((err) => {
+              suite.error = { error: err };
+              console.log(err);
               sectionResolve();
             });
         });

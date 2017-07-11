@@ -15,7 +15,7 @@ class FeaturePanel extends Component {
     super(props);
 
     this.state = {
-      showScenarios: false
+      showScenarios: true
     };
   }
 
