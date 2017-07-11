@@ -52,6 +52,7 @@
     "redux-thunk": "^2.2.0",
     "serve-favicon": "^2.4.2",
     "string-similarity": "^1.2.0",
+    "text-diff": "^1.0.1",
     "winston": "^2.3.1"
   },
   "devDependencies": {

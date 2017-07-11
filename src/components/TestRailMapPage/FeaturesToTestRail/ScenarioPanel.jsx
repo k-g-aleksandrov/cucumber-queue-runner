@@ -7,6 +7,10 @@ import TestCasesColumn from './TestCasesColumn';
 
 import stringSimilarity from 'string-similarity';
 
+import Diff from 'text-diff';
+
+import './ScenarioPanel.css';
+
 const propTypes = {
   scenario: PropTypes.any
 };
@@ -21,6 +25,18 @@ class ScenarioPanel extends Component {
     const hue = (value * 120).toString(10);
 
     return [ `hsl(${hue},100%,76%)` ].join('');
+  }
+
+  getDiffHtml(scName, tcName) {
+    const diff = new Diff();
+    const textDiff = diff.main(tcName, scName);
+
+    diff.cleanupSemantic(textDiff);
+    return diff.prettyHtml(textDiff);
+  }
+
+  removeTag(str, tag) {
+    return str.replace(new RegExp(`<${tag}>(.*?)</${tag}>`, 'g'), '');
   }
 
   render() {
@@ -38,8 +54,14 @@ class ScenarioPanel extends Component {
       for (const testCase of scenario.testCases) {
         const currentSimilarity = stringSimilarity.compareTwoStrings(scenario.scenarioName, testCase.title);
 
-        similarity = currentSimilarity < similarity ? currentSimilarity : similarity;
-        color = this.getColor(similarity);
+        if (currentSimilarity < similarity) {
+          similarity = currentSimilarity < similarity ? currentSimilarity : similarity;
+          color = this.getColor(similarity);
+          const html = this.getDiffHtml(scenario.scenarioName, testCase.title);
+
+          scenario.scenarioNameDiff = this.removeTag(html, 'del');
+          scenario.testCaseTitleDiff = this.removeTag(html, 'ins');
+        }
       }
     }
 
@@ -54,11 +76,17 @@ class ScenarioPanel extends Component {
         }}
       >
         <Col md={4} key='title'>
+          {!scenario.scenarioNameDiff && <span>{scenario.scenarioName}</span>}
+          {scenario.scenarioNameDiff && (
+            <span>
+              <span><b>Aut:&nbsp;</b></span><span dangerouslySetInnerHTML={{ __html: scenario.scenarioNameDiff }}/><br/>
+              <span><b>TR:&nbsp;&nbsp;</b></span><span dangerouslySetInnerHTML={{ __html: scenario.testCaseTitleDiff }}/>
+            </span>
+          )}
           {
             scenario.filters.includes('disabled')
-            && <span style={{ color: 'red', fontWeight: 'bold' }}>[disabled]&nbsp;</span>
+            && <span style={{ color: 'red', fontStyle: 'italic' }}><br/>[disabled]&nbsp;</span>
           }
-          {scenario.scenarioName}
         </Col>
         <TestCasesColumn scenario={scenario}/>
       </Row>
