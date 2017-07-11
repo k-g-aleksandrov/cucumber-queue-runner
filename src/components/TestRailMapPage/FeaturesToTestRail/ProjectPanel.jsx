@@ -13,6 +13,14 @@ class ProjectPanel extends Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      showFeatures: false
+    };
+  }
+
+  handleShowFeaturesClick() {
+    this.setState({ showFeatures: !this.state.showFeatures });
   }
 
   render() {
@@ -28,6 +36,9 @@ class ProjectPanel extends Component {
       >
         <Grid fluid>
           <Row
+            onClick={() => {
+              this.handleShowFeaturesClick();
+            }}
             style={{
               backgroundColor: '#d9edf7',
               padding: '8px',
@@ -37,7 +48,7 @@ class ProjectPanel extends Component {
           >
             <h4>{project.name}</h4>
           </Row>
-          {Object.keys(project.features).map((featureName, i) => {
+          {this.state.showFeatures && Object.keys(project.features).map((featureName, i) => {
             return <FeaturePanel key={i} feature={project.features[featureName]}/>;
           })}
         </Grid>

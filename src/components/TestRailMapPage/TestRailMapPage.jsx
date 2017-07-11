@@ -71,9 +71,9 @@ class TestRailMapPage extends Component {
       return (
         <Grid fluid style={{ paddingBottom: '20px' }}>
           <div style={{ marginBottom: '20px' }}>
-            <h2 style={{ display: 'inline' }}>
+            <h3 style={{ display: 'inline' }}>
               Features → TestRail Cases&nbsp;
-            </h2>
+            </h3>
             (<Link to={'/testrail-map?mode=testrail'}>TestRail Cases → Features</Link>)
             <div style={{ float: 'right' }}>
               <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>
@@ -90,9 +90,6 @@ class TestRailMapPage extends Component {
               Last scan: {moment(new Date()).to(moment(testRailMapperDetails.mappingDate))}<br/>
               Current state: {testRailMapperDetails.state}
             </span>
-          </div>
-          <div style={{ align: 'right' }}>
-            <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>
           </div>
           {Object.keys(testRailMapperDetails.featuresToTestRailMap).map((project, i) => {
             return <ProjectPanel key={i} project={testRailMapperDetails.featuresToTestRailMap[project]}/>;
@@ -111,9 +108,9 @@ class TestRailMapPage extends Component {
     return (
       <Grid fluid style={{ paddingBottom: '20px' }}>
         <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ display: 'inline' }}>
+          <h3 style={{ display: 'inline' }}>
             TestRail Cases → Features&nbsp;
-          </h2>
+          </h3>
           (<Link to={'/testrail-map?mode=features'}>Features → TestRail Cases</Link>)
           <div style={{ float: 'right' }}>
             <Button bsStyle='primary' onClick={() => this.handleRescanClick()}>Rescan</Button>

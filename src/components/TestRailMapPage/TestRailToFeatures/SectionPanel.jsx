@@ -15,7 +15,7 @@ class SectionPanel extends Component {
     super(props);
 
     this.state = {
-      showTestCases: true
+      showTestCases: false
     };
   }
 

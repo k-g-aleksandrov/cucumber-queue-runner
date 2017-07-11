@@ -13,6 +13,14 @@ class SuitePanel extends Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      showSections: false
+    };
+  }
+
+  handleShowSectionsClick() {
+    this.setState({ showSections: !this.state.showSections });
   }
 
   render() {
@@ -22,6 +30,9 @@ class SuitePanel extends Component {
       <Row style={{ marginBottom: '20px', boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)', border: '1px solid #ddd' }}>
         <Grid fluid>
           <Row
+            onClick={() => {
+              this.handleShowSectionsClick();
+            }}
             style={{
               backgroundColor: '#d9edf7',
               padding: '8px',
@@ -31,7 +42,7 @@ class SuitePanel extends Component {
           >
             <h4>{suite.name}</h4>
           </Row>
-          {Object.keys(suite.sections).map((sectionName, i) => {
+          {this.state.showSections && Object.keys(suite.sections).map((sectionName, i) => {
             return <SectionPanel key={i} section={suite.sections[sectionName]}/>;
           })}
         </Grid>
