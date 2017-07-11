@@ -81,7 +81,7 @@ class TestRailMapper {
     return new Promise((resolve) => {
       const reverseMap = {};
 
-      Scenario.find({}, {
+      Scenario.find({ scenarioName : { $exists: true } }, {
         executions: 0,
         __v:0,
         _id: 0,
