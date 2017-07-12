@@ -62,7 +62,7 @@ function renderHTML(componentHTML, initialState) {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cucumber Queue Runner</title>
+        <title>Cucumber Runner</title>
         <link rel="stylesheet" href="${assetUrl}/assets/styles${clientSuffix}.css">
         <script type="application/javascript">
           window.REDUX_INITIAL_STATE = ${JSON.stringify(initialState)};
