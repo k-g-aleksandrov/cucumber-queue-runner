@@ -33,9 +33,6 @@ class App extends Component {
                 <NavItem>TestRail Map</NavItem>
               </LinkContainer>
             </Nav>
-            <Navbar.Text>
-              <Navbar.Link href='http://fluix-auto.od.readdle.com' target='_blank'>Open Jenkins</Navbar.Link>
-            </Navbar.Text>
           </Navbar.Collapse>
         </Navbar>
         <Grid fluid>
