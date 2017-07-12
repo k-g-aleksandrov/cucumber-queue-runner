@@ -35,13 +35,13 @@ class FeaturePanel extends Component {
             }}
             style={{
               padding: '8px',
-              paddingLeft: '10px',
+              paddingLeft: '12px',
               borderTop: '1px solid #ddd',
               borderLeft: '1px solid #ddd',
               cursor: 'pointer'
             }}
           >
-            <h5>{this.state.showScenarios ? '↓  ' : '↳' }&nbsp;{feature.name}</h5>
+            <h5><span>{this.state.showScenarios ? '▼' : '►' }&nbsp;</span>{feature.name}</h5>
           </Row>
           {this.state.showScenarios && Object.keys(feature.scenarios).map((scenarioName, i) => {
             return <ScenarioPanel key={i} scenario={feature.scenarios[scenarioName]}/>;

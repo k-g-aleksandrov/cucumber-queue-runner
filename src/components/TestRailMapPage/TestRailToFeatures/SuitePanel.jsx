@@ -36,11 +36,11 @@ class SuitePanel extends Component {
             style={{
               backgroundColor: '#d9edf7',
               padding: '8px',
-              paddingLeft: '16px',
+              paddingLeft: '8px',
               cursor: 'pointer'
             }}
           >
-            <h4>{suite.name}</h4>
+            <h4><span>{this.state.showSections ? '▼' : '►' }&nbsp;</span>{suite.name}</h4>
           </Row>
           {this.state.showSections && Object.keys(suite.sections).map((sectionName, i) => {
             return <SectionPanel key={i} section={suite.sections[sectionName]}/>;

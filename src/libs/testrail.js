@@ -4,12 +4,16 @@ import { TestRailMap, Scenario } from 'libs/mongoose';
 
 import config from 'config';
 
+import stringSimilarity from 'string-similarity';
+
+import Diff from 'text-diff';
+
 class TestRailMapper {
 
   constructor() {
     this.mapperState = TestRailMapper.STATE_IDLE;
     this.testRailMap = {};
-    TestRailMap.findOne({}, { __v:0, _id: 0 }).limit(1).exec()
+    TestRailMap.findOne({}, { __v:0, _id: 0 }).exec()
       .then((testRailMap) => {
         if (testRailMap) {
           this.testRailMap = testRailMap.toObject();
@@ -59,20 +63,28 @@ class TestRailMapper {
         console.log('Testrail Map: reverse mapping');
         return this.compareFeaturesWithTestRail(suitesList, sectionsList, casesList);
       })
-      .then((featuresToTestRailMap) => {
-        this.testRailMap.featuresToTestRailMap = featuresToTestRailMap;
+      .then((array) => {
+        this.testRailMap.featuresToTestRailMap = array[0];
+        this.testRailMap.sortedBySimilarity = array[1];
         this.testRailMap.mappingDate = new Date();
         this.mapperState = TestRailMapper.STATE_IDLE;
         console.log('Testrail Map: done mapping');
         const map = new TestRailMap({
           mappingDate: this.testRailMap.mappingDate,
           featuresToTestRailMap: this.testRailMap.featuresToTestRailMap,
-          testRailToFeaturesMap: this.testRailMap.testRailToFeaturesMap
+          testRailToFeaturesMap: this.testRailMap.testRailToFeaturesMap,
+          sortedBySimilarity: this.testRailMap.sortedBySimilarity
         });
 
-        map.save()
+        TestRailMap.remove({}).exec()
+          .then(() => {
+            return map.save();
+          })
           .then(() => {
             console.log('TestRail Map: saved object to DB');
+          })
+          .catch((err) => {
+            console.log(`Failed to save scan result. Error: ${err}`);
           });
       });
   }
@@ -120,17 +132,70 @@ class TestRailMapper {
               }
             }
 
+            let similarity = 1;
+
+            if (scenario.incorrectTags) {
+              similarity = 0;
+            } else if (scenario.testCases) {
+              const titleSum = scenario.testCases.map((tc) => tc.title).join(' + ');
+
+              const currentSimilarity = stringSimilarity.compareTwoStrings(scenario.scenarioName, titleSum);
+
+              if (currentSimilarity < similarity) {
+                similarity = currentSimilarity;
+                const html = this.getDiffHtml(scenario.scenarioName, titleSum);
+
+                scenario.scenarioNameDiff = this.removeTag(html, 'del');
+                scenario.testCaseTitleDiff = this.removeTag(html, 'ins');
+              }
+            }
+            scenario.similarity = similarity;
+
+            if (scenario.noTagsWarning) {
+              // set similarity > 1 for sorting purposes
+              scenario.similarity = 2;
+            }
+
             reverseMap[scenario.project]
                     .features[scenario.featureName]
                     .scenarios[scenario.scenarioName.replace(/\./g, '_')] = scenario;
           }
-          resolve(reverseMap);
+
+          const similarityList = [];
+
+          for (const projectId of Object.keys(reverseMap)) {
+            const project = reverseMap[projectId];
+
+            for (const featureId of Object.keys(project.features)) {
+              const feature = project.features[featureId];
+
+              for (const scenarioId of Object.keys(feature.scenarios)) {
+                similarityList.push(feature.scenarios[scenarioId]);
+              }
+            }
+            similarityList.sort((a, b) => {
+              return a.similarity - b.similarity;
+            });
+          }
+          resolve([reverseMap, similarityList]);
         })
         .catch((err) => {
           console.log(err);
           resolve({});
         });
     });
+  }
+
+  removeTag(str, tag) {
+    return str.replace(new RegExp(`<${tag}>(.*?)</${tag}>`, 'g'), '');
+  }
+
+  getDiffHtml(scName, tcName) {
+    const diff = new Diff();
+    const textDiff = diff.main(tcName, scName);
+
+    diff.cleanupSemantic(textDiff);
+    return diff.prettyHtml(textDiff);
   }
 
   compareWithFeatures(suitesList, sectionsList, casesList) {
@@ -168,6 +233,17 @@ class TestRailMapper {
             testRailMap[testCase.suite]
                   .sections[testCase.section.replace(/\./g, '_')] = { ...sectionsList[testCase.section_id], cases: {} };
           }
+
+          let similarity = 1;
+
+          for (const scenario of testCase.scenarios) {
+            const currentSimilarity = stringSimilarity.compareTwoStrings(testCase.title, scenario.scenarioName);
+
+            similarity = currentSimilarity < similarity ? currentSimilarity : similarity;
+          }
+
+          testCase.similarity = similarity;
+
           testRailMap[testCase.suite]
                   .sections[testCase.section.replace(/\./g, '_')].cases[testCase.title.replace(/\./g, '_')] = testCase;
         }

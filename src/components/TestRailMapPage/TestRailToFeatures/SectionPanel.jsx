@@ -35,13 +35,15 @@ class SectionPanel extends Component {
             }}
             style={{
               padding: '8px',
-              paddingLeft: '10px',
+              paddingLeft: '12px',
               borderTop: '1px solid #ddd',
               borderLeft: '1px solid #ddd',
               cursor: 'pointer'
             }}
           >
-            <h5><span style={{ width: '30px' }}>{this.state.showTestCases ? '↓' : '↳' }</span>&nbsp;{section.name}</h5>
+            <h5>
+              <span>{this.state.showTestCases ? '▼' : '►' }&nbsp;</span>{section.name}
+            </h5>
           </Row>
           {this.state.showTestCases && Object.keys(section.cases).map((caseTitle, i) => {
             return <TestCasePanel key={i} testCase={section.cases[caseTitle]}/>;

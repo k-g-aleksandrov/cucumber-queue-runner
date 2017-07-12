@@ -42,11 +42,11 @@ class ProjectPanel extends Component {
             style={{
               backgroundColor: '#d9edf7',
               padding: '8px',
-              paddingLeft: '16px',
+              paddingLeft: '8px',
               cursor: 'pointer'
             }}
           >
-            <h4>{project.name}</h4>
+            <h4><span>{this.state.showFeatures ? '▼' : '►' }&nbsp;</span>{project.name}</h4>
           </Row>
           {this.state.showFeatures && Object.keys(project.features).map((featureName, i) => {
             return <FeaturePanel key={i} feature={project.features[featureName]}/>;

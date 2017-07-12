@@ -1,0 +1,11 @@
+del {
+  color: red;
+  font-weight: bold;
+  text-decoration-line: none;
+}
+
+ins {
+  color: green;
+  font-weight: bold;
+  text-decoration-line: none;
+}

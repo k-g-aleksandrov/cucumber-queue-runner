@@ -5,7 +5,7 @@ import { Row, Col } from 'react-bootstrap';
 
 import TestCasesColumn from './TestCasesColumn';
 
-import './ScenarioPanel.css';
+import './ScenarioSimilarityPanel.css';
 
 const propTypes = {
   scenario: PropTypes.any
