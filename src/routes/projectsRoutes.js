@@ -269,51 +269,89 @@ router.get('/:project', (req, res) => {
     scenariosScopes[scenariosFilter.id] = { filter: scenariosFilter, scenarios: [] };
   }
 
-  const scopePromises = Object.keys(scenariosScopes).map((scope) => {
-    return new Promise((resolve) => {
-      Scenario.find({
-        project: req.params.project,
-        filters: {
-          $in: [
-            scenariosScopes[scope].filter.id
-          ]
+  return Project.findOne({ projectId: req.params.project }).exec()
+    .then((project) => {
+      if (!project) {
+        return res.send({
+          project: { error: 'no project' }
+        });
+      }
+      res.send({
+        project: {
+          details: {
+            id: project.projectId,
+            name: project.name,
+            description: project.description,
+            tag: project.tag,
+            workingCopyPath: project.workingCopyPath
+          },
+          scopes: scenariosScopes
         }
-      }).exec()
-        .then((scenarios) => {
-          scenariosScopes[scope].scenarios = scenarios;
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+router.get('/:project/counter', (req, res) => {
+  const counters = {};
+  const promises = [filter.development, filter.daily, filter.muted, filter.full, filter.disabled].map((filterObject) => {
+    return new Promise((resolve) => {
+      Scenario.count({ project: req.params.project, filters: { $in: [ filterObject.id ] } }).exec()
+        .then((count) => {
+          counters[filterObject.id] = count;
           resolve();
-        })
-        .catch((err) => {
-          console.log(err);
         });
     });
   });
 
-  Promise.all(scopePromises).then(() => {
-    Project.findOne({ projectId: req.params.project }).exec()
-      .then((project) => {
-        if (!project) {
-          return res.send({
-            project: { error: 'no project' }
-          });
-        }
-        res.send({
-          project: {
-            details: {
-              id: project.projectId,
-              name: project.name,
-              description: project.description,
-              tag: project.tag,
-              workingCopyPath: project.workingCopyPath
-            },
-            scopes: scenariosScopes
-          }
-        });
+  Promise.all(promises).then(() => {
+    res.send(counters);
+  });
+});
+
+router.get('/:project/scenarios', (req, res) => {
+  const scenariosScopes = {};
+
+  const filterParam = req.query.filter;
+//  const offset = req.query.offset;
+
+  if (filterParam) {
+    const scenariosFilter = filter.getFilterByName(filterParam);
+
+    scenariosScopes[scenariosFilter.id] = { filter: scenariosFilter, scenarios: [] };
+    /* let */const query = Scenario.find({
+      project: req.params.project,
+      filters: {
+        $in: [
+          scenariosScopes[scenariosFilter.id].filter.id
+        ]
+      }
+    }, {
+      _id: 0,
+      __v: 0,
+      classpath: 0,
+      exampleParams: 0,
+      executions: { $slice: -30 },
+      'executions.endTimestamp': 0,
+      'executions.startTimestamp': 0,
+      'executions._id': 0,
+      'executions.executor': 0
+    });
+
+//    if (offset) {
+//      query = query.limit(100).skip(Number(offset));
+//    }
+    query.exec()
+      .then((scenarios) => {
+        scenariosScopes[filterParam].scenarios = scenarios;
+        res.send(scenariosScopes);
       })
       .catch((err) => {
         console.log(err);
       });
-  }).catch(log.error);
+  }
 });
 
 /**

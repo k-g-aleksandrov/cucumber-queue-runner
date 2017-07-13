@@ -146,10 +146,12 @@ module.exports.getFilterByName = function getFilterByName(filter) {
     return this.full;
   } else if (filter === 'dev') {
     return this.development;
-  } else if (filter === 'failed') {
+  } else if (filter === 'failed' || filter === 'muted') {
     return this.muted;
   } else if (filter === 'daily') {
     return this.daily;
+  } else if (filter === 'disabled') {
+    return this.disabled;
   } else if (filter === 'custom') {
     return this.custom;
   }

@@ -16,7 +16,10 @@ export default function (state = initialState, action) {
       return {
         loading: false,
         errors: null,
-        projectDetails: action.payload.project
+        projectDetails: {
+          ...state.projectDetails,
+          ...action.payload.project
+        }
       };
     case 'project/scan/SUCCESS':
       return {
@@ -24,6 +27,32 @@ export default function (state = initialState, action) {
         errors: null,
         projectScanResult: action.payload.project
       };
+    case 'project/scope/REQUEST':
+      return state;
+    case 'project/scope/SUCCESS':
+      return {
+        ...state,
+        projectDetails: {
+          ...state.projectDetails,
+          scopes: {
+            ...state.projectDetails.scopes,
+            [action.meta.scope]: {
+              ...action.payload[action.meta.scope],
+              nextOffset: action.meta.offset + 100
+            }
+          }
+        }
+      };
+    case 'project/counter/SUCCESS':
+      return {
+        ...state,
+        projectDetails: {
+          ...state.projectDetails,
+          count: action.payload
+        }
+      };
+    case 'project/scope/FAILURE':
+      return state;
     case 'project/FAILURE':
     case 'project/scan/FAILURE':
     case 'project/delete/FAILURE':

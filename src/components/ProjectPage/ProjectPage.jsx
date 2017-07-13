@@ -9,7 +9,7 @@ import { Grid, Row, Col, Nav, NavItem, Tabs, Tab } from 'react-bootstrap';
 
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
-import { fetchProjectFilters } from 'redux/actions/projectsActions';
+import { fetchProjectFilters, fetchProjectScenarios, countProjectFilters } from 'redux/actions/projectsActions';
 import ProjectScopesChart from './ProjectScopesChart';
 
 const propTypes = {
@@ -31,10 +31,27 @@ class ProjectPage extends Component {
 
   componentDidMount() {
     this.fetchProjectFilters();
+    this.fetchProjectCounter();
+
+    const activeTab = this.props.location.query.scope ? this.props.location.query.scope : 'dev';
+//    const scopes = ['dev', 'daily', 'muted', 'full', 'disabled'];
+
+    this.fetchProjectScenarios(activeTab, 0);
+//    scopes.filter((scope) => scope !== activeTab).map((scope) => {
+//      this.fetchProjectScenarios(scope);
+//    });
+  }
+
+  fetchProjectCounter() {
+    this.props.dispatch(countProjectFilters(this.props.params.project));
   }
 
   fetchProjectFilters() {
     this.props.dispatch(fetchProjectFilters(this.props.params.project));
+  }
+
+  fetchProjectScenarios(activeTab) {
+    this.props.dispatch(fetchProjectScenarios(this.props.params.project, activeTab, 0));
   }
 
   render() {
@@ -47,7 +64,7 @@ class ProjectPage extends Component {
       this.props.router.push(`/projects?lost=${projectId}`);
     }
 
-    if (this.props.loading || !projectDetails || !projectDetails.details) {
+    if (this.props.loading || !projectDetails || !projectDetails.details || !projectDetails.count) {
       return <Spinner/>;
     }
 
@@ -61,7 +78,7 @@ class ProjectPage extends Component {
           </Col>
           <Col md={8}>
             <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
-            <ProjectScopesChart scopes={projectDetails.scopes}/>
+            <ProjectScopesChart projectDetails={projectDetails}/>
           </Col>
         </Row>
         <Row>
@@ -74,9 +91,13 @@ class ProjectPage extends Component {
                       const scopeObject = projectDetails.scopes[scope];
 
                       return (
-                        <LinkContainer key={i} to={`/projects/${projectId}?scope=${scopeObject.filter.id}`}>
+                        <LinkContainer
+                          key={i}
+                          to={`/projects/${projectId}?scope=${scopeObject.filter.id}`}
+                          onClick={() => this.fetchProjectScenarios(scopeObject.filter.id, 0)}
+                        >
                           <NavItem eventKey={scopeObject.filter.id}>
-                            {scopeObject.filter.displayName} ({scopeObject.scenarios.length})
+                            {scopeObject.filter.displayName} ({projectDetails.count[scopeObject.filter.id]})
                           </NavItem>
                         </LinkContainer>
                       );

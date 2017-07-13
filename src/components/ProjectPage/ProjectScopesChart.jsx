@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 let Doughnut;
 
 const propTypes = {
-  scopes: PropTypes.any.isRequired
+  projectDetails: PropTypes.any.isRequired
 };
 
 class ProjectScopesChart extends Component {
@@ -18,17 +18,17 @@ class ProjectScopesChart extends Component {
   }
 
   render() {
-    const { scopes } = this.props;
+    const { projectDetails } = this.props;
 
     const labels = [];
     const data = [];
     const backgroundColors = [];
 
-    for (const filterId of Object.keys(scopes)) {
+    for (const filterId of Object.keys(projectDetails.count)) {
       if (filterId !== 'full') {
-        labels.push(`${scopes[filterId].filter.displayName} (${scopes[filterId].scenarios.length})`);
-        data.push(scopes[filterId].scenarios.length);
-        backgroundColors.push(scopes[filterId].filter.chartColor);
+        labels.push(`${projectDetails.scopes[filterId].filter.displayName} (${projectDetails.count[filterId]})`);
+        data.push(projectDetails.count[filterId]);
+        backgroundColors.push(projectDetails.scopes[filterId].filter.chartColor);
       }
     }
     const chartData = {

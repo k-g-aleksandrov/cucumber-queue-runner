@@ -20,6 +20,30 @@ export function fetchProjectFilters(projectId) {
   };
 }
 
+export function countProjectFilters(projectId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/projects/${projectId}/counter`,
+      method: 'GET',
+      types: ['project/counter/REQUEST', 'project/counter/SUCCESS', 'project/counter/FAILURE']
+    }
+  };
+}
+
+export function fetchProjectScenarios(projectId, scope, offset) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/projects/${projectId}/scenarios?filter=${scope}&offset=${offset}`,
+      method: 'GET',
+      types: [
+        { type: 'project/scope/REQUEST', meta: { scope, offset } },
+        { type: 'project/scope/SUCCESS', meta: { scope, offset } },
+        { type: 'project/scope/FAILURE', meta: { scope, offset } }
+      ]
+    }
+  };
+}
+
 export function scanProject(projectId) {
   return {
     [CALL_API]: {
