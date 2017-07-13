@@ -1,0 +1,9 @@
+{
+  "port": 8080,
+  "testrail": {
+    "url": "<URL>",
+    "login": "<LOGIN>",
+    "password": "<PASSWORD>",
+    "projectId": 1
+  }
+}

@@ -84,7 +84,13 @@ class TestRailMapPage extends Component {
           return <ScenarioSimilarityPanel key={i} scenario={scenario}/>;
         })}
         {activeMode === 'testrail' && Object.keys(testRailMapperDetails.testRailToFeaturesMap).map((suite, i) => {
-          return <SuitePanel key={i} suite={testRailMapperDetails.testRailToFeaturesMap[suite]}/>;
+          return (
+            <SuitePanel
+              key={i}
+              testRailUrl={testRailMapperDetails.testRailUrl}
+              suite={testRailMapperDetails.testRailToFeaturesMap[suite]}
+            />
+          );
         })}
       </Grid>
     );

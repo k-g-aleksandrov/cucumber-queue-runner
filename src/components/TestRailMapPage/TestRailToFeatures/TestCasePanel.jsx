@@ -6,6 +6,7 @@ import { Row, Col } from 'react-bootstrap';
 import ScenariosColumn from './ScenariosColumn';
 
 const propTypes = {
+  testRailUrl: PropTypes.string,
   testCase: PropTypes.any,
   doShowNotCovered: PropTypes.bool
 };
@@ -27,7 +28,7 @@ class TestCasePanel extends Component {
   }
 
   render() {
-    const { testCase, doShowNotCovered } = this.props;
+    const { testCase, doShowNotCovered, testRailUrl } = this.props;
 
     let row = null;
 
@@ -43,7 +44,10 @@ class TestCasePanel extends Component {
           backgroundColor: color
         }}
         >
-          <Col md={4} key='title'><i>C{testCase.id}:&nbsp;</i>{testCase.title}</Col>
+          <Col md={4} key='title'>
+            {testRailUrl && <i><a href={`https://${testRailUrl}/index.php?/cases/view/${testCase.id}`} target='_blank'>C{testCase.id}</a></i>}
+            {!testRailUrl && <i>C{testCase.id}</i>}
+            :&nbsp;{testCase.title}</Col>
           <Col md={8}><ScenariosColumn scenarios={testCase.scenarios}/></Col>
         </Row>
       );

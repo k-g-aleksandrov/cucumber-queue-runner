@@ -390,6 +390,7 @@ class TestRailMapper {
   getCurrentState() {
     return {
       state: this.mapperState,
+      testRailUrl: config.get('testrail:url'),
       ...this.testRailMap
     };
   }

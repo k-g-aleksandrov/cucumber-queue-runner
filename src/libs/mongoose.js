@@ -90,7 +90,8 @@ const HistoryScenariosSchema = new Schema({
 const TestRailMapSchema = new Schema({
   mappingDate: Schema.Types.Date,
   featuresToTestRailMap: Schema.Types.Mixed,
-  testRailToFeaturesMap: Schema.Types.Mixed
+  testRailToFeaturesMap: Schema.Types.Mixed,
+  sortedBySimilarity: Schema.Types.Mixed
 });
 
 const Scenario = mongoose.model('Scenario', ScenarioSchema);

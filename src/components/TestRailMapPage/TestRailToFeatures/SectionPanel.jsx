@@ -6,6 +6,7 @@ import { Grid, Row } from 'react-bootstrap';
 import TestCasePanel from './TestCasePanel';
 
 const propTypes = {
+  testRailUrl: PropTypes.string,
   section: PropTypes.any
 };
 
@@ -46,7 +47,13 @@ class SectionPanel extends Component {
             </h5>
           </Row>
           {this.state.showTestCases && Object.keys(section.cases).map((caseTitle, i) => {
-            return <TestCasePanel key={i} testCase={section.cases[caseTitle]}/>;
+            return (
+              <TestCasePanel
+                key={i}
+                testCase={section.cases[caseTitle]}
+                testRailUrl={this.props.testRailUrl}
+              />
+            );
           })}
         </Grid>
       </Row>

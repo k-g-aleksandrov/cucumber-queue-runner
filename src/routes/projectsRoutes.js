@@ -80,6 +80,7 @@ router.get('/', (req, res) => {
 router.get('/testrail-map', (req, res) => {
   res.send(mapper.getCurrentState());
 });
+
 router.get('/testrail-map/scan', (req, res) => {
   mapper.rescanTestRailMap();
   res.send(mapper.getCurrentState());

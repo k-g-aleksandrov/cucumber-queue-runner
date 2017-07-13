@@ -6,6 +6,7 @@ import { Grid, Row } from 'react-bootstrap';
 import SectionPanel from './SectionPanel';
 
 const propTypes = {
+  testRailUrl: PropTypes.string,
   suite: PropTypes.any
 };
 
@@ -43,7 +44,13 @@ class SuitePanel extends Component {
             <h4><span>{this.state.showSections ? '▼' : '►' }&nbsp;</span>{suite.name}</h4>
           </Row>
           {this.state.showSections && Object.keys(suite.sections).map((sectionName, i) => {
-            return <SectionPanel key={i} section={suite.sections[sectionName]}/>;
+            return (
+              <SectionPanel
+                key={i}
+                section={suite.sections[sectionName]}
+                testRailUrl={this.props.testRailUrl}
+              />
+            );
           })}
         </Grid>
       </Row>
