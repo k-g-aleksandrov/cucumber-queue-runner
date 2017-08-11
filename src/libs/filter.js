@@ -164,6 +164,7 @@ module.exports.applyCustomFilterToProject = function applyCustomFilterToProject(
     }
     if (!project) {
       log.error(`Failed to find project with id ${projectId}`);
+      return callback(new Error(`Failed to find project with id ${projectId}`));
     }
 
     const filteredScenarios = [];

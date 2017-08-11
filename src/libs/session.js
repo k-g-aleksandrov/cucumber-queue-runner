@@ -52,6 +52,10 @@ class Session {
   }
 
   finalizeSessionInit(err, scenarios, iterations) {
+    if (err) {
+      this.sessionState = Session.STATE_ERROR;
+      return;
+    }
     let scenariosArray = [];
 
     for (let i = 0; i < iterations; i++) {
@@ -514,6 +518,7 @@ Session.STATE_DONE = 'done';
 Session.STATE_PASSED = 'passed';
 Session.STATE_FAILED = 'failed';
 Session.STATE_SKIPPED = 'skipped';
+Session.STATE_ERROR = 'error';
 
 Session.OK = 'OK';
 Session.NOT_FOUND = 'NOT_FOUND';
