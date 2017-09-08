@@ -5,6 +5,8 @@ import moment from 'moment';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 
+import ReportAttachment from './ReportAttachment';
+
 const propTypes = {
   step: PropTypes.any,
   type: PropTypes.any
@@ -52,7 +54,12 @@ function ReportStep(props) {
 
   return (
     <Row className={`${stepClass}`} style={{ margin: 0 }}>
-      <Col md={10}>{rows}</Col>
+      <Col md={10}>
+        {rows}
+        {step.embeddings && step.embeddings.map((embedding, index) => {
+          return <ReportAttachment embedding={embedding} key={index}/>;
+        })}
+      </Col>
       <Col md={2} style={{ textAlign: 'center' }}>{stepDuration}</Col>
       {errorMessage}
     </Row>

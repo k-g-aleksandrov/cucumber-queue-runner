@@ -326,16 +326,6 @@ class Session {
     return status;
   }
 
-  removeEmbeddings(report) {
-    for (const prop in report) {
-      if (prop === 'embeddings') {
-        delete report[prop];
-      } else if (typeof report[prop] === 'object') {
-        this.removeEmbeddings(report[prop]);
-      }
-    }
-  }
-
   saveHistory() {
     const scenarios = {};
 
@@ -355,7 +345,6 @@ class Session {
           console.log(e);
         }
 
-        this.removeEmbeddings(report);
         scenarios[featureKey].push({
           scenarioId: scenario._id,
           classpath: scenario.classpath,
