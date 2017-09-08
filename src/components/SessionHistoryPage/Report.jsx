@@ -34,18 +34,22 @@ function Report(props) {
             <Grid fluid style={{ paddingTop: '4px', paddingBottom: '8px' }} key={i}
               onClick={(e) => e.stopPropagation()}
             >
-              {rep.elements[scenarioElementsIndex].before.map((before, j) => {
-                return <ReportStep key={j} type='before' step={before}/>;
-              })}
+              {rep.elements[scenarioElementsIndex].before
+                && rep.elements[scenarioElementsIndex].before.map((before, j) => {
+                  return <ReportStep key={j} type='before' step={before}/>;
+                })
+              }
               {haveBackground && rep.elements[0].steps.map((step, j) => {
                 return <ReportStep key={j} type='step' step={step}/>;
               })}
               {rep.elements[scenarioElementsIndex].steps.map((step, j) => {
                 return <ReportStep key={j} type='step' step={step}/>;
               })}
-              {rep.elements[scenarioElementsIndex].after.map((after, j) => {
-                return <ReportStep key={j} type='after' step={after}/>;
-              })}
+              {rep.elements[scenarioElementsIndex].after
+                && rep.elements[scenarioElementsIndex].after.map((after, j) => {
+                  return <ReportStep key={j} type='after' step={after}/>;
+                })
+              }
             </Grid>
           );
         })}
