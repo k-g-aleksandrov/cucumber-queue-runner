@@ -32,6 +32,9 @@ class App extends Component {
               <LinkContainer to='/testrail-map'>
                 <NavItem>TestRail Map</NavItem>
               </LinkContainer>
+              <LinkContainer to='/dashboard'>
+                <NavItem>Dashboard</NavItem>
+              </LinkContainer>
             </Nav>
           </Navbar.Collapse>
         </Navbar>

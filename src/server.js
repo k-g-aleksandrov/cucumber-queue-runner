@@ -7,6 +7,7 @@ import configureStore from './redux/configureStore.prod';
 import routes from './routes';
 import sessionsRoutes from './routes/sessionsRoutes';
 import projectsRoutes from './routes/projectsRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
 import favicon from 'serve-favicon';
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -25,6 +26,7 @@ app.use(favicon(path.join('public', 'favicon.ico')));
 
 app.use('/api/sessions', sessionsRoutes);
 app.use('/api/projects', projectsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.use((req, res) => {
   const store = configureStore();

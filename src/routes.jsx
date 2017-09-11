@@ -7,6 +7,7 @@ import SessionHistoryPage from 'components/SessionHistoryPage';
 import ProjectsPage from 'components/ProjectsPage';
 import ProjectPage from 'components/ProjectPage';
 import TestRailMapPage from 'components/TestRailMapPage';
+import DashboardPage from 'components/DashboardPage';
 
 export default (
   <Route component={App} path='/'>
@@ -19,6 +20,7 @@ export default (
       <Route component={ProjectPage} path=':project'/>
     </Route>
     <Route component={TestRailMapPage} path='testrail-map'/>
+    <Route component={DashboardPage} path='dashboard'/>
     <Redirect from='*' to=''/>
   </Route>
 );
