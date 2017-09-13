@@ -67,7 +67,7 @@ class ScenariosHistoryTable extends Component {
                   }
                   return <SessionHistoryScenarioRow key={j} scenario={scenario} failed={this.state.onlyFailed}/>;
                 })}
-                <hr style={{ marginLeft: '16px' }}/>
+                <hr style={{ marginLeft: '8px' }}/>
               </div>
             );
           })}

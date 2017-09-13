@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 import Report from './Report';
 
-import Grid from 'react-bootstrap/lib/Grid';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 
@@ -52,30 +51,21 @@ class SessionHistoryScenarioRow extends Component {
       );
     }
     return (
-      <Row onClick={() => {
-        this.handleGetScenarioReportClick();
-      }} style={{ backgroundColor, marginLeft: '16px' }}
-      >
-        <Col>
-          <Grid>
-            <Row style={{ padding: 0 }}>
-              <Col md={10} style={{ padding: '8px' }}>
-                <span style={{ cursor: 'pointer' }}>
-                  {this.props.failed && <b>{scenario.report[0].name}: </b>}
-                  {`${scenario.scenarioName} (:${scenario.scenarioLine})`}
-                </span><br/>
-              </Col>
-              <Col md={2}
-                style={{
-                  textAlign: 'center',
-                  padding: '8px'
-                }}
-              >{scenario.executor}</Col>
-            </Row>
-            {this.state.reportDisplayed && <Report report={scenario.report}/>}
-          </Grid>
-        </Col>
-      </Row>
+      <div>
+        <div onClick={() => {
+          this.handleGetScenarioReportClick();
+        }} style={{ backgroundColor, marginLeft: '16px', padding: '8px', cursor: 'pointer' }}
+        >
+          <span>
+            {this.props.failed && <b>{scenario.report[0].name}: </b>}
+            {<span>Scenario: {scenario.scenarioName} <i>line {scenario.scenarioLine}</i></span>}
+          </span>
+          <span style={{ float: 'right' }}>{scenario.executor}</span>
+        </div>
+        <div style={{ marginLeft: '32px' }}>
+          {this.state.reportDisplayed && <Report report={scenario.report}/>}
+        </div>
+      </div>
     );
   }
 }

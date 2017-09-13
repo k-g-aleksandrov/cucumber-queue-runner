@@ -52,7 +52,7 @@ function ReportStep(props) {
     : null;
 
   return (
-    <Row className={`${stepClass}`} style={{ margin: 0 }}>
+    <Row className={`${stepClass}`} style={{ margin: 0, padding: '2px' }}>
       {rows}
       <span className='report-duration'>{stepDuration}</span>
       {step.embeddings && step.embeddings.map((embedding, index) => {
