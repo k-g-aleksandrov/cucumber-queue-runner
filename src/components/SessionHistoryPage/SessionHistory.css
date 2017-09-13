@@ -1,0 +1,16 @@
+.report-keyword {
+  font-weight: bold;
+  width: 60px;
+  display: inline-block;
+  text-align: right;
+  margin-right: 4px;
+}
+
+.report-duration {
+  float: right;
+  margin-right: 4px;
+}
+
+.scenarios-report-header {
+  display: inline;
+}

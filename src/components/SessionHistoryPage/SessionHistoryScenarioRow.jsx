@@ -9,7 +9,8 @@ import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 
 const propTypes = {
-  scenario: PropTypes.any
+  scenario: PropTypes.any,
+  failed: PropTypes.bool
 };
 
 class SessionHistoryScenarioRow extends Component {
@@ -42,8 +43,10 @@ class SessionHistoryScenarioRow extends Component {
     if (scenario.result === 'skipped') {
       return (
         <Row style={{ backgroundColor }}>
-          <Col style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}>
-            <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
+          <Col style={{ padding: '8px' }}>
+            <span>
+              {`${scenario.scenarioName} (:${scenario.scenarioLine})`}
+            </span><br/>
           </Col>
         </Row>
       );
@@ -51,20 +54,21 @@ class SessionHistoryScenarioRow extends Component {
     return (
       <Row onClick={() => {
         this.handleGetScenarioReportClick();
-      }} style={{ backgroundColor, padding: 0 }}
+      }} style={{ backgroundColor, marginLeft: '16px' }}
       >
         <Col>
-          <Grid fluid>
+          <Grid>
             <Row style={{ padding: 0 }}>
-              <Col md={10} style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}>
-                <span style={{ cursor: 'pointer' }}>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span><br/>
+              <Col md={10} style={{ padding: '8px' }}>
+                <span style={{ cursor: 'pointer' }}>
+                  {this.props.failed && <b>{scenario.report[0].name}: </b>}
+                  {`${scenario.scenarioName} (:${scenario.scenarioLine})`}
+                </span><br/>
               </Col>
               <Col md={2}
                 style={{
                   textAlign: 'center',
-                  padding: '8px',
-                  borderTop: '1px solid #ddd',
-                  borderLeft: '1px solid #ddd'
+                  padding: '8px'
                 }}
               >{scenario.executor}</Col>
             </Row>

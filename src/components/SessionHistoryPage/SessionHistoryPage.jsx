@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
-import Grid from 'react-bootstrap/lib/Grid';
 import Alert from 'react-bootstrap/lib/Alert';
 
 import Spinner from 'components/common/Spinner';
@@ -52,7 +51,7 @@ class SessionHistoryPage extends Component {
     }
 
     return (
-      <Grid fluid>
+      <div>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
           <Col md={4}>
             <SessionDetails sessionDetails={session.details} history/>
@@ -62,20 +61,22 @@ class SessionHistoryPage extends Component {
             <SessionStatusChart sessionBriefStatus={session.briefStatus}/>
           </Col>
         </Row>
+
         {session.historyScenarios &&
-        <Row>
-          <Col sm={12}>
-            <ScenariosHistoryTable sessionScenarios={session.historyScenarios.scenarios} onlyFailed={false}/>
-          </Col>
-        </Row>
+          <Row>
+            <Col sm={12}>
+              <ScenariosHistoryTable sessionScenarios={session.historyScenarios.scenarios} onlyFailed={false}/>
+            </Col>
+          </Row>
         }
+
         {!session.historyScenarios &&
         <Row>
           <Col>
             <Alert bsStyle='info'>No scenarios history</Alert>
           </Col>
         </Row>}
-      </Grid>
+      </div>
     );
   }
 }
