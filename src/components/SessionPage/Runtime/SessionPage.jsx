@@ -131,7 +131,11 @@ class SessionPage extends Component {
                   <Col sm={12}>
                     <Tab.Content>
                       <Tab.Pane eventKey='queue'>
-                        <QueueScenariosTable scenarios={session.status.queue} sessionId={sessionId} />
+                        <QueueScenariosTable
+                          onSkip={this.handleSkipScenarioClick}
+                          scenarios={session.status.queue}
+                          sessionId={sessionId}
+                        />
                       </Tab.Pane>
                       <Tab.Pane eventKey='progress'>
                         <Grid fluid style={{ border: '1px solid #ddd' }}>

@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import Table from 'react-bootstrap/lib/Table';
-import Button from 'react-bootstrap-button-loader';
-
 const propTypes = {
   sessionId: PropTypes.any,
+  onSkip: PropTypes.func.Required,
   scenarios: PropTypes.any
 };
 
@@ -19,25 +17,21 @@ class QueueScenariosTable extends Component {
     const { scenarios, sessionId } = this.props;
 
     return (
-      <Table bordered style={{ marginBottom: '0px' }}>
-        <tbody>
-          {scenarios.map((scenario, i) => {
-            return (
-              <tr key={i}>
-                <td>
-                  <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
-                  <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span>
-                </td>
-                <td style={{ textAlign: 'center' }}>
-                  <Button onClick={() => this.handleSkipScenarioClick(sessionId, scenario.scenarioId)}>
-                    Skip Scenario ->
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+      <div>
+        {scenarios.map((scenario, i) => {
+          return (
+            <div key={i} style={{ marginLeft: '16px', padding: '8px' }}>
+              <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
+              <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span>
+              <div style={{ float: 'right' }}>
+                <a onClick={() => this.props.onSkip(sessionId, scenario.scenarioId)}>
+                  Skip Scenario ->
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     );
   }
 }
