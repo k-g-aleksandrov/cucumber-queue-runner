@@ -95,144 +95,142 @@ class SessionPage extends Component {
     }
 
     return (
-      <Grid fluid style={{ paddingBottom: '20px' }}>
+      <Grid style={{ paddingBottom: '20px' }}>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
-          <Col md={4}>
+          <Col md={5}>
             <SessionDetails sessionDetails={session.details} history={false}/>
           </Col>
-          <Col md={8}>
-            <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
+          <Col md={7}>
             <SessionStatusChart sessionBriefStatus={session.briefStatus}/>
           </Col>
         </Row>
         <Row>
           <Col>
-            <Tabs id='tabs-with-dropdown' defaultActiveKey={activeTab} animation={false}>
-              <Row className='clearfix'>
-                <Col sm={12}>
-                  <Nav bsStyle='tabs'>
-                    <LinkContainer to={`/sessions/${sessionId}?tab=queue`}>
-                      <NavItem eventKey='queue'>
-                        Queue
-                      </NavItem>
-                    </LinkContainer>
-                    <LinkContainer to={`/sessions/${sessionId}?tab=progress`}>
-                      <NavItem eventKey='progress'>
-                        In Progress
-                      </NavItem>
-                    </LinkContainer>
-                    <LinkContainer to={`/sessions/${sessionId}?tab=done`}>
-                      <NavItem eventKey='done'>
-                        Done
-                      </NavItem>
-                    </LinkContainer>
-                    <LinkContainer to={`/sessions/${sessionId}?tab=failed`}>
-                      <NavItem eventKey='failed'>
-                        Failed
-                      </NavItem>
-                    </LinkContainer>
-                  </Nav>
-                </Col>
-                <Col sm={12}>
-                  <Tab.Content>
-                    <Tab.Pane eventKey='queue'>
-                      <Table bordered style={{ marginBottom: '0px' }}>
-                        <tbody>
-                          {session.status.queue.map((queueItem, i) => {
+            <div className='info-panel'>
+              <h2>Scenarios</h2>
+              <Tabs
+                id='tabs-with-dropdown'
+                defaultActiveKey={activeTab}
+                animation={false}
+              >
+                <Row className='clearfix'>
+                  <Col sm={12}>
+                    <Nav bsStyle='tabs'>
+                      <LinkContainer to={`/sessions/${sessionId}?tab=queue`}>
+                        <NavItem eventKey='queue'>Queue</NavItem>
+                      </LinkContainer>
+                      <LinkContainer to={`/sessions/${sessionId}?tab=progress`}>
+                        <NavItem eventKey='progress'>In Progress</NavItem>
+                      </LinkContainer>
+                      <LinkContainer to={`/sessions/${sessionId}?tab=done`}>
+                        <NavItem eventKey='done'>Done</NavItem>
+                      </LinkContainer>
+                      <LinkContainer to={`/sessions/${sessionId}?tab=failed`}>
+                        <NavItem eventKey='failed'>Failed</NavItem>
+                      </LinkContainer>
+                    </Nav>
+                  </Col>
+                  <Col sm={12}>
+                    <Tab.Content>
+                      <Tab.Pane eventKey='queue'>
+                        <Table bordered style={{ marginBottom: '0px' }}>
+                          <tbody>
+                            {session.status.queue.map((queueItem, i) => {
+                              return (
+                                <tr key={i}>
+                                  <td>
+                                    <span style={{ fontWeight: 'bold' }}>{queueItem.featureName}:&nbsp;</span>
+                                    <span>{`${queueItem.scenarioName} (:${queueItem.scenarioLine})`}</span>
+                                  </td>
+                                  <td style={{ textAlign: 'center' }}>
+                                    <Button onClick={() => this.handleSkipScenarioClick(sessionId, queueItem.scenarioId)}>
+                                      Skip Scenario ->
+                                    </Button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </Table>
+                      </Tab.Pane>
+                      <Tab.Pane eventKey='progress'>
+                        <Grid fluid style={{ border: '1px solid #ddd' }}>
+                          <Row>
+                            <Col md={10}
+                              style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                            >Scenario</Col>
+                            <Col md={2}
+                              style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                            >Taken By</Col>
+                          </Row>
+                          {session.status.inProgress.map((inProgressItem, i) => {
                             return (
-                              <tr key={i}>
-                                <td>
-                                  <span style={{ fontWeight: 'bold' }}>{queueItem.featureName}:&nbsp;</span>
-                                  <span>{`${queueItem.scenarioName} (:${queueItem.scenarioLine})`}</span>
-                                </td>
-                                <td style={{ textAlign: 'center' }}>
-                                  <Button onClick={() => this.handleSkipScenarioClick(sessionId, queueItem.scenarioId)}>
-                                    Skip Scenario ->
-                                  </Button>
-                                </td>
-                              </tr>
+                              <Row key={i} style={{ backgroundColor: 'lightgray' }}>
+                                <Col md={10}
+                                  style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                                >
+                                  <span style={{ fontWeight: 'bold' }}>{inProgressItem.featureName}:&nbsp;</span>
+                                  <span>{`${inProgressItem.scenarioName} (:${inProgressItem.scenarioLine})`}</span>
+                                </Col>
+                                <Col md={2}
+                                  style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
+                                >
+                                  {inProgressItem.executor}
+                                  &nbsp;({moment(new Date()).to(moment(inProgressItem.startTimestamp))})
+                                </Col>
+                              </Row>
                             );
                           })}
-                        </tbody>
-                      </Table>
-                    </Tab.Pane>
-                    <Tab.Pane eventKey='progress'>
-                      <Grid fluid style={{ border: '1px solid #ddd' }}>
-                        <Row>
-                          <Col md={10}
-                            style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                          >Scenario</Col>
-                          <Col md={2}
-                            style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                          >Taken By</Col>
-                        </Row>
-                        {session.status.inProgress.map((inProgressItem, i) => {
-                          return (
-                            <Row key={i} style={{ backgroundColor: 'lightgray' }}>
-                              <Col md={10}
-                                style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                              >
-                                <span style={{ fontWeight: 'bold' }}>{inProgressItem.featureName}:&nbsp;</span>
-                                <span>{`${inProgressItem.scenarioName} (:${inProgressItem.scenarioLine})`}</span>
-                              </Col>
-                              <Col md={2}
-                                style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                              >
-                                {inProgressItem.executor}
-                                &nbsp;({moment(new Date()).to(moment(inProgressItem.startTimestamp))})
-                              </Col>
-                            </Row>
-                          );
-                        })}
-                      </Grid>
-                    </Tab.Pane>
-                    <Tab.Pane eventKey='done'>
-                      <Grid fluid>
-                        <Row>
-                          <Col>
-                            {session.status.done && Object.keys(session.status.done).map((feature, i) => {
-                              return (
-                                <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
-                                  <Row style={{ margin: '2px' }}>
-                                    <Col><h4>{feature}</h4></Col>
-                                  </Row>
-                                  {session.status.done[feature].map((scenario, j) => {
-                                    return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
-                                  })}
-                                </Grid>
-                              );
-                            })}
-                          </Col>
-                        </Row>
-                      </Grid>
-                    </Tab.Pane>
-                    <Tab.Pane eventKey='failed'>
-                      <Grid fluid>
-                        <Row>
-                          <Col>
-                            {failedScenarios && Object.keys(failedScenarios).map((feature, i) => {
-                              return (
-                                <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
-                                  <Row style={{ margin: '2px' }}>
-                                    <Col><h4>{feature}</h4></Col>
-                                  </Row>
-                                  {failedScenarios[feature].map((scenario, j) => {
-                                    if (scenario.result === 'failed') {
+                        </Grid>
+                      </Tab.Pane>
+                      <Tab.Pane eventKey='done'>
+                        <Grid fluid>
+                          <Row>
+                            <Col>
+                              {session.status.done && Object.keys(session.status.done).map((feature, i) => {
+                                return (
+                                  <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
+                                    <Row style={{ margin: '2px' }}>
+                                      <Col><h4>{feature}</h4></Col>
+                                    </Row>
+                                    {session.status.done[feature].map((scenario, j) => {
                                       return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
-                                    }
-                                    return null;
-                                  })}
-                                </Grid>
-                              );
-                            })}
-                          </Col>
-                        </Row>
-                      </Grid>
-                    </Tab.Pane>
-                  </Tab.Content>
-                </Col>
-              </Row>
-            </Tabs>
+                                    })}
+                                  </Grid>
+                                );
+                              })}
+                            </Col>
+                          </Row>
+                        </Grid>
+                      </Tab.Pane>
+                      <Tab.Pane eventKey='failed'>
+                        <Grid fluid>
+                          <Row>
+                            <Col>
+                              {failedScenarios && Object.keys(failedScenarios).map((feature, i) => {
+                                return (
+                                  <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
+                                    <Row style={{ margin: '2px' }}>
+                                      <Col><h4>{feature}</h4></Col>
+                                    </Row>
+                                    {failedScenarios[feature].map((scenario, j) => {
+                                      if (scenario.result === 'failed') {
+                                        return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
+                                      }
+                                      return null;
+                                    })}
+                                  </Grid>
+                                );
+                              })}
+                            </Col>
+                          </Row>
+                        </Grid>
+                      </Tab.Pane>
+                    </Tab.Content>
+                  </Col>
+                </Row>
+              </Tabs>
+            </div>
           </Col>
         </Row>
       </Grid>

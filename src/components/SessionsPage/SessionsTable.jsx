@@ -62,9 +62,9 @@ class SessionsTable extends Component {
     }
 
     return (
-      <div>
+      <div className='info-panel'>
         <h3 style={{ paddingBottom: '10px' }}>Current Sessions</h3>
-        <Table style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }} striped bordered>
+        <Table style={{ margin: 0 }} striped bordered>
           <tbody>
             <SessionsTableHeader/>
             {rows}

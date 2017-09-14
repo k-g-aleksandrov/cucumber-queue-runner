@@ -56,7 +56,7 @@ class SessionDetails extends Component {
     }
 
     return (
-      <div className='info-panel'>
+      <div className='info-panel' style={{ height: '250px' }}>
         <h2>Session Details</h2>
         <div className='details-row'>
           <span className='details-row-title'>Project</span>
