@@ -45,7 +45,7 @@ class ScenariosHistoryTable extends Component {
       }
     }
     return (
-      <div style={{  padding: '32px', backgroundColor: 'white' }}>
+      <div className='info-panel'>
         <div style={{ paddingBottom: '4px' }}>
           <h2 className='scenarios-report-header'>
             {this.state.onlyFailed ? 'Failed Scenarios' : 'All Scenarios'}

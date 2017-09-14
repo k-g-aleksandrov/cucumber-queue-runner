@@ -53,11 +53,10 @@ class SessionHistoryPage extends Component {
     return (
       <div>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
-          <Col md={4}>
+          <Col md={5}>
             <SessionDetails sessionDetails={session.details} history/>
           </Col>
-          <Col md={8}>
-            <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
+          <Col md={7}>
             <SessionStatusChart sessionBriefStatus={session.briefStatus}/>
           </Col>
         </Row>

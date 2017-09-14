@@ -58,7 +58,12 @@ class SessionHistoryScenarioRow extends Component {
         >
           <span>
             {this.props.failed && <b>{scenario.report[0].name}: </b>}
-            {<span>Scenario: {scenario.scenarioName} <i>line {scenario.scenarioLine}</i></span>}
+            {
+              <span>
+                Scenario: {scenario.scenarioName}&nbsp;
+                <span className='report-scenario-line'>line {scenario.scenarioLine}</span>
+              </span>
+            }
           </span>
           <span style={{ float: 'right' }}>{scenario.executor}</span>
         </div>

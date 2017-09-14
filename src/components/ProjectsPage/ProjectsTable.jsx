@@ -39,7 +39,7 @@ class ProjectsTable extends Component {
     const { availableProjects } = this.props;
 
     return (
-      <Table striped bordered style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }}>
+      <Table striped bordered>
         <tbody>
           <tr>
             <th>Name</th>
