@@ -7,9 +7,9 @@ import Col from 'react-bootstrap/lib/Col';
 import Alert from 'react-bootstrap/lib/Alert';
 
 import Spinner from 'components/common/Spinner';
-import SessionDetails from 'components/common/SessionDetails';
-import SessionStatusChart from 'components/common/SessionStatusChart';
-import ScenariosHistoryTable from './ScenariosHistoryTable';
+import SessionDetails from 'components/SessionPage/Components/SessionDetails';
+import SessionStatusChart from 'components/SessionPage/Components/SessionStatusChart';
+import ScenariosHistoryTable from 'components/SessionHistoryPage/ScenariosHistoryTable';
 
 import { fetchSessionHistory } from 'redux/actions/sessionsActions';
 

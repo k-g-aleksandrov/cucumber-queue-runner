@@ -4,25 +4,25 @@ import PropTypes from 'prop-types';
 
 import moment from 'moment';
 
-import Button from 'react-bootstrap-button-loader';
 import Tab from 'react-bootstrap/lib/Tab';
 import Tabs from 'react-bootstrap/lib/Tabs';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 import Nav from 'react-bootstrap/lib/Nav';
 import NavItem from 'react-bootstrap/lib/NavItem';
-import Table from 'react-bootstrap/lib/Table';
 import Grid from 'react-bootstrap/lib/Grid';
 
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 
 import Spinner from 'components/common/Spinner';
-import SessionDetails from 'components/common/SessionDetails';
-import SessionStatusChart from 'components/common/SessionStatusChart';
+import SessionDetails from 'components/SessionPage/Components/SessionDetails';
+import SessionStatusChart from 'components/SessionPage/Components/SessionStatusChart';
 
-import DoneScenarioRow from './DoneScenarioRow';
+import DoneScenarioRow from 'components/SessionPage/DoneScenarioRow';
 
 import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
+
+import QueueScenariosTable from 'components/SessionPage/Components/Scenarios/QueueScenariosTable';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -113,45 +113,25 @@ class SessionPage extends Component {
                 defaultActiveKey={activeTab}
                 animation={false}
               >
+                <Nav bsStyle='tabs'>
+                  <LinkContainer to={`/sessions/${sessionId}?tab=queue`}>
+                    <NavItem eventKey='queue'>Queue</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to={`/sessions/${sessionId}?tab=progress`}>
+                    <NavItem eventKey='progress'>In Progress</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to={`/sessions/${sessionId}?tab=done`}>
+                    <NavItem eventKey='done'>Done</NavItem>
+                  </LinkContainer>
+                  <LinkContainer to={`/sessions/${sessionId}?tab=failed`}>
+                    <NavItem eventKey='failed'>Failed</NavItem>
+                  </LinkContainer>
+                </Nav>
                 <Row className='clearfix'>
-                  <Col sm={12}>
-                    <Nav bsStyle='tabs'>
-                      <LinkContainer to={`/sessions/${sessionId}?tab=queue`}>
-                        <NavItem eventKey='queue'>Queue</NavItem>
-                      </LinkContainer>
-                      <LinkContainer to={`/sessions/${sessionId}?tab=progress`}>
-                        <NavItem eventKey='progress'>In Progress</NavItem>
-                      </LinkContainer>
-                      <LinkContainer to={`/sessions/${sessionId}?tab=done`}>
-                        <NavItem eventKey='done'>Done</NavItem>
-                      </LinkContainer>
-                      <LinkContainer to={`/sessions/${sessionId}?tab=failed`}>
-                        <NavItem eventKey='failed'>Failed</NavItem>
-                      </LinkContainer>
-                    </Nav>
-                  </Col>
                   <Col sm={12}>
                     <Tab.Content>
                       <Tab.Pane eventKey='queue'>
-                        <Table bordered style={{ marginBottom: '0px' }}>
-                          <tbody>
-                            {session.status.queue.map((queueItem, i) => {
-                              return (
-                                <tr key={i}>
-                                  <td>
-                                    <span style={{ fontWeight: 'bold' }}>{queueItem.featureName}:&nbsp;</span>
-                                    <span>{`${queueItem.scenarioName} (:${queueItem.scenarioLine})`}</span>
-                                  </td>
-                                  <td style={{ textAlign: 'center' }}>
-                                    <Button onClick={() => this.handleSkipScenarioClick(sessionId, queueItem.scenarioId)}>
-                                      Skip Scenario ->
-                                    </Button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </Table>
+                        <QueueScenariosTable scenarios={session.status.queue} sessionId={sessionId} />
                       </Tab.Pane>
                       <Tab.Pane eventKey='progress'>
                         <Grid fluid style={{ border: '1px solid #ddd' }}>
