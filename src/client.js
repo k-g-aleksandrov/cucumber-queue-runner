@@ -6,6 +6,8 @@ import configureStore from './redux/configureStore';
 import routes from './routes';
 import DevTools from './components/DevTools';
 
+import 'react-responsive-carousel/lib/styles/carousel.css';
+
 const initialState = window.REDUX_INITIAL_STATE || {};
 
 const store = configureStore(initialState);
