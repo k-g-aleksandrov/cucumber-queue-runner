@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import moment from 'moment';
-
 import Tab from 'react-bootstrap/lib/Tab';
 import Tabs from 'react-bootstrap/lib/Tabs';
 import Row from 'react-bootstrap/lib/Row';
@@ -18,11 +16,12 @@ import Spinner from 'components/common/Spinner';
 import SessionDetails from 'components/SessionPage/Components/SessionDetails';
 import SessionStatusChart from 'components/SessionPage/Components/SessionStatusChart';
 
-import DoneScenarioRow from 'components/SessionPage/DoneScenarioRow';
-
 import { fetchSessionDetails, skipScenario } from 'redux/actions/sessionsActions';
 
 import QueueScenariosTable from 'components/SessionPage/Components/Scenarios/QueueScenariosTable';
+import InProgressScenariosTable from 'components/SessionPage/Components/Scenarios/InProgressScenariosTable';
+import DoneScenariosTable from 'components/SessionPage/Components/Scenarios/DoneScenariosTable';
+import FailedScenariosTable from 'components/SessionPage/Components/Scenarios/FailedScenariosTable';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -62,6 +61,21 @@ class SessionPage extends Component {
     this.props.dispatch(fetchSessionDetails(this.props.params.session));
   }
 
+  filterFailedScenarios(scenarios) {
+    const filteredScenarios = {};
+
+    for (const feature of Object.keys(scenarios)) {
+      const featureScenarios = scenarios[feature].filter((scenario) => {
+        return scenario.result === 'failed';
+      });
+
+      if (featureScenarios && featureScenarios.length) {
+        filteredScenarios[feature] = featureScenarios;
+      }
+    }
+    return filteredScenarios;
+  }
+
   render() {
     const sessionId = this.props.params.session;
     const queryParams = this.props.location.query;
@@ -78,21 +92,6 @@ class SessionPage extends Component {
     }
 
     const activeTab = queryParams.tab ? queryParams.tab : 'queue';
-
-    let failedScenarios = null;
-
-    if (activeTab === 'failed') {
-      failedScenarios = {};
-      for (const feature of Object.keys(session.status.done)) {
-        const featureScenarios = session.status.done[feature].filter((scenario) => {
-          return scenario.result === 'failed';
-        });
-
-        if (featureScenarios && featureScenarios.length) {
-          failedScenarios[feature] = featureScenarios;
-        }
-      }
-    }
 
     return (
       <Grid style={{ paddingBottom: '20px' }}>
@@ -127,7 +126,7 @@ class SessionPage extends Component {
                     <NavItem eventKey='failed'>Failed</NavItem>
                   </LinkContainer>
                 </Nav>
-                <Row className='clearfix'>
+                <Row className='clearfix' style={{ paddingTop: '16px' }}>
                   <Col sm={12}>
                     <Tab.Content>
                       <Tab.Pane eventKey='queue'>
@@ -138,77 +137,16 @@ class SessionPage extends Component {
                         />
                       </Tab.Pane>
                       <Tab.Pane eventKey='progress'>
-                        <Grid fluid style={{ border: '1px solid #ddd' }}>
-                          <Row>
-                            <Col md={10}
-                              style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                            >Scenario</Col>
-                            <Col md={2}
-                              style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                            >Taken By</Col>
-                          </Row>
-                          {session.status.inProgress.map((inProgressItem, i) => {
-                            return (
-                              <Row key={i} style={{ backgroundColor: 'lightgray' }}>
-                                <Col md={10}
-                                  style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                                >
-                                  <span style={{ fontWeight: 'bold' }}>{inProgressItem.featureName}:&nbsp;</span>
-                                  <span>{`${inProgressItem.scenarioName} (:${inProgressItem.scenarioLine})`}</span>
-                                </Col>
-                                <Col md={2}
-                                  style={{ padding: '8px', borderTop: '1px solid #ddd', borderLeft: '1px solid #ddd' }}
-                                >
-                                  {inProgressItem.executor}
-                                  &nbsp;({moment(new Date()).to(moment(inProgressItem.startTimestamp))})
-                                </Col>
-                              </Row>
-                            );
-                          })}
-                        </Grid>
+                        <InProgressScenariosTable scenarios={session.status.inProgress} />
                       </Tab.Pane>
                       <Tab.Pane eventKey='done'>
-                        <Grid fluid>
-                          <Row>
-                            <Col>
-                              {session.status.done && Object.keys(session.status.done).map((feature, i) => {
-                                return (
-                                  <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
-                                    <Row style={{ margin: '2px' }}>
-                                      <Col><h4>{feature}</h4></Col>
-                                    </Row>
-                                    {session.status.done[feature].map((scenario, j) => {
-                                      return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
-                                    })}
-                                  </Grid>
-                                );
-                              })}
-                            </Col>
-                          </Row>
-                        </Grid>
+                        <DoneScenariosTable sessionScenarios={session.status.done} sessionId={sessionId} />
                       </Tab.Pane>
                       <Tab.Pane eventKey='failed'>
-                        <Grid fluid>
-                          <Row>
-                            <Col>
-                              {failedScenarios && Object.keys(failedScenarios).map((feature, i) => {
-                                return (
-                                  <Grid style={{ border: 'solid 1px #ccc' }} fluid key={i}>
-                                    <Row style={{ margin: '2px' }}>
-                                      <Col><h4>{feature}</h4></Col>
-                                    </Row>
-                                    {failedScenarios[feature].map((scenario, j) => {
-                                      if (scenario.result === 'failed') {
-                                        return <DoneScenarioRow key={j} session={session} scenario={scenario}/>;
-                                      }
-                                      return null;
-                                    })}
-                                  </Grid>
-                                );
-                              })}
-                            </Col>
-                          </Row>
-                        </Grid>
+                        <FailedScenariosTable
+                          sessionScenarios={this.filterFailedScenarios(session.status.done)}
+                          sessionId={sessionId}
+                        />
                       </Tab.Pane>
                     </Tab.Content>
                   </Col>

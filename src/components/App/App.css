@@ -36,6 +36,10 @@ body {
   margin-left: 32px;
 }
 
+.report-embeddings-icon {
+  font-size: 60%;
+}
+
 .details-row {
   border-bottom: 1px solid #eee;
   padding-top: 4px;

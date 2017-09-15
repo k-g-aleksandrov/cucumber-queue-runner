@@ -56,6 +56,14 @@ class ReportStep extends Component {
       rows.push(<span key={`${step.line}-location`}>{step.name}</span>);
     }
 
+    if (step.embeddings) {
+      if (this.state.showEmbeddings) {
+        rows.push(<span style={{ fontSize: '70%' }}>&nbsp;▼</span>);
+      } else {
+        rows.push(<span style={{ fontSize: '70%' }}>&nbsp;▶</span>);
+      }
+    }
+
     const errorMessage = step.result.error_message
       ? (
         <pre style={{ backgroundColor: '#eee', margin: '16px', border: '1px solid #ccc' }}>
@@ -65,7 +73,11 @@ class ReportStep extends Component {
       : null;
 
     return (
-      <Row className={`${stepClass}`} onClick={this.handleShowEmbeddings} style={{ margin: 0, padding: '2px' }}>
+      <Row
+        className={`${stepClass}`}
+        onClick={this.handleShowEmbeddings}
+        style={{ margin: 0, padding: '2px', cursor: step.embeddings ? 'pointer' : '' }}
+      >
         {rows}
         <span className='report-duration'>{stepDuration}</span>
         {this.state.showEmbeddings && step.embeddings &&

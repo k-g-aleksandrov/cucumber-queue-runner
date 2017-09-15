@@ -317,6 +317,7 @@ class Session {
           classpath: scenario.classpath,
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
+          featureName: scenario.featureName,
           result: scenario.result,
           executor: scenario.executor
         });
@@ -350,6 +351,7 @@ class Session {
           classpath: scenario.classpath,
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
+          featureName: scenario.featureName,
           result: scenario.result,
           report,
           executor: scenario.executor
@@ -391,6 +393,7 @@ Session.pushScenarioToStatusList = function pushScenarioToStatusList(resultObjec
     classpath: scenario.classpath,
     scenarioLine: scenario.scenarioLine,
     scenarioName: scenario.scenarioName,
+    featureName: scenario.featureName,
     result: scenario.result,
     executor: scenario.executor
   });

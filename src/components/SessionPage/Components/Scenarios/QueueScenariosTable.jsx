@@ -21,11 +21,14 @@ class QueueScenariosTable extends Component {
         {scenarios.map((scenario, i) => {
           return (
             <div key={i} style={{ marginLeft: '16px', padding: '8px' }}>
-              <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
-              <span>{`${scenario.scenarioName} (:${scenario.scenarioLine})`}</span>
+              <span style={{ width: '90%' }}>
+                <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
+                {scenario.scenarioName}&nbsp;
+                <span className='report-scenario-line'>line {scenario.scenarioLine}</span>
+              </span>
               <div style={{ float: 'right' }}>
                 <a onClick={() => this.props.onSkip(sessionId, scenario.scenarioId)}>
-                  Skip Scenario ->
+                  Skip >
                 </a>
               </div>
             </div>
