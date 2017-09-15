@@ -1,3 +1,64 @@
 html {
-    overflow-y: scroll;
+  overflow-y: scroll;
+}
+
+body {
+  background-color: #ECECEC;
+}
+
+.report-keyword {
+  font-weight: bold;
+  width: 60px;
+  display: inline-block;
+  text-align: right;
+  margin-right: 4px;
+}
+
+.report-duration {
+  float: right;
+  margin-right: 4px;
+}
+
+.info-panel {
+  padding: 16px 32px;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  margin-bottom: 20px;
+}
+.scenarios-report-header {
+  display: inline;
+}
+
+.report-embeddings {
+  padding: 8px;
+  margin-left: 16px;
+}
+
+.report-embeddings-icon {
+  font-size: 60%;
+}
+
+.details-row {
+  border-bottom: 1px solid #eee;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.details-row-title {
+  width: 80px;
+  display: inline-block;
+  margin-right: 4px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.details-row-value {
+  display: inline-block;
+}
+
+.report-scenario-line {
+  font-style: italic;
+  font-size: 80%;
+  color: #4a4a4a;
 }

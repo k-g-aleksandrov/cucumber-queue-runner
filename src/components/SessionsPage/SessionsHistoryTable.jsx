@@ -47,14 +47,17 @@ class SessionsHistoryTable extends Component {
     }
 
     return (
-      <Table style={{ boxShadow: '0 0 1px rgba(0, 0, 0, 0.2)' }} striped bordered>
-        <tbody>
-          <SessionsHistoryTableHeader/>
-          {Object.keys(sessionsHistory).map((session, i) => {
-            return <SessionsHistoryTableRow key={i} session={sessionsHistory[session]}/>;
-          })}
-        </tbody>
-      </Table>
+      <div className='info-panel'>
+        <h3 style={{ paddingBottom: '10px' }}>Sessions History</h3>
+        <Table striped bordered>
+          <tbody>
+            <SessionsHistoryTableHeader/>
+            {Object.keys(sessionsHistory).map((session, i) => {
+              return <SessionsHistoryTableRow key={i} session={sessionsHistory[session]}/>;
+            })}
+          </tbody>
+        </Table>
+      </div>
     );
   }
 }

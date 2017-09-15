@@ -71,19 +71,23 @@ class ProjectPage extends Component {
     const activeTab = queryParams.scope ? queryParams.scope : 'dev';
 
     return (
-      <Grid fluid style={{ paddingBottom: '20px' }}>
+      <Grid style={{ paddingBottom: '20px' }}>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
-          <Col md={4}>
+          <Col md={5}>
             <ProjectDetails projectDetails={projectDetails.details} history={false}/>
           </Col>
-          <Col md={8}>
-            <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
+          <Col md={7}>
             <ProjectScopesChart projectDetails={projectDetails}/>
           </Col>
         </Row>
         <Row>
           <Col>
-            <Tabs id='tabs-with-dropdown' defaultActiveKey={activeTab} animation={false}>
+            <Tabs
+              className='info-panel'
+              id='tabs-with-dropdown'
+              defaultActiveKey={activeTab}
+              animation={false}
+            >
               <Row className='clearfix'>
                 <Col sm={12}>
                   <Nav bsStyle='tabs'>

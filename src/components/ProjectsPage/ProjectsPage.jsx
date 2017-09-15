@@ -60,7 +60,7 @@ class ProjectsPage extends Component {
       );
     }
     return (
-      <div>
+      <div className='info-panel'>
         {this.props.location.query.lost &&
         <Alert bsStyle='danger'>
           <span style={{ fontWeight: 'bold' }}>Error: </span>

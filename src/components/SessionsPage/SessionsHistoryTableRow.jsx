@@ -24,7 +24,7 @@ class SessionsHistoryTableRow extends Component {
 
     return (
       <tr>
-        <td style={{ verticalAlign: 'center', width: '50%' }}>
+        <td style={{ verticalAlign: 'center', width: '35%' }}>
           {details.project}&nbsp;
           <span style={{ fontStyle: 'italic', fontColor: '#d3d3d3', maxWidth: '50%' }}>
             (scope:&nbsp;
