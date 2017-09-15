@@ -76,6 +76,9 @@ router.get('/history/:sessionId/percent', (req, res) => {
 
   history.exec()
     .then((historyObject) => {
+      if (!historyObject) {
+        return res.send('0');
+      }
       const { passedCount, skippedCount, doneCount } = historyObject.briefStatus;
 
       res.send(((passedCount / (doneCount - skippedCount)) * 100).toString());
