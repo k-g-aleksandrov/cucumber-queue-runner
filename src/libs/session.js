@@ -317,6 +317,7 @@ class Session {
           classpath: scenario.classpath,
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
+          featureName: scenario.featureName,
           result: scenario.result,
           executor: scenario.executor
         });
@@ -324,16 +325,6 @@ class Session {
       }
     }
     return status;
-  }
-
-  removeEmbeddings(report) {
-    for (const prop in report) {
-      if (prop === 'embeddings') {
-        delete report[prop];
-      } else if (typeof report[prop] === 'object') {
-        this.removeEmbeddings(report[prop]);
-      }
-    }
   }
 
   saveHistory() {
@@ -355,12 +346,12 @@ class Session {
           console.log(e);
         }
 
-        this.removeEmbeddings(report);
         scenarios[featureKey].push({
           scenarioId: scenario._id,
           classpath: scenario.classpath,
           scenarioLine: scenario.scenarioLine,
           scenarioName: scenario.scenarioName,
+          featureName: scenario.featureName,
           result: scenario.result,
           report,
           executor: scenario.executor
@@ -402,6 +393,7 @@ Session.pushScenarioToStatusList = function pushScenarioToStatusList(resultObjec
     classpath: scenario.classpath,
     scenarioLine: scenario.scenarioLine,
     scenarioName: scenario.scenarioName,
+    featureName: scenario.featureName,
     result: scenario.result,
     executor: scenario.executor
   });

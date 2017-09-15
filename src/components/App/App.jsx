@@ -17,7 +17,7 @@ class App extends Component {
   render() {
     return (
       <div style={{ padding: 0 }}>
-        <Navbar inverse fluid>
+        <Navbar inverse>
           <Navbar.Header>
             <Navbar.Toggle/>
           </Navbar.Header>
@@ -38,7 +38,7 @@ class App extends Component {
             </Nav>
           </Navbar.Collapse>
         </Navbar>
-        <Grid fluid>
+        <Grid>
           {this.props.children}
         </Grid>
       </div>

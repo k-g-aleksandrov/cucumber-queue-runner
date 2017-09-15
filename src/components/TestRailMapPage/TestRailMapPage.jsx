@@ -68,7 +68,7 @@ class TestRailMapPage extends Component {
     }
 
     return (
-      <Grid fluid style={{ paddingBottom: '20px' }}>
+      <Grid className='info-panel' fluid style={{ paddingBottom: '20px' }}>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
           <Col md={4}>
             <NavigationPanel activeMode={activeMode}/>

@@ -45,7 +45,12 @@ class ProjectScopesChart extends Component {
     if (Doughnut === undefined) {
       return null;
     }
-    return <Doughnut data={chartData} height={70}/>;
+    return (
+      <div className='info-panel' style={{ height: '100%' }}>
+        <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
+        <Doughnut data={chartData} height={70}/>
+      </div>
+    );
   }
 }
 

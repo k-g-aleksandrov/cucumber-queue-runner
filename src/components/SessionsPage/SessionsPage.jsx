@@ -26,9 +26,7 @@ class SessionsPage extends Component {
     return (
       <div>
         <SessionLostPanel sessionId={this.props.location.query.lost}/>
-        <h3 style={{ paddingBottom: '10px' }}>Current Sessions</h3>
         <SessionsTable/>
-        <h3 style={{ paddingBottom: '10px' }}>Sessions History</h3>
         <SessionsHistoryTable/>
       </div>
     );
