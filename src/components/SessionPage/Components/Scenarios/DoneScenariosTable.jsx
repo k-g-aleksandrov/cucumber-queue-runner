@@ -27,7 +27,9 @@ class DoneScenariosTable extends Component {
         {sessionScenarios && Object.keys(sessionScenarios).map((feature, i) => {
           return (
             <div key={i}>
-              <h4 style={{ margin: '4px' }}><span>Feature:&nbsp;</span><span>{feature}</span></h4>
+              <h4 style={{ margin: '4px' }}>
+                <span>{feature}</span>
+              </h4>
               {sessionScenarios[feature].map((scenario, j) => {
                 return (
                   <SessionHistoryScenarioRow
