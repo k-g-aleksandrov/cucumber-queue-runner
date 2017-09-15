@@ -64,14 +64,6 @@ class ReportStep extends Component {
       }
     }
 
-    const errorMessage = step.result.error_message
-      ? (
-        <pre style={{ backgroundColor: '#eee', margin: '16px', border: '1px solid #ccc' }}>
-          {step.result.error_message}
-        </pre>
-      )
-      : null;
-
     return (
       <Row
         className={`${stepClass}`}
@@ -87,7 +79,6 @@ class ReportStep extends Component {
             })}
           </div>
         }
-        {errorMessage}
       </Row>
     );
   }

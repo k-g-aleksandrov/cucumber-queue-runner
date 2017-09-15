@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import ReportStep from './ReportStep';
+import ReportErrorMessage from './ReportErrorMessage';
 
 import Grid from 'react-bootstrap/lib/Grid';
 import Row from 'react-bootstrap/lib/Row';
@@ -36,18 +37,38 @@ function Report(props) {
             >
               {rep.elements[scenarioElementsIndex].before
                 && rep.elements[scenarioElementsIndex].before.map((before, j) => {
-                  return <ReportStep key={j} type='before' step={before}/>;
+                  return (
+                    <div key={j}>
+                      <ReportStep key={j} type='before' step={before}/>
+                      <ReportErrorMessage errorMessage={before.result.error_message}/>
+                    </div>
+                  );
                 })
               }
               {haveBackground && rep.elements[0].steps.map((step, j) => {
-                return <ReportStep key={j} type='step' step={step}/>;
+                return (
+                  <div key={j}>
+                    <ReportStep type='step' step={step}/>
+                    <ReportErrorMessage errorMessage={step.result.error_message}/>
+                  </div>
+                );
               })}
               {rep.elements[scenarioElementsIndex].steps.map((step, j) => {
-                return <ReportStep key={j} type='step' step={step}/>;
+                return (
+                  <div key={j}>
+                    <ReportStep type='step' step={step}/>
+                    <ReportErrorMessage errorMessage={step.result.error_message}/>
+                  </div>
+                );
               })}
               {rep.elements[scenarioElementsIndex].after
                 && rep.elements[scenarioElementsIndex].after.map((after, j) => {
-                  return <ReportStep key={j} type='after' step={after}/>;
+                  return (
+                    <div key={j}>
+                      <ReportStep type='after' step={after}/>
+                      <ReportErrorMessage errorMessage={after.result.error_message}/>
+                    </div>
+                  );
                 })
               }
             </Grid>
