@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 
-import Row from 'react-bootstrap/lib/Row';
-
+import ReportStepTitle from './ReportStepTitle';
 import ReportAttachment from './ReportAttachment';
+import ReportErrorMessage from './ReportErrorMessage';
 
 const propTypes = {
   step: PropTypes.any,
@@ -29,57 +28,25 @@ class ReportStep extends Component {
   render() {
     const { step, type } = this.props;
 
-    let stepDuration = '';
-    let stepClass = 'bg-active';
-
-    if (step.result.duration) {
-      stepDuration = moment.utc(step.result.duration / 1000000).format('HH:mm:ss.SSS');
-    }
-    if (step.result.status === 'passed') {
-      stepClass = 'bg-success';
-    } else if (step.result.status === 'failed') {
-      stepClass = 'bg-danger';
-    } else if (step.result.status === 'skipped') {
-      stepClass = 'bg-info';
-    }
-
-    const rows = [];
-
-    if (type === 'before') {
-      rows.push(<span key={`${step.line}-keyword`} className='report-keyword'>Before</span>);
-      rows.push(<span key={`${step.line}-location`}>{step.match.location}</span>);
-    } else if (type === 'after') {
-      rows.push(<span key={`${step.line}-keyword`} className='report-keyword'>After</span>);
-      rows.push(<span key={`${step.line}-location`}>{step.match.location}</span>);
-    } else {
-      rows.push(<span key={`${step.line}-keyword`} className='report-keyword'>{step.keyword}</span>);
-      rows.push(<span key={`${step.line}-location`}>{step.name}</span>);
-    }
-
-    if (step.embeddings) {
-      if (this.state.showEmbeddings) {
-        rows.push(<span style={{ fontSize: '70%' }}>&nbsp;▼</span>);
-      } else {
-        rows.push(<span style={{ fontSize: '70%' }}>&nbsp;▶</span>);
-      }
-    }
-
     return (
-      <Row
-        className={`${stepClass}`}
-        onClick={this.handleShowEmbeddings}
-        style={{ margin: 0, padding: '2px', cursor: step.embeddings ? 'pointer' : '' }}
-      >
-        {rows}
-        <span className='report-duration'>{stepDuration}</span>
+      <div>
+        <ReportStepTitle
+          onClick={this.handleShowEmbeddings}
+          showEmbeddings={this.state.showEmbeddings}
+          type={type}
+          step={step}
+        />
         {this.state.showEmbeddings && step.embeddings &&
-          <div className='report-embeddings'>
+          <div
+            style={{ margin: '8px 16px 0px' }}
+          >
             {step.embeddings.map((embedding, index) => {
               return <ReportAttachment embedding={embedding} index={index} key={index}/>;
             })}
           </div>
         }
-      </Row>
+        <ReportErrorMessage errorMessage={step.result.error_message}/>
+      </div>
     );
   }
 }

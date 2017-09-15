@@ -30,8 +30,6 @@ class SessionHistoryScenarioRow extends Component {
         fetch(`/api/sessions/${sessionId}/reports/${scenarioId}`)
           .then((response) => response.json())
           .then((responseJson) => {
-            console.log('set state');
-            console.log(JSON.stringify(responseJson.report));
             this.setState({ report: responseJson.report });
           })
           .catch((error) => {

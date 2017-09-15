@@ -31,9 +31,8 @@ body {
 }
 
 .report-embeddings {
-  background-color: white;
   padding: 8px;
-  margin-left: 32px;
+  margin-left: 16px;
 }
 
 .report-embeddings-icon {

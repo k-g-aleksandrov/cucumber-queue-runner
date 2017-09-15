@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import ReportStep from './ReportStep';
-import ReportErrorMessage from './ReportErrorMessage';
-
 import Grid from 'react-bootstrap/lib/Grid';
 import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
+
+import ReportStep from './ReportStep';
 
 const propTypes = {
   report: PropTypes.any
@@ -37,38 +36,18 @@ function Report(props) {
             >
               {rep.elements[scenarioElementsIndex].before
                 && rep.elements[scenarioElementsIndex].before.map((before, j) => {
-                  return (
-                    <div key={j}>
-                      <ReportStep key={j} type='before' step={before}/>
-                      <ReportErrorMessage errorMessage={before.result.error_message}/>
-                    </div>
-                  );
+                  return <ReportStep key={j} type='before' step={before} />;
                 })
               }
               {haveBackground && rep.elements[0].steps.map((step, j) => {
-                return (
-                  <div key={j}>
-                    <ReportStep type='step' step={step}/>
-                    <ReportErrorMessage errorMessage={step.result.error_message}/>
-                  </div>
-                );
+                return <ReportStep key={j} type='step' step={step} />;
               })}
               {rep.elements[scenarioElementsIndex].steps.map((step, j) => {
-                return (
-                  <div key={j}>
-                    <ReportStep type='step' step={step}/>
-                    <ReportErrorMessage errorMessage={step.result.error_message}/>
-                  </div>
-                );
+                return <ReportStep key={j} type='step' step={step} />;
               })}
               {rep.elements[scenarioElementsIndex].after
                 && rep.elements[scenarioElementsIndex].after.map((after, j) => {
-                  return (
-                    <div key={j}>
-                      <ReportStep type='after' step={after}/>
-                      <ReportErrorMessage errorMessage={after.result.error_message}/>
-                    </div>
-                  );
+                  return <ReportStep key={j} type='after' step={after} />;
                 })
               }
             </Grid>

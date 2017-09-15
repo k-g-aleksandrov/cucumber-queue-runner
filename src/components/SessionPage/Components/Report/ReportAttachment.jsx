@@ -27,11 +27,17 @@ class ReportAttachment extends Component {
   render() {
     const { embedding, index } = this.props;
 
+    if (this.state.extend) {
+      return (
+        <pre onClick={this.handleShowAttachment} style={{ backgroundColor: '#eee', border: '1px solid #ccc' }}>
+          {base64.decode(embedding.data)}
+        </pre>
+      );
+    }
     return (
-      <div>
+      <pre style={{ backgroundColor: '#eee', border: '1px solid #ccc' }}>
         <a onClick={this.handleShowAttachment}>Attachment {index + 1} ({embedding.mime_type})</a>
-        {this.state.extend && <pre>{base64.decode(embedding.data)}</pre>}
-      </div>
+      </pre>
     );
   }
 }
