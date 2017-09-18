@@ -5,7 +5,7 @@ import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 import Alert from 'react-bootstrap/lib/Alert';
 
-import SessionHistoryScenarioRow from './DoneScenarioRow';
+import DoneScenarioRow from './DoneScenarioRow';
 
 const propTypes = {
   sessionId: PropTypes.any,
@@ -27,12 +27,12 @@ class DoneScenariosTable extends Component {
         {sessionScenarios && Object.keys(sessionScenarios).map((feature, i) => {
           return (
             <div key={i}>
-              <h4 style={{ margin: '4px' }}>
+              <h4 style={{ marginTop: '12px', marginBottom: '12px', marginLeft: '4px' }}>
                 <span>{feature}</span>
               </h4>
               {sessionScenarios[feature].map((scenario, j) => {
                 return (
-                  <SessionHistoryScenarioRow
+                  <DoneScenarioRow
                     key={j}
                     sessionId={sessionId}
                     scenario={scenario}
@@ -41,7 +41,7 @@ class DoneScenariosTable extends Component {
                   />
                 );
               })}
-              <hr style={{ marginLeft: '8px' }}/>
+              <hr style={{ marginTop: '12px', marginBottom: '12px', marginLeft: '4px' }}/>
             </div>
           );
         })}
