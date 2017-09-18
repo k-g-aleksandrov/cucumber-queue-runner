@@ -19,12 +19,12 @@ class CoveragePage extends Component {
     this.fetchCoverage();
   }
 
-  getPercent(coverage) {
+  getCoverageData(coverage) {
     const total = coverage.blocked + coverage.failed + coverage.passed + coverage.retest + coverage.untested;
     let percent = ((total - coverage.untested) / total) * 100;
 
     percent = Math.round(percent * 10) / 10;
-    return percent;
+    return { percent, covered: total - coverage.untested, total };
   }
 
   fetchCoverage() {
@@ -52,16 +52,16 @@ class CoveragePage extends Component {
       );
     }
 
-    const coveragePercents = {};
+    const coverageData = {};
 
     for (const projectKey of Object.keys(coverage)) {
       const project = coverage[projectKey];
 
       for (const projectEntry of project) {
-        if (!coveragePercents[projectKey]) {
-          coveragePercents[projectKey] = [];
+        if (!coverageData[projectKey]) {
+          coverageData[projectKey] = [];
         }
-        coveragePercents[projectKey].push(this.getPercent(projectEntry));
+        coverageData[projectKey].push(this.getCoverageData(projectEntry));
       }
     }
 
@@ -75,10 +75,10 @@ class CoveragePage extends Component {
         }}
       >
         <h1 style={{ marginTop: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>Tests Coverage</h1>
-        {Object.keys(coveragePercents).map((key, index) => {
+        {Object.keys(coverageData).map((key, index) => {
           return (
-            <span key={index} style={{ fontWeight: '700px', fontSize: '76px', color: 'white' }}>
-              {key}: {coveragePercents[key][0]}%
+            <span key={index} style={{ display: 'block', fontWeight: '700px', fontSize: '76px', color: 'white' }}>
+              {key}: {coverageData[key][0].percent}% ({coverageData[key][0].covered} of {coverageData[key][0].total})
             </span>
           );
         })}
