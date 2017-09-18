@@ -13,6 +13,8 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import config from 'config';
 
+import DashboardDataCollector from 'libs/dashboardDataCollector';
+
 const app = express();
 
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -78,6 +80,8 @@ function renderHTML(componentHTML, initialState) {
     </html>
   `;
 }
+
+DashboardDataCollector.instance = new DashboardDataCollector();
 
 const PORT = process.env.PORT || config.get('port');
 

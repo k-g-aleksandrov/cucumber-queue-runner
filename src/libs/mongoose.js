@@ -94,12 +94,28 @@ const TestRailMapSchema = new Schema({
   sortedBySimilarity: Schema.Types.Mixed
 });
 
+const DashboardCoverageSchema = new Schema({
+  date: Date,
+  project: String,
+  passed: Number,
+  failed: Number,
+  retest: Number,
+  blocked: Number,
+  untested: Number
+});
+
+DashboardCoverageSchema.index({
+  date: 1,
+  project: 1
+}, { unique: true });
+
 const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
 const Execution = mongoose.model('Execution', ExecutionSchema);
 const SessionHistory = mongoose.model('SessionHistory', SessionHistorySchema);
 const HistoryScenarios = mongoose.model('HistoryScenarios', HistoryScenariosSchema);
 const TestRailMap = mongoose.model('TestRailMap', TestRailMapSchema);
+const DashboardCoverage = mongoose.model('DashboardCoverage', DashboardCoverageSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
@@ -107,3 +123,4 @@ module.exports.Execution = Execution;
 module.exports.SessionHistory = SessionHistory;
 module.exports.HistoryScenarios = HistoryScenarios;
 module.exports.TestRailMap = TestRailMap;
+module.exports.DashboardCoverage = DashboardCoverage;
