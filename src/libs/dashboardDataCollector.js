@@ -2,7 +2,7 @@ import config from 'config';
 import cron from 'node-cron';
 import dateFormat from 'date-format';
 
-import { Project, DashboardCoverage } from 'libs/mongoose';
+import { Project, DashboardCoverage, SessionHistory } from 'libs/mongoose';
 
 class DashboardDataCollector {
   constructor() {
@@ -96,6 +96,14 @@ class DashboardDataCollector {
           resolve(result);
         });
     });
+  }
+
+  getExecutionStatus() {
+    SessionHistory.find({ 'details.project': 'ios-testing', 'details.scenariosFilter.scope': 'daily' }).exec()
+      .then((history) => {
+        console.log(history.length);
+        console.log(history[0].details.scenariosFilter);
+      });
   }
 
   stop() {
