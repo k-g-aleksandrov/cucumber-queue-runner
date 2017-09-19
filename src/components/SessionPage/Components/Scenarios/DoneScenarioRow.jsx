@@ -79,7 +79,7 @@ class SessionHistoryScenarioRow extends Component {
       <div>
         <div onClick={() => {
           this.handleGetScenarioReportClick(sessionId, scenario.scenarioId);
-        }} style={{ backgroundColor, marginLeft: '16px', padding: '8px', cursor: 'pointer' }}
+        }} style={{ backgroundColor, marginLeft: '16px', padding: '8px', cursor: 'pointer', overflow: 'hidden' }}
         >
           <span>
             {this.props.failed && <b>{feature}: </b>}
@@ -95,6 +95,7 @@ class SessionHistoryScenarioRow extends Component {
         <div style={{ marginLeft: '32px' }}>
           {this.state.reportDisplayed && <Report report={report}/>}
         </div>
+        <hr style={{ margin: '0px', marginLeft: '16px', borderTop: '1px solid #eeeeee' }}/>
       </div>
     );
   }
