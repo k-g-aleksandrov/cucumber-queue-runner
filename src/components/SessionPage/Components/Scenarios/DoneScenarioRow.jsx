@@ -93,7 +93,7 @@ class SessionHistoryScenarioRow extends Component {
           <span style={{ float: 'right' }}>{scenario.executor}</span>
         </div>
         <div style={{ marginLeft: '32px' }}>
-          {this.state.reportDisplayed && <Report report={report}/>}
+          {this.state.reportDisplayed && <Report report={report} sessionId={sessionId}/>}
         </div>
         <hr style={{ margin: '0px', marginLeft: '16px', borderTop: '1px solid #eeeeee' }}/>
       </div>

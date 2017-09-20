@@ -7,7 +7,8 @@ import ReportErrorMessage from './ReportErrorMessage';
 
 const propTypes = {
   step: PropTypes.any,
-  type: PropTypes.any
+  type: PropTypes.any,
+  sessionId: PropTypes.any
 };
 
 class ReportStep extends Component {
@@ -26,7 +27,9 @@ class ReportStep extends Component {
   }
 
   render() {
-    const { step, type } = this.props;
+    const { step, type, sessionId } = this.props;
+
+    console.log(`ReportStep ${sessionId}`);
 
     return (
       <div>
@@ -41,7 +44,11 @@ class ReportStep extends Component {
             style={{ margin: '8px 16px 0px' }}
           >
             {step.embeddings.map((embedding, index) => {
-              return <ReportAttachment embedding={embedding} index={index} key={index}/>;
+              return (
+                <ReportAttachment sessionId={sessionId} embedding={embedding} index={index}
+                  key={index}
+                />
+              );
             })}
           </div>
         }

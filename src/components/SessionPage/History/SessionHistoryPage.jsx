@@ -64,7 +64,11 @@ class SessionHistoryPage extends Component {
         {session.historyScenarios &&
           <Row>
             <Col sm={12}>
-              <ScenariosHistoryTable sessionScenarios={session.historyScenarios.scenarios} onlyFailed={false}/>
+              <ScenariosHistoryTable
+                sessionId={sessionId}
+                sessionScenarios={session.historyScenarios.scenarios}
+                onlyFailed={false}
+              />
             </Col>
           </Row>
         }
