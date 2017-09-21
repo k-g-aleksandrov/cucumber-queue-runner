@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import moment from 'moment';
+import InProgressScenarioRow from './InProgressScenarioRow';
 
 const propTypes = {
-  scenarios: PropTypes.any
+  scenarios: PropTypes.any,
+  sessionId: PropTypes.any
 };
 
 class InProgressScenariosTable extends Component {
@@ -14,23 +15,17 @@ class InProgressScenariosTable extends Component {
   }
 
   render() {
-    const { scenarios } = this.props;
+    const { scenarios, sessionId } = this.props;
 
     return (
       <div>
         {scenarios.map((scenario, i) => {
           return (
-            <div key={i} style={{ backgroundColor: 'lightgray', marginLeft: '16px', padding: '8px' }}>
-              <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
-              <span>
-                {scenario.scenarioName}&nbsp;
-                <span className='report-scenario-line'>line {scenario.scenarioLine}</span>
-              </span>
-              <div style={{ float: 'right' }}>
-                {scenario.executor}
-                &nbsp;({moment(new Date()).to(moment(scenario.startTimestamp))})
-              </div>
-            </div>
+            <InProgressScenarioRow
+              key={i}
+              sessionId={sessionId}
+              scenario={scenario}
+            />
           );
         })}
       </div>

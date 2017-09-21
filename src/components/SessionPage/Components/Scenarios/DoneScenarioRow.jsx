@@ -11,7 +11,7 @@ const propTypes = {
   history: PropTypes.bool
 };
 
-class SessionHistoryScenarioRow extends Component {
+class DoneScenarioRow extends Component {
 
   constructor(props) {
     super(props);
@@ -101,6 +101,6 @@ class SessionHistoryScenarioRow extends Component {
   }
 }
 
-SessionHistoryScenarioRow.propTypes = propTypes;
+DoneScenarioRow.propTypes = propTypes;
 
-export default connect()(SessionHistoryScenarioRow);
+export default connect()(DoneScenarioRow);

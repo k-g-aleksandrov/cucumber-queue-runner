@@ -160,12 +160,53 @@ class Session {
     }
   }
 
+  updateScenarioRuntimeReport(scenarioId, payload) {
+    const scenario = this.inProgressScenarios[scenarioId];
+
+    if (payload.executor) {
+      scenario.executor = payload.executor;
+    }
+
+    if (!scenario.report[0].elements || !scenario.report[0].elements[0]) {
+      scenario.report[0].elements = [];
+      scenario.report[0].elements.push({ before: [], steps: [], after: [] });
+    }
+
+    let lastStep;
+
+    switch (payload.type) {
+      case 'before':
+        scenario.report[0].elements[0].before.push(payload.report);
+        break;
+      case 'step':
+        lastStep = scenario.report[0].elements[0].steps[scenario.report[0].elements[0].steps.length - 1];
+
+        if (lastStep && scenario.report[0].elements[0].steps[scenario.report[0].elements[0].steps.length - 1].name
+          === payload.report.name) {
+          scenario.report[0].elements[0].steps[scenario.report[0].elements[0].steps.length - 1] = payload.report;
+        } else {
+          scenario.report[0].elements[0].steps.push(payload.report);
+        }
+        break;
+      case 'after':
+        scenario.report[0].elements[0].after.push(payload.report);
+        break;
+      default:
+        console.log(`unknown type ${payload.type}`);
+    }
+  }
+
+  getScenarioRuntimeReport(scenarioId) {
+    return this.inProgressScenarios[scenarioId].report;
+  }
+
   getNextScenario(executor) {
     const next = this.scenarios.shift();
 
     if (next) {
       next.startTimestamp = Date.now();
       next.executor = executor;
+      next.report = [ { elements: [ { before: [], steps: [], after: [] } ] } ];
       this.inProgressScenarios[next._id] = next;
     }
     return next;

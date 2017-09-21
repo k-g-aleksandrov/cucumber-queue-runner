@@ -5,7 +5,7 @@ import Row from 'react-bootstrap/lib/Row';
 import Col from 'react-bootstrap/lib/Col';
 import Alert from 'react-bootstrap/lib/Alert';
 
-import SessionHistoryScenarioRow from './DoneScenarioRow';
+import DoneScenarioRow from './DoneScenarioRow';
 
 const propTypes = {
   sessionScenarios: PropTypes.any,
@@ -32,7 +32,7 @@ class FailedScenariosTable extends Component {
                   return null;
                 }
                 return (
-                  <SessionHistoryScenarioRow
+                  <DoneScenarioRow
                     key={j} scenario={scenario} failed
                     sessionId={sessionId} history={history}
                   />

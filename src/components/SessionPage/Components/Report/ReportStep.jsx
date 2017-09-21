@@ -52,7 +52,7 @@ class ReportStep extends Component {
             })}
           </div>
         }
-        <ReportErrorMessage errorMessage={step.result.error_message}/>
+        {step.result && step.result.error_message && <ReportErrorMessage errorMessage={step.result.error_message}/>}
       </div>
     );
   }

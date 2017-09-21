@@ -218,6 +218,60 @@ router.post('/:sessionId/reports', (req, res) => {
   res.send({ scenario: { scenarioId }, success: true });
 });
 
+router.get('/:sessionId/runtime/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+  const scenario = currentSession.inProgressScenarios[req.params.scenarioId];
+
+  if (scenario) {
+    return res.send({ report: scenario.report });
+  }
+
+  res.send({
+    session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
+  });
+});
+
+router.post('/:sessionId/runtime/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+
+  const scenario = currentSession.inProgressScenarios[req.params.scenarioId];
+
+  if (scenario) {
+    currentSession.updateScenarioRuntimeReport(req.params.scenarioId, req.body);
+
+    return res.send({ report: scenario.runtime });
+  }
+
+  res.send({
+    session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
+  });
+});
+
+router.get('/:sessionId/runtime/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+  const scenario = currentSession.inProgressScenarios[req.params.scenarioId];
+
+  if (scenario) {
+    return res.send({ report: scenario.runtime });
+  }
+
+  res.send({
+    session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
+  });
+});
+
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 
