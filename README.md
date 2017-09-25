@@ -37,7 +37,8 @@ Fill and submit form:
 | Project ID | custom string that identifies project in API | `app-tests` |
 | Display Name | name that will be shown in UI | `App Tests` |
 | Working Copy Path | path to working copy on server machine (source code should be downloaded before using it) | `<full_path_to_working_copy>`
-| Features Root Path | relative path to Cucumber features | `src/test/resources/` | Project Tag | Cucumber tag that identifies all scenarios related to a project |  @tag |
+| Features Root Path | relative path to Cucumber features | `src/test/resources/` |
+| Project Tag | Cucumber tag that identifies all scenarios related to a project |  @tag |
 | Description | project description | |
 
 Here is a sample configuration:
