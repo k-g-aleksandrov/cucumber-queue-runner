@@ -65,7 +65,18 @@ function saveScenarios(scenarios, projectTag, callback) {
 }
 
 /**
- * List all projects
+ * @api {get} /projects List Projects
+ *
+ * @apiName List Projects
+ * @apiGroup projects
+ *
+ * @apiSuccess (Success-Response) {object[]} projects[] List of available projects
+ * @apiSuccess (Success-Response) {string}   projects.projectId project ID
+ * @apiSuccess (Success-Response) {string}   projects.name project name
+ * @apiSuccess (Success-Response) {string}   projects.tag Default cucumber tag that will be used to filter project-related scenarios
+ * @apiSuccess (Success-Response) {string}   projects.description project description
+ * @apiSuccess (Success-Response) {string}   projects.workingCopyPath path to working copy to scan for scenarios
+ * @apiSuccess (Success-Response) {bool}     projects.featuresRoot cucumber features root path related to working copy path (e.g. src/test/resources/)
  */
 router.get('/', (req, res) => {
   Project.find({}).exec()
@@ -157,6 +168,18 @@ router.post('/add', (req, res) => {
   });
 });
 
+/**
+ * @api {get} /projects/:project/scan Scan Project
+ *
+ * @apiName Scan Project
+ * @apiGroup projects
+ *
+ * @apiParam {string} projectId project ID
+ *
+ * @apiSuccess (Success-Response) {object}          project
+ * @apiSuccess (Success-Response) {string}       project.projectId project ID
+ * @apiSuccess (Success-Response) {number}  project.scenariosCount count of scenarios found
+ */
 router.get('/:project/scan', (req, res) => {
   if (!req.params.project) {
     return res.status(400).send({ error: 'Project name was not specified' });
@@ -356,7 +379,16 @@ router.get('/:project/scenarios', (req, res) => {
 });
 
 /**
- * Delete project by specified project ID
+ * @api {delete} /projects/:projectId Delete Project
+ *
+ * @apiName Delete Project
+ * @apiGroup projects
+ *
+ * @apiParam {string} projectId project ID
+ *
+ * @apiSuccess (Success-Response) {object} project
+ * @apiSuccess (Success-Response) {string}   project.projectId project ID
+ * @apiSuccess (Success-Response) {bool}     project.success success flag
  */
 router.delete('/:project', (req, res) => {
   Project.findOneAndRemove({ projectId: req.params.project }).exec()
