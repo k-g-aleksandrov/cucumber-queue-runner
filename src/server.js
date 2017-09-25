@@ -53,7 +53,7 @@ app.use((req, res) => {
 });
 
 const assetUrl = process.env.NODE_ENV !== 'production' ? 'http://localhost:8050/public' : '';
-const clientSuffix = process.env.NODE_ENV === 'production' ? '-' : '';
+const clientSuffix = process.env.NODE_ENV === 'production' ? '-$HASH' : '';
 
 function renderHTML(componentHTML, initialState) {
   return `

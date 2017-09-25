@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const FileChanger = require('webpack-file-changer');
 
 const publicPath = 'http://localhost:8050/public/assets';
 const cssName = process.env.NODE_ENV === 'production' ? 'styles-[hash].css' : 'styles.css';
@@ -31,6 +32,17 @@ if (process.env.NODE_ENV === 'production') {
       dry: false
     })
   );
+  plugins.push(
+    new FileChanger({
+      change: [ {
+        file: 'src/server.js',
+        parameters: {
+          '-[a-z0-9]{20}': '-[hash]',
+          '-\\$HASH': '-[hash]'
+        }
+      } ]
+    })
+  )
 }
 
 module.exports = {
