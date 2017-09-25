@@ -1,5 +1,9 @@
 {
   "port": 8080,
+  "db": {
+    "server": "127.0.0.1",
+    "port": 27017
+  },
   "testrail": {
     "url": "<URL>",
     "login": "<LOGIN>",
