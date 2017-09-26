@@ -26,7 +26,7 @@ npm run webpack-dev-server
 NODE_ENV=production CONFIG_FILE=<full_path_to_config> node server.js
 ```
 
-# How It Works
+## How It Works
 
 Cucumber tests executions are split by projects, identified by working copy location, cucumber features path and project tag (cucumber tag which marks all scenarios related to current project).
 
@@ -76,5 +76,9 @@ cucumber.api.cli.Main.run(new String[] {
 2. Download reports.zip: `curl http://<server_url>/api/sessions/history/<session_id>/zip`
 3. Downloaded reports are Cucumber JSON reports split by feature, and can be passed to cucumber-reports plugin, etc.
 
-### Limitations
+#### Additional Resources
+1. API documentation: `http://<server_url>/apidoc`
+2. Java project example located in `java-runner-example`
+
+## Limitations
 This service is implemented to be used in our project, and is optimized for running on OSX or Linux, and checked with Java-based cucumber tests. Feel free to provide any improvements to make it more generic.
