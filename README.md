@@ -32,8 +32,9 @@ Cucumber tests executions are split by projects, identified by working copy loca
 
 To add new project, go to `http://<server_url>/projects` and click `Add Project`.
 Fill and submit form:
+
 | Form Field | Description | Example |
-| ---------- | ----------- | ------- |
+|------------|-------------|---------|
 | Project ID | custom string that identifies project in API | `app-tests` |
 | Display Name | name that will be shown in UI | `App Tests` |
 | Working Copy Path | path to working copy on server machine (source code should be downloaded before using it) | `<full_path_to_working_copy>` |
