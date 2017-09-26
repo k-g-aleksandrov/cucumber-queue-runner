@@ -395,22 +395,6 @@ router.post('/:sessionId/skip/:scenarioId', (req, res) => {
   res.send({ success: true });
 });
 
-/**
- * @api {get} /sessions/:sessionId Get Session Details
- *
- * @apiDescription  Get session details
- *
- * @apiName Get Session Details
- * @apiGroup sessions
- *
- * @apiParam {string} sessionId session ID
- *
- * @apiSuccess (Success-Response) {object}  session
- * @apiSuccess (Success-Response) {string}  session.sessionId
- * @apiSuccess (Success-Response) {object}  session.details session details
- * @apiSuccess (Success-Response) {object}  session.briefStatus count of scenarios in different state
- * @apiSuccess (Success-Response) {object}  session.status extended status of scenarios execution
- */
 router.get('/:sessionId', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 

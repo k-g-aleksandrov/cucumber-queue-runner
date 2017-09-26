@@ -19,8 +19,6 @@ function Report(props) {
 
   const { report, sessionId } = props;
 
-  console.log(`Report ${sessionId}`);
-
   return (
     <Row>
       <Col>

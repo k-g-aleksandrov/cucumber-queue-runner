@@ -29,8 +29,6 @@ class ReportStep extends Component {
   render() {
     const { step, type, sessionId } = this.props;
 
-    console.log(`ReportStep ${sessionId}`);
-
     return (
       <div>
         <ReportStepTitle
