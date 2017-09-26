@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import config from 'config';
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
 
@@ -6,10 +7,10 @@ mongoose.Promise = Promise;
 
 const dockerAddr = (process.env.MONGO_PORT_27017_TCP_ADDR)
   ? process.env.MONGO_PORT_27017_TCP_ADDR
-  : '192.168.99.100';
+  : config.get('db:server');
 const dockerPort = (process.env.MONGO_PORT_27017_TCP_PORT)
   ? process.env.MONGO_PORT_27017_TCP_PORT
-  : '27017';
+  : config.get('db:port');
 
 function connectWithRetry() {
   const mongoUrl = `mongodb://${dockerAddr}:${dockerPort}/cucumber-queue-db`;
