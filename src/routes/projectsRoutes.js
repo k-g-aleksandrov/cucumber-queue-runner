@@ -386,9 +386,9 @@ router.get('/:project/scenarios', (req, res) => {
  *
  * @apiParam {string} projectId project ID
  *
- * @apiSuccess (Success-Response) {object} project
- * @apiSuccess (Success-Response) {string}   project.projectId project ID
- * @apiSuccess (Success-Response) {bool}     project.success success flag
+ * @apiSuccess (Success-Response) {object}  project
+ * @apiSuccess (Success-Response) {string}  project.projectId project ID
+ * @apiSuccess (Success-Response) {bool}    project.success success flag
  */
 router.delete('/:project', (req, res) => {
   Project.findOneAndRemove({ projectId: req.params.project }).exec()

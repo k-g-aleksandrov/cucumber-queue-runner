@@ -70,6 +70,18 @@ router.get('/history/:sessionId', (req, res) => {
     });
 });
 
+/**
+ * @api {get} /sessions/history/:sessionId/percent Get Passed Scenarios Percent
+ *
+ * @apiDescription  Get percent of passed scenarios
+ *
+ * @apiName Get Passed Scenarios Percent
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {number} percent
+ */
 router.get('/history/:sessionId/percent', (req, res) => {
   const sessionId = req.params.sessionId;
   const history = SessionHistory.findOne({ 'details.sessionId': sessionId });
@@ -88,6 +100,18 @@ router.get('/history/:sessionId/percent', (req, res) => {
     });
 });
 
+/**
+ * @api {get} /sessions/history/:sessionId/zip Get Session ZIP Report
+ *
+ * @apiDescription  Download ZIP archive with cucumber reports
+ *
+ * @apiName Get Session ZIP Report
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {file} reports.zip
+ */
 router.get('/history/:sessionId/zip', (req, res) => {
   const file = `${process.env.NODE_PATH}/../public/results/${req.params.sessionId}/reports.zip`;
 
@@ -116,11 +140,11 @@ router.get('/history/:sessionId/zip', (req, res) => {
 });
 
 /**
- * @api {get} /start?project=:project&scope=:scope&tags=:tags&[link=:link] Start New Session
+ * @api {get} /sessions/start?project=:project&scope=:scope&tags=:tags&[link=:link] Start New Session
  *
  * @apiDescription  Take next scenario from queue
  *
- * @apiName Get Next Scenario
+ * @apiName Start New Session
  * @apiGroup sessions
  *
  * @apiParam {string} project project ID
@@ -169,7 +193,7 @@ router.get('/start', (req, res) => {
 });
 
 /**
- * @api {get} /:sessionId/next Get Next Scenario
+ * @api {get} /sessions/:sessionId/next Get Next Scenario
  *
  * @apiDescription  Take next scenario from queue
  *
@@ -208,7 +232,7 @@ router.get('/:sessionId/next', (req, res) => {
 });
 
 /**
- * @api {get} /:sessionId/state Get Session State
+ * @api {get} /sessions/:sessionId/state Get Session State
  *
  * @apiDescription  Get session state
  *
@@ -234,7 +258,7 @@ router.get('/:sessionId/state', extendTimeout, (req, res) => {
 });
 
 /**
- * @api {post} /:sessionId/reports Save Scenario Report
+ * @api {post} /sessions/:sessionId/reports Save Scenario Report
  *
  * @apiDescription  Save scenario report
  *
@@ -268,7 +292,7 @@ router.post('/:sessionId/reports', (req, res) => {
 });
 
 /**
- * @api {get} /:sessionId/runtime/:scenarioId Get Scenario Runtime Report
+ * @api {get} /sessions/:sessionId/runtime/:scenarioId Get Scenario Runtime Report
  *
  * @apiDescription  Get scenario runtime report
  *
@@ -298,7 +322,7 @@ router.get('/:sessionId/runtime/:scenarioId', (req, res) => {
 });
 
 /**
- * @api {post} /:sessionId/runtime/:scenarioId Update Scenario Runtime Report
+ * @api {post} /sessions/:sessionId/runtime/:scenarioId Update Scenario Runtime Report
  *
  * @apiDescription  Update scenario runtime report
  *
@@ -330,19 +354,6 @@ router.post('/:sessionId/runtime/:scenarioId', (req, res) => {
   });
 });
 
-/**
- * @api {get} /:sessionId/reports/:scenarioId Get Scenario Report
- *
- * @apiDescription  Get scenario JSON report
- *
- * @apiName Get Scenario Report
- * @apiGroup sessions
- *
- * @apiParam {string} sessionId  session ID
- * @apiParam {string} scenarioId scenario ID
- *
- * @apiSuccess (Success-Response) {object}  report scenario report
- */
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 
@@ -362,7 +373,7 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
 });
 
 /**
- * @api {post} /:sessionId/skip/:scenarioId Skip Scenario
+ * @api {post} /sessions/:sessionId/skip/:scenarioId Skip Scenario
  *
  * @apiDescription  Skip session scenario
  *
