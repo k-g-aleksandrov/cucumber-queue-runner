@@ -46,6 +46,9 @@ router.get('/history', (req, res) => {
     .then((sessions) => {
       responseObject.sessionsHistory = {};
       for (const session of sessions) {
+        if (!session.details || !session.details.sessionId) {
+          continue;
+        }
         responseObject.sessionsHistory[session.details.sessionId] = session;
       }
       res.send(responseObject);
@@ -58,7 +61,8 @@ router.get('/history', (req, res) => {
 router.get('/history/:sessionId', (req, res) => {
   const sessionId = req.params.sessionId;
   const responseObject = {};
-  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId }).populate('historyScenarios');
+  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId })
+    .populate({ path: 'features', populate: { path: 'scenarios' } });
 
   histories.exec()
     .then((history) => {
