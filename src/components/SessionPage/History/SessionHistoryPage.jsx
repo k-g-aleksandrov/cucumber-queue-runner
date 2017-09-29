@@ -9,7 +9,7 @@ import Alert from 'react-bootstrap/lib/Alert';
 import Spinner from 'components/common/Spinner';
 import SessionDetails from 'components/SessionPage/Components/SessionDetails';
 import SessionStatusChart from 'components/SessionPage/Components/SessionStatusChart';
-import ScenariosHistoryTable from 'components/SessionHistoryPage/ScenariosHistoryTable';
+import FeaturesTable from 'components/SessionPage/History/AdvancedReport/FeaturesTable';
 
 import { fetchSessionHistory } from 'redux/actions/sessionsActions';
 
@@ -61,19 +61,18 @@ class SessionHistoryPage extends Component {
           </Col>
         </Row>
 
-        {session.historyScenarios &&
+        {session.features &&
           <Row>
             <Col sm={12}>
-              <ScenariosHistoryTable
+              <FeaturesTable
                 sessionId={sessionId}
-                sessionScenarios={session.historyScenarios.scenarios}
-                onlyFailed={false}
+                features={session.features}
               />
             </Col>
           </Row>
         }
 
-        {!session.historyScenarios &&
+        {!session.features &&
         <Row>
           <Col>
             <Alert bsStyle='info'>No scenarios history</Alert>
