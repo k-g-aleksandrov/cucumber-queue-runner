@@ -18,7 +18,8 @@ const propTypes = {
   router: PropTypes.any,
   location: PropTypes.any,
   sessionsHistory: PropTypes.any,
-  params: PropTypes.object
+  params: PropTypes.object,
+  children: PropTypes.node
 };
 
 class SessionHistoryPage extends Component {
@@ -36,6 +37,11 @@ class SessionHistoryPage extends Component {
   }
 
   render() {
+    if (this.props.params.feature) {
+      return (
+        <div>{this.props.children}</div>
+      );
+    }
     const sessionId = this.props.params.session;
 
     const { sessionsHistory } = this.props;

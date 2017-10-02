@@ -99,6 +99,15 @@ const TestRailMapSchema = new Schema({
 const HistoryFeatureSchema = new Schema({
   sessionId: String,
   name: String,
+  passedScenarios: Number,
+  failedScenarios: Number,
+  skippedScenarios: Number,
+  unstableScenarios: Number,
+  passedSteps: Number,
+  failedSteps: Number,
+  skippedSteps: Number,
+  pendingSteps: Number,
+  undefinedSteps: Number,
   scenarios: [ { type: Schema.Types.ObjectId, ref: 'HistoryScenario' } ]
 });
 

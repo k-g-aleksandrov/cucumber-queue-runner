@@ -46,19 +46,35 @@ class FeaturesTable extends Component {
           </thead>
           <tbody>
             {features.map((feature, featureKey) => {
+              if (!feature.scenarios) {
+                return null;
+              }
+              const totalScenarios = feature.passedScenarios + feature.failedScenarios;
+              const totalSteps = feature.passedSteps + feature.failedSteps
+                      + feature.skippedSteps + feature.pendingSteps + feature.undefinedSteps;
+
               return (
                 <tr key={featureKey}>
                   <td>
-                    <Link to={`/sessions/${sessionId}/features/${feature._id}`}>{feature.name}</Link>
+                    <Link to={`/sessions/history/${sessionId}/features/${feature._id}`}>{feature.name}</Link>
                   </td>
-                  <td>
-                    {feature.scenarios.filter((scenario) => scenario.scenario.result === 'passed').length}
+                  <td className={feature.passedScenarios > 0 ? 'passed' : ''}>
+                    {feature.passedScenarios}
                   </td>
-                  <td>
-                    {feature.scenarios.filter((scenario) => scenario.scenario.result === 'failed').length}
+                  <td className={feature.failedScenarios > 0 ? 'failed' : ''}>
+                    {feature.failedScenarios}
                   </td>
-                  <td>{feature.scenarios.length}</td>
-                  <td colSpan={8}>0</td>
+                  <td className={totalScenarios > 0 ? 'total' : ''}>{totalScenarios}</td>
+                  <td className={feature.passedSteps > 0 ? 'passed' : ''}>{feature.passedSteps}</td>
+                  <td className={feature.failedSteps > 0 ? 'failed' : ''}>{feature.failedSteps}</td>
+                  <td className={feature.skippedSteps > 0 ? 'skipped' : ''}>{feature.skippedSteps}</td>
+                  <td className={feature.pendingSteps > 0 ? 'pending' : ''}>{feature.pendingSteps}</td>
+                  <td className={feature.undefinedSteps > 0 ? 'undefined' : ''}>{feature.undefinedSteps}</td>
+                  <td className={totalSteps > 0 ? 'total' : ''}>{totalSteps}</td>
+                  <td>0</td>
+                  <td
+                    className={feature.failedScenarios > 0 ? 'failed' : 'passed'}
+                  >{feature.failedScenarios > 0 ? 'Failed' : 'Passed'}</td>
                 </tr>
               );
             })}

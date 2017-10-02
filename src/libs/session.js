@@ -346,7 +346,19 @@ class Session {
 
         SessionHistory.update({ sessionId: this.sessionId }, { $push: pushObject }).exec();
 
-        this.pushHistoryFeature(sc.featureName, savedScenario._id);
+        const increment = {
+          passedScenarios: sc.result === 'passed' ? 1 : 0,
+          failedScenarios: sc.result === 'failed' ? 1 : 0,
+          skippedScenarios: sc.result === 'skipped' ? 1 : 0,
+          unstableScenarios: 1,
+          passedSteps: 1,
+          failedSteps: 1,
+          skippedSteps: 1,
+          pendingSteps: 1,
+          undefinedSteps: 1
+        };
+
+        this.pushHistoryFeature(sc.featureName, savedScenario._id, increment);
         this.pushHistoryTags(sc.report, savedScenario._id);
       })
       .catch((saveHistoryScenarioErr) => {
@@ -356,10 +368,10 @@ class Session {
     return cb();
   }
 
-  pushHistoryFeature(featureName, savedScenarioId) {
+  pushHistoryFeature(featureName, savedScenarioId, increment) {
     HistoryFeature.findOneAndUpdate(
         { sessionId: this.sessionId, name: featureName },
-        { sessionId: this.sessionId, name: featureName, $push: { scenarios: savedScenarioId } },
+        { sessionId: this.sessionId, name: featureName, $push: { scenarios: savedScenarioId }, $inc: increment },
         { upsert: true, new: true }
       ).exec().then((historyTag) => {
         return SessionHistory.findOneAndUpdate(
@@ -454,13 +466,18 @@ class Session {
   }
 
   saveHistory() {
-    SessionHistory.update({ sessionId: this.sessionId }, {
-      details: {
-        ...this.getSessionDetails(),
-        endDate: new Date()
-      },
-      briefStatus: this.getBriefStatus()
-    }).exec();
+    return new Promise((resolve) => {
+      SessionHistory.update({ sessionId: this.sessionId }, {
+        details: {
+          ...this.getSessionDetails(),
+          endDate: new Date()
+        },
+        briefStatus: this.getBriefStatus()
+      }).exec()
+      .then(() => {
+        resolve();
+      })
+    });
   }
 }
 
@@ -512,44 +529,46 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
     let haveReports = false;
 
     if (session.getScenariosCount(Session.STATE_DONE) > 0) {
-      session.saveHistory();
-      log.debug(`${session.sessionId}: Tests execution done. Preparing reports...`);
-      for (const key of Object.keys(session.doneScenarios)) {
-        let combinedReport = null;
+      session.saveHistory().then(() => {
+        log.debug(`${session.sessionId}: Tests execution done. Preparing reports...`);
+        for (const key of Object.keys(session.doneScenarios)) {
+          let combinedReport = null;
 
-        const featureReports = session.doneScenarios[key];
+          const featureReports = session.doneScenarios[key];
 
-        for (const scenario of featureReports) {
-          if (!scenario.report) {
-            log.error(`No report for scenario ${scenario.getScenarioId()} saved`);
-            continue;
-          }
-          const report = scenario.report[0];
-
-          if (report) {
-            if (!combinedReport) {
-              combinedReport = scenario.report;
-            } else {
-              combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+          for (const scenario of featureReports) {
+            if (!scenario.report) {
+              log.error(`No report for scenario ${scenario.getScenarioId()} saved`);
+              continue;
             }
-          } else {
-            log.error(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
+            const report = scenario.report[0];
+
+            if (report) {
+              if (!combinedReport) {
+                combinedReport = scenario.report;
+              } else {
+                combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+              }
+            } else {
+              log.error(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
+            }
+          }
+          const filename = key.replace(/\W/g, '');
+
+          if (combinedReport) {
+            fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(combinedReport, null, 4));
+            haveReports = true;
           }
         }
-        const filename = key.replace(/\W/g, '');
-
-        if (combinedReport) {
-          fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(combinedReport, null, 4));
-          haveReports = true;
-        }
-      }
+        util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
+      });
     }
 
     if (!haveReports) {
       fs.writeFileSync(`${session.sessionPath}/dummy.txt`, '', {});
+      util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     }
 
-    util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     clearInterval(session.trackSessionState);
     session.sessionState = Session.NOT_FOUND;
     log.debug(`${session.sessionId}: Session stopped`);
