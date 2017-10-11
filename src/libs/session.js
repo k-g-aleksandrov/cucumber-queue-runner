@@ -46,10 +46,16 @@ class Session {
               this.finalizeSessionInit(null, scenarios, iterations);
               return new SessionHistory({
                 sessionId, details: {}, briefStatus: {}, features: [], tags: [], failures: [], scenarios: []
-              }).save();
+              }).save()
+              .then(() => {
+                log.debug(`successfully prepared session history object for session ${sessionId}`);
+              })
+              .catch((err) => {
+                log.error(err);
+              });
             })
             .catch((err) => {
-              console.log(err);
+              log.error(err);
             });
         }
       });
