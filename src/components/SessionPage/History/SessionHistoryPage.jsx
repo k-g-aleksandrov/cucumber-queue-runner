@@ -37,11 +37,6 @@ class SessionHistoryPage extends Component {
   }
 
   render() {
-    if (this.props.params.feature) {
-      return (
-        <div>{this.props.children}</div>
-      );
-    }
     const sessionId = this.props.params.session;
 
     const { sessionsHistory } = this.props;
@@ -56,6 +51,23 @@ class SessionHistoryPage extends Component {
       this.props.router.push(`/sessions?lost=${sessionId}`);
     }
 
+    let reportPage = null;
+
+    if (this.props.params.feature) {
+      reportPage = this.props.children;
+    } else if (session.features) {
+      reportPage = (
+        <Row>
+          <Col sm={12}>
+            <FeaturesTable
+              sessionId={sessionId}
+              features={session.features}
+            />
+          </Col>
+        </Row>
+      );
+    }
+
     return (
       <div>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
@@ -67,16 +79,7 @@ class SessionHistoryPage extends Component {
           </Col>
         </Row>
 
-        {session.features &&
-          <Row>
-            <Col sm={12}>
-              <FeaturesTable
-                sessionId={sessionId}
-                features={session.features}
-              />
-            </Col>
-          </Row>
-        }
+        {reportPage}
 
         {!session.features &&
         <Row>

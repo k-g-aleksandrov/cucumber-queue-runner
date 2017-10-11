@@ -57,17 +57,17 @@ body {
   display: inline-block;
 }
 
-.report-scenario-line {
-  font-style: italic;
+.report-test-id {
   font-size: 80%;
   color: #4a4a4a;
   white-space: nowrap;
 }
 
-body {
-    /* Shifts body so navigation bar does not overlap it.
-    Make sure to include this after the core Bootstrap CSS. */
-    padding-top: 60px;
+.report-scenario-line {
+  font-style: italic;
+  font-size: 80%;
+  color: #4a4a4a;
+  white-space: nowrap;
 }
 
 h2 {

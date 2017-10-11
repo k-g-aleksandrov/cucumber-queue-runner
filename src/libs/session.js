@@ -391,7 +391,9 @@ class Session {
 
       if (elements) {
         for (let j = 0; j < elements.length; j++) {
-          allTags.push(...elements[j].tags);
+          if (elements[j].tags) {
+            allTags.push(...elements[j].tags);
+          }
         }
       }
     }

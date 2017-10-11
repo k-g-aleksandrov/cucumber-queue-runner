@@ -6,7 +6,7 @@ import fs from 'fs';
 import Session from 'libs/session';
 import util from 'libs/util';
 
-import { SessionHistory } from 'libs/mongoose';
+import { SessionHistory, HistoryFeature } from 'libs/mongoose';
 
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
@@ -61,8 +61,7 @@ router.get('/history', (req, res) => {
 router.get('/history/:sessionId', (req, res) => {
   const sessionId = req.params.sessionId;
   const responseObject = {};
-  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId })
-    .populate({ path: 'features', populate: { path: 'scenarios' } });
+  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId }).populate('features');
 
   histories.exec()
     .then((history) => {
@@ -101,6 +100,37 @@ router.get('/history/:sessionId/percent', (req, res) => {
     })
     .catch((err) => {
       log.error(err);
+    });
+});
+
+/**
+ * @api {get} /history/:sessionId/features/:featureId Get Passed Scenarios Percent
+ *
+ * @apiDescription  Get feature history
+ *
+ * @apiName Get Feature History
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ * @apiParam {string} featureId feature ID
+ *
+ * @apiSuccess (Success-Response) {object}  payload response payload
+ */
+router.get('/history/:sessionId/features/:featureId', (req, res) => {
+  const featureId = req.params.featureId;
+  const feature = HistoryFeature.findOne({ _id: featureId }).populate('scenarios');
+
+  feature.exec()
+    .then((featureObject) => {
+      if (!featureObject) {
+        return res.status(404).send({ 'error': 'no history for feature' });
+      }
+
+      res.send(featureObject);
+    })
+    .catch((err) => {
+      log.error(err);
+      return res.status(404).send({ 'error': `no history for feature ${featureId}` });
     });
 });
 
