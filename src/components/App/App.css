@@ -74,14 +74,6 @@ h2 {
     font-size: 24px;
 }
 
-a {
-    color: #0097da;
-}
-
-a:hover {
-    color: #00587f;
-}
-
 .header-tag-name {
     color: gray;
     font-style: italic;
@@ -254,4 +246,82 @@ tr:hover {
 pre {
     margin-left: 10px;
     margin-right: 10px;
+}
+
+.queue-scenario-line {
+  margin-left: 16px;
+  padding: 8px;
+  padding-top: 16px;
+  padding-bottom: 0;
+}
+
+.queue-scenario-line:hover {
+  background-color: lightblue;
+}
+
+
+/* animation */
+@keyframes blink {
+    /**
+     * At the start of the animation the dot
+     * has an opacity of .2
+     */
+    0% {
+      opacity: .2;
+    }
+    /**
+     * At 20% the dot is fully visible and
+     * then fades out slowly
+     */
+    20% {
+      opacity: 1;
+    }
+    /**
+     * Until it reaches an opacity of .2 and
+     * the animation can start again
+     */
+    100% {
+      opacity: .2;
+    }
+}
+
+.step-in-progress span {
+    /**
+     * Use the blink animation, which is defined above
+     */
+    animation-name: blink;
+    /**
+     * The animation should take 1.4 seconds
+     */
+    animation-duration: 1.4s;
+    /**
+     * It will repeat itself forever
+     */
+    animation-iteration-count: infinite;
+    /**
+     * This makes sure that the starting style (opacity: .2)
+     * of the animation is applied before the animation starts.
+     * Otherwise we would see a short flash or would have
+     * to set the default styling of the dots to the same
+     * as the animation. Same applies for the ending styles.
+     */
+    animation-fill-mode: both;
+}
+
+.step-in-progress span:nth-child(2) {
+    /**
+     * Starts the animation of the third dot
+     * with a delay of .2s, otherwise all dots
+     * would animate at the same time
+     */
+    animation-delay: .2s;
+}
+
+.step-in-progress span:nth-child(3) {
+    /**
+     * Starts the animation of the third dot
+     * with a delay of .4s, otherwise all dots
+     * would animate at the same time
+     */
+    animation-delay: .4s;
 }
