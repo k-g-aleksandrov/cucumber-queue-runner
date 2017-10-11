@@ -9,7 +9,7 @@ import Alert from 'react-bootstrap/lib/Alert';
 import Spinner from 'components/common/Spinner';
 import SessionDetails from 'components/SessionPage/Components/SessionDetails';
 import SessionStatusChart from 'components/SessionPage/Components/SessionStatusChart';
-import ScenariosHistoryTable from 'components/SessionHistoryPage/ScenariosHistoryTable';
+import FeaturesTable from 'components/SessionPage/History/AdvancedReport/FeaturesTable';
 
 import { fetchSessionHistory } from 'redux/actions/sessionsActions';
 
@@ -18,7 +18,8 @@ const propTypes = {
   router: PropTypes.any,
   location: PropTypes.any,
   sessionsHistory: PropTypes.any,
-  params: PropTypes.object
+  params: PropTypes.object,
+  children: PropTypes.node
 };
 
 class SessionHistoryPage extends Component {
@@ -50,6 +51,23 @@ class SessionHistoryPage extends Component {
       this.props.router.push(`/sessions?lost=${sessionId}`);
     }
 
+    let reportPage = null;
+
+    if (this.props.params.feature) {
+      reportPage = this.props.children;
+    } else if (session.features) {
+      reportPage = (
+        <Row>
+          <Col sm={12}>
+            <FeaturesTable
+              sessionId={sessionId}
+              features={session.features}
+            />
+          </Col>
+        </Row>
+      );
+    }
+
     return (
       <div>
         <Row className='show-grid' style={{ paddingBottom: '20px' }}>
@@ -61,19 +79,9 @@ class SessionHistoryPage extends Component {
           </Col>
         </Row>
 
-        {session.historyScenarios &&
-          <Row>
-            <Col sm={12}>
-              <ScenariosHistoryTable
-                sessionId={sessionId}
-                sessionScenarios={session.historyScenarios.scenarios}
-                onlyFailed={false}
-              />
-            </Col>
-          </Row>
-        }
+        {reportPage}
 
-        {!session.historyScenarios &&
+        {!session.features &&
         <Row>
           <Col>
             <Alert bsStyle='info'>No scenarios history</Alert>

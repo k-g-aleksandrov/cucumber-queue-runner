@@ -3,7 +3,7 @@ const log = logTemplate(module);
 
 import util from 'libs/util';
 import fs from 'fs';
-import { Execution, SessionHistory, Scenario, HistoryScenarios } from 'libs/mongoose';
+import { Execution, SessionHistory, Scenario, HistoryScenario, HistoryTag, HistoryFeature } from 'libs/mongoose';
 
 import filter from 'libs/filter';
 
@@ -21,36 +21,47 @@ class Session {
 
     this.iterations = iterations;
 
-    fs.mkdirSync(this.sessionPath);
-
-    if (!filter.getFilterByName(scenariosFilter.scope)) {
-      throw Error(`Can\'t find filter with name ${scenariosFilter.scope}`);
-    }
-    if (scenariosFilter.scope === 'custom') {
-      if (!scenariosFilter.tags) {
-        throw Error('You should specify tags to filter scenarios if you use custom filter.');
-      }
-      filter.applyCustomFilterToProject(project, scenariosFilter.tags, (err, prj, scenarios) => {
-        this.finalizeSessionInit(err, scenarios, iterations);
-      });
-    } else {
-      Scenario.find({
-        project,
-        filters: {
-          $in: [
-            filter.getFilterByName(scenariosFilter.scope).id
-          ]
+    this.makeSessionDirectory()
+      .then(() => {
+        if (!filter.hasFilter(scenariosFilter.scope)) {
+          throw Error(`Can\'t find filter with name ${scenariosFilter.scope}`);
         }
-      }).exec()
-        .then((scenarios) => {
-          this.finalizeSessionInit(null, scenarios, iterations);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+        if (scenariosFilter.scope === 'custom') {
+          if (!scenariosFilter.tags) {
+            throw Error('\'tags\' parameter should be specified for custom filter.');
+          }
+          filter.applyCustomFilterToProject(project, scenariosFilter.tags, (err, prj, scenarios) => {
+            this.finalizeSessionInit(err, scenarios, iterations);
+          });
+        } else {
+          Scenario.find({
+            project,
+            filters: {
+              $in: [
+                filter.getFilterByName(scenariosFilter.scope).id
+              ]
+            }
+          }).exec()
+            .then((scenarios) => {
+              this.finalizeSessionInit(null, scenarios, iterations);
+              return new SessionHistory({
+                sessionId, details: {}, briefStatus: {}, features: [], tags: [], failures: [], scenarios: []
+              }).save();
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      });
   }
 
+  makeSessionDirectory() {
+    return new Promise((resolve) => {
+      fs.mkdir(this.sessionPath, () => {
+        resolve();
+      });
+    });
+  }
   finalizeSessionInit(err, scenarios, iterations) {
     if (err) {
       this.sessionState = Session.STATE_ERROR;
@@ -146,13 +157,9 @@ class Session {
       case Session.STATE_DONE:
         return this.getDoneScenariosCount();
       case Session.STATE_PASSED:
-        return this.getDoneScenariosCount([
-          'passed'
-        ]);
+        return this.getDoneScenariosCount([ 'passed' ]);
       case Session.STATE_FAILED:
-        return this.getDoneScenariosCount([
-          'failed'
-        ]);
+        return this.getDoneScenariosCount([ 'failed' ]);
       case Session.STATE_SKIPPED:
         return this.getDoneScenariosCount(['skipped', 'undefined']);
       default:
@@ -167,29 +174,34 @@ class Session {
       scenario.executor = payload.executor;
     }
 
-    if (!scenario.report[0].elements || !scenario.report[0].elements[0]) {
-      scenario.report[0].elements = [];
-      scenario.report[0].elements.push({ before: [], steps: [], after: [] });
+    const reportInstance = scenario.report[0];
+
+    if (!reportInstance.elements) {
+      reportInstance.elements = [];
     }
+    if (!reportInstance.elements[0]) {
+      reportInstance.elements.push({ before: [], steps: [], after: [] });
+    }
+
+    const reportElementsInstance = reportInstance.elements[0];
 
     let lastStep;
 
     switch (payload.type) {
       case 'before':
-        scenario.report[0].elements[0].before.push(payload.report);
+        reportElementsInstance.before.push(payload.report);
         break;
       case 'step':
-        lastStep = scenario.report[0].elements[0].steps[scenario.report[0].elements[0].steps.length - 1];
+        lastStep = reportElementsInstance.steps[reportElementsInstance.steps.length - 1];
 
-        if (lastStep && scenario.report[0].elements[0].steps[scenario.report[0].elements[0].steps.length - 1].name
-          === payload.report.name) {
-          scenario.report[0].elements[0].steps[scenario.report[0].elements[0].steps.length - 1] = payload.report;
+        if (lastStep && reportElementsInstance.steps[reportElementsInstance.steps.length - 1].name === payload.report.name) {
+          reportElementsInstance.steps[reportElementsInstance.steps.length - 1] = payload.report;
         } else {
-          scenario.report[0].elements[0].steps.push(payload.report);
+          reportElementsInstance.steps.push(payload.report);
         }
         break;
       case 'after':
-        scenario.report[0].elements[0].after.push(payload.report);
+        reportElementsInstance.after.push(payload.report);
         break;
       default:
         console.log(`unknown type ${payload.type}`);
@@ -311,8 +323,95 @@ class Session {
       }
     }
     this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
+    const historyScenario = new HistoryScenario({
+      scenario: {
+        scenarioId: sc._id,
+        classpath: sc.classpath,
+        scenarioLine: sc.scenarioLine,
+        scenarioName: sc.scenarioName,
+        featureName: sc.featureName,
+        result: sc.result,
+        report: sc.report,
+        executor: sc.executor
+      }
+    });
+
+    historyScenario.save()
+      .then((savedScenario) => {
+        const pushObject = { scenarios: savedScenario._id };
+
+        if (sc.result === 'failed') {
+          pushObject.failures = savedScenario._id;
+        }
+
+        SessionHistory.update({ sessionId: this.sessionId }, { $push: pushObject }).exec();
+
+        const increment = {
+          passedScenarios: sc.result === 'passed' ? 1 : 0,
+          failedScenarios: sc.result === 'failed' ? 1 : 0,
+          skippedScenarios: sc.result === 'skipped' ? 1 : 0,
+          unstableScenarios: 1,
+          passedSteps: 1,
+          failedSteps: 1,
+          skippedSteps: 1,
+          pendingSteps: 1,
+          undefinedSteps: 1
+        };
+
+        this.pushHistoryFeature(sc.featureName, savedScenario._id, increment);
+        this.pushHistoryTags(sc.report, savedScenario._id);
+      })
+      .catch((saveHistoryScenarioErr) => {
+        log.error(saveHistoryScenarioErr);
+      });
     delete this.inProgressScenarios[scenarioId];
     return cb();
+  }
+
+  pushHistoryFeature(featureName, savedScenarioId, increment) {
+    HistoryFeature.findOneAndUpdate(
+        { sessionId: this.sessionId, name: featureName },
+        { sessionId: this.sessionId, name: featureName, $push: { scenarios: savedScenarioId }, $inc: increment },
+        { upsert: true, new: true }
+      ).exec().then((historyTag) => {
+        return SessionHistory.findOneAndUpdate(
+          { sessionId: this.sessionId },
+          { $addToSet: { features: historyTag._id } }
+        ).exec();
+      }).catch((err) => {
+        log.info(err);
+      });
+  }
+
+  pushHistoryTags(scenarioReport, savedScenarioId) {
+    const allTags = [];
+
+    for (let i = 0; i < scenarioReport.length; i++) {
+      const elements = scenarioReport[i].elements;
+
+      if (elements) {
+        for (let j = 0; j < elements.length; j++) {
+          if (elements[j].tags) {
+            allTags.push(...elements[j].tags);
+          }
+        }
+      }
+    }
+
+    for (const tag of allTags) {
+      HistoryTag.findOneAndUpdate(
+        { sessionId: this.sessionId, name: tag.name },
+        { sessionId: this.sessionId, name: tag.name, $push: { scenarios: savedScenarioId } },
+        { upsert: true, new: true }
+      ).exec().then((historyTag) => {
+        return SessionHistory.findOneAndUpdate(
+          { sessionId: this.sessionId },
+          { $addToSet: { tags: historyTag._id } }
+        ).exec();
+      }).catch((err) => {
+        log.info(err);
+      });
+    }
   }
 
   getSessionState() {
@@ -369,61 +468,17 @@ class Session {
   }
 
   saveHistory() {
-    const scenarios = {};
-
-    for (const featureKey of Object.keys(this.doneScenarios)) {
-      const feature = this.doneScenarios[featureKey];
-
-      for (const scenario of feature) {
-        if (!scenarios[featureKey]) {
-          scenarios[featureKey] = [];
-        }
-
-        let report;
-
-        try {
-          report = JSON.parse(JSON.stringify(scenario.report));
-        } catch (e) {
-          console.log(e);
-        }
-
-        scenarios[featureKey].push({
-          scenarioId: scenario._id,
-          classpath: scenario.classpath,
-          scenarioLine: scenario.scenarioLine,
-          scenarioName: scenario.scenarioName,
-          featureName: scenario.featureName,
-          result: scenario.result,
-          report,
-          executor: scenario.executor
-        });
-      }
-    }
-    const history = new SessionHistory({
-      details: {
-        ...this.getSessionDetails(),
-        endDate: new Date()
-      },
-      briefStatus: this.getBriefStatus()
-    });
-
-    const scenariosHistory = new HistoryScenarios({
-      scenarios
-    });
-
-    scenariosHistory.save((saveScenariosErr) => {
-      if (saveScenariosErr) {
-        log.error(saveScenariosErr);
-      } else {
-        history.historyScenarios = scenariosHistory._id;
-        history.save((saveHistoryErr) => {
-          if (saveHistoryErr) {
-            log.error(saveHistoryErr);
-          } else {
-            log.info(`History for session ${this.sessionId} successfully saved.`);
-          }
-        });
-      }
+    return new Promise((resolve) => {
+      SessionHistory.update({ sessionId: this.sessionId }, {
+        details: {
+          ...this.getSessionDetails(),
+          endDate: new Date()
+        },
+        briefStatus: this.getBriefStatus()
+      }).exec()
+      .then(() => {
+        resolve();
+      })
     });
   }
 }
@@ -476,44 +531,46 @@ Session.trackSessionStateFunc = function trackSessionStateFunc(session) {
     let haveReports = false;
 
     if (session.getScenariosCount(Session.STATE_DONE) > 0) {
-      session.saveHistory();
-      log.debug(`${session.sessionId}: Tests execution done. Preparing reports...`);
-      for (const key of Object.keys(session.doneScenarios)) {
-        let combinedReport = null;
+      session.saveHistory().then(() => {
+        log.debug(`${session.sessionId}: Tests execution done. Preparing reports...`);
+        for (const key of Object.keys(session.doneScenarios)) {
+          let combinedReport = null;
 
-        const featureReports = session.doneScenarios[key];
+          const featureReports = session.doneScenarios[key];
 
-        for (const scenario of featureReports) {
-          if (!scenario.report) {
-            log.error(`No report for scenario ${scenario.getScenarioId()} saved`);
-            continue;
-          }
-          const report = scenario.report[0];
-
-          if (report) {
-            if (!combinedReport) {
-              combinedReport = scenario.report;
-            } else {
-              combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+          for (const scenario of featureReports) {
+            if (!scenario.report) {
+              log.error(`No report for scenario ${scenario.getScenarioId()} saved`);
+              continue;
             }
-          } else {
-            log.error(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
+            const report = scenario.report[0];
+
+            if (report) {
+              if (!combinedReport) {
+                combinedReport = scenario.report;
+              } else {
+                combinedReport[0].elements = combinedReport[0].elements.concat(report.elements);
+              }
+            } else {
+              log.error(`Report for scenario ${scenario.getScenarioId()} was not sent correctly`);
+            }
+          }
+          const filename = key.replace(/\W/g, '');
+
+          if (combinedReport) {
+            fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(combinedReport, null, 4));
+            haveReports = true;
           }
         }
-        const filename = key.replace(/\W/g, '');
-
-        if (combinedReport) {
-          fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(combinedReport, null, 4));
-          haveReports = true;
-        }
-      }
+        util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
+      });
     }
 
     if (!haveReports) {
       fs.writeFileSync(`${session.sessionPath}/dummy.txt`, '', {});
+      util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     }
 
-    util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
     clearInterval(session.trackSessionState);
     session.sessionState = Session.NOT_FOUND;
     log.debug(`${session.sessionId}: Session stopped`);
