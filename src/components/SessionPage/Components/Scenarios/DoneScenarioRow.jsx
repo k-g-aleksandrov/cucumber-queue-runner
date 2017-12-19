@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+// import ReactTooltip from 'react-tooltip';
+
 import Report from 'components/SessionPage/Components/Report/Report';
 
 const propTypes = {
@@ -11,7 +14,7 @@ const propTypes = {
   history: PropTypes.bool
 };
 
-class SessionHistoryScenarioRow extends Component {
+class DoneScenarioRow extends Component {
 
   constructor(props) {
     super(props);
@@ -66,10 +69,15 @@ class SessionHistoryScenarioRow extends Component {
 
     let report;
     let feature;
+    let tags;
 
     if (this.props.history) {
       feature = scenario.report[0].name;
       report = scenario.report;
+      if (scenario.report[0].elements[0].tags) {
+        tags = scenario.report[0].elements[0].tags.map((tag) => tag.name)
+          .filter((tag) => tag.startsWith('@id'));
+      }
     } else {
       feature = scenario.featureName;
       report = this.state.report;
@@ -86,6 +94,25 @@ class SessionHistoryScenarioRow extends Component {
             {
               <span>
                 {scenario.scenarioName}&nbsp;
+                {tags && tags.length > 0 &&
+                  <span className='report-test-id' onClick={(e) => e.stopPropagation()}>
+                    [&nbsp;{tags.map((tag, i) => {
+                      return (
+                        <span key={i}>
+                          <CopyToClipboard text={tag}>
+                            <a onCopy={(e) => {
+                              console.log('tag');
+                              e.stopPropagation();
+                            }}
+                            >
+                              {tag}&nbsp;
+                            </a>
+                          </CopyToClipboard>
+                        </span>
+                      );
+                    })}]&nbsp;
+                  </span>
+                }
                 <span className='report-scenario-line'>line {scenario.scenarioLine}</span>
               </span>
             }
@@ -93,7 +120,7 @@ class SessionHistoryScenarioRow extends Component {
           <span style={{ float: 'right' }}>{scenario.executor}</span>
         </div>
         <div style={{ marginLeft: '32px' }}>
-          {this.state.reportDisplayed && <Report report={report}/>}
+          {this.state.reportDisplayed && <Report report={report} sessionId={sessionId}/>}
         </div>
         <hr style={{ margin: '0px', marginLeft: '16px', borderTop: '1px solid #eeeeee' }}/>
       </div>
@@ -101,6 +128,6 @@ class SessionHistoryScenarioRow extends Component {
   }
 }
 
-SessionHistoryScenarioRow.propTypes = propTypes;
+DoneScenarioRow.propTypes = propTypes;
 
-export default connect()(SessionHistoryScenarioRow);
+export default connect()(DoneScenarioRow);

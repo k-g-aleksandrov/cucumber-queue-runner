@@ -4,6 +4,7 @@ const initialState = {
 
 export default function (state = initialState, action) {
   let newState;
+  let features = [];
 
   switch (action.type) {
     case 'sessions/REQUEST':
@@ -63,6 +64,30 @@ export default function (state = initialState, action) {
         }
       };
     case 'session/history/FAILURE':
+      return Object.assign({}, state);
+    case 'session/history/features/REQUEST':
+      return Object.assign({}, state);
+    case 'session/history/features/SUCCESS':
+      features = [];
+
+      state.sessionsHistory[action.meta.sessionId].features.map((feature) => {
+        if (feature._id === action.meta.featureId) {
+          features.push(action.payload);
+        } else {
+          features.push(feature);
+        }
+      });
+      return {
+        ...state,
+        sessionsHistory: {
+          ...state.sessionsHistory,
+          [action.meta.sessionId]: {
+            ...state.sessionsHistory[action.meta.sessionId],
+            features
+          }
+        }
+      };
+    case 'session/history/features/FAILURE':
       return Object.assign({}, state);
     default:
       return state;

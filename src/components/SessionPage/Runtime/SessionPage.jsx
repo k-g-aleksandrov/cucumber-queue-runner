@@ -137,10 +137,16 @@ class SessionPage extends Component {
                         />
                       </Tab.Pane>
                       <Tab.Pane eventKey='progress'>
-                        <InProgressScenariosTable scenarios={session.status.inProgress} />
+                        <InProgressScenariosTable
+                          scenarios={session.status.inProgress}
+                          sessionId={sessionId}
+                        />
                       </Tab.Pane>
                       <Tab.Pane eventKey='done'>
-                        <DoneScenariosTable sessionScenarios={session.status.done} sessionId={sessionId} />
+                        <DoneScenariosTable
+                          sessionScenarios={session.status.done}
+                          sessionId={sessionId}
+                        />
                       </Tab.Pane>
                       <Tab.Pane eventKey='failed'>
                         <FailedScenariosTable

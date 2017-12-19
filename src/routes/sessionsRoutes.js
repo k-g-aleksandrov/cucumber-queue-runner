@@ -6,7 +6,7 @@ import fs from 'fs';
 import Session from 'libs/session';
 import util from 'libs/util';
 
-import { SessionHistory } from 'libs/mongoose';
+import { SessionHistory, HistoryFeature } from 'libs/mongoose';
 
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
@@ -46,6 +46,9 @@ router.get('/history', (req, res) => {
     .then((sessions) => {
       responseObject.sessionsHistory = {};
       for (const session of sessions) {
+        if (!session.details || !session.details.sessionId) {
+          continue;
+        }
         responseObject.sessionsHistory[session.details.sessionId] = session;
       }
       res.send(responseObject);
@@ -58,7 +61,7 @@ router.get('/history', (req, res) => {
 router.get('/history/:sessionId', (req, res) => {
   const sessionId = req.params.sessionId;
   const responseObject = {};
-  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId }).populate('historyScenarios');
+  const histories = SessionHistory.findOne({ 'details.sessionId': sessionId }).populate('features');
 
   histories.exec()
     .then((history) => {
@@ -70,6 +73,18 @@ router.get('/history/:sessionId', (req, res) => {
     });
 });
 
+/**
+ * @api {get} /sessions/history/:sessionId/percent Get Passed Scenarios Percent
+ *
+ * @apiDescription  Get percent of passed scenarios
+ *
+ * @apiName Get Passed Scenarios Percent
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {number} percent
+ */
 router.get('/history/:sessionId/percent', (req, res) => {
   const sessionId = req.params.sessionId;
   const history = SessionHistory.findOne({ 'details.sessionId': sessionId });
@@ -88,6 +103,49 @@ router.get('/history/:sessionId/percent', (req, res) => {
     });
 });
 
+/**
+ * @api {get} /history/:sessionId/features/:featureId Get Passed Scenarios Percent
+ *
+ * @apiDescription  Get feature history
+ *
+ * @apiName Get Feature History
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ * @apiParam {string} featureId feature ID
+ *
+ * @apiSuccess (Success-Response) {object}  payload response payload
+ */
+router.get('/history/:sessionId/features/:featureId', (req, res) => {
+  const featureId = req.params.featureId;
+  const feature = HistoryFeature.findOne({ _id: featureId }).populate('scenarios');
+
+  feature.exec()
+    .then((featureObject) => {
+      if (!featureObject) {
+        return res.status(404).send({ 'error': 'no history for feature' });
+      }
+
+      res.send(featureObject);
+    })
+    .catch((err) => {
+      log.error(err);
+      return res.status(404).send({ 'error': `no history for feature ${featureId}` });
+    });
+});
+
+/**
+ * @api {get} /sessions/history/:sessionId/zip Get Session ZIP Report
+ *
+ * @apiDescription  Download ZIP archive with cucumber reports
+ *
+ * @apiName Get Session ZIP Report
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {file} reports.zip
+ */
 router.get('/history/:sessionId/zip', (req, res) => {
   const file = `${process.env.NODE_PATH}/../public/results/${req.params.sessionId}/reports.zip`;
 
@@ -115,6 +173,26 @@ router.get('/history/:sessionId/zip', (req, res) => {
   });
 });
 
+/**
+ * @api {get} /sessions/start?project=:project&scope=:scope&tags=:tags&[link=:link] Start New Session
+ *
+ * @apiDescription  Take next scenario from queue
+ *
+ * @apiName Start New Session
+ * @apiGroup sessions
+ *
+ * @apiParam {string} project project ID
+ * @apiParam {string} scope One of the 5 options:
+ *                            full - all project scenarios
+ *                            dev - new scenarios that did not pass more than 5 executions in a row
+ *                            daily - non-development scenarios that passed last execution
+ *                            failed - non-development scenarios that did not pass last execution
+ *                            custom - scenarios marked with tag specified in tags param (project tag will be ignored)
+ * @apiParam {string} tags tag
+ * @apiParam {string} link test link
+ *
+ * @apiSuccess (Success-Response) {string}  sessionId
+ */
 router.get('/start', (req, res) => {
   if (!req.query.project) {
     return res.status(400).send({ error: 'no_project_specified' });
@@ -149,7 +227,16 @@ router.get('/start', (req, res) => {
 });
 
 /**
- * take next scenario from session queue
+ * @api {get} /sessions/:sessionId/next Get Next Scenario
+ *
+ * @apiDescription  Take next scenario from queue
+ *
+ * @apiName Get Next Scenario
+ * @apiGroup sessions
+ *
+ * @apiSuccess (Success-Response) {object}  payload response payload
+ * @apiSuccess (Success-Response) {string}  payload.state session state
+ * @apiSuccess (Success-Response) {object}  payload.scenario next scenario details
  */
 router.get('/:sessionId/next', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
@@ -179,7 +266,14 @@ router.get('/:sessionId/next', (req, res) => {
 });
 
 /**
- * either receive link for reports or get message that session is still in progress
+ * @api {get} /sessions/:sessionId/state Get Session State
+ *
+ * @apiDescription  Get session state
+ *
+ * @apiName Get Session State
+ * @apiGroup sessions
+ *
+ * @apiSuccess (Success-Response) {string}  either session state or relative reports.zip path
  */
 router.get('/:sessionId/state', extendTimeout, (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
@@ -197,6 +291,19 @@ router.get('/:sessionId/state', extendTimeout, (req, res) => {
   }
 });
 
+/**
+ * @api {post} /sessions/:sessionId/reports Save Scenario Report
+ *
+ * @apiDescription  Save scenario report
+ *
+ * @apiName Save Scenario Report
+ * @apiGroup sessions
+ *
+ * @apiParam {string} id scenarioId
+ * @apiParam {object} report Cucumber JSON report
+ *
+ * @apiSuccess (Success-Response) {object}  report scenario report
+ */
 router.post('/:sessionId/reports', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
   const scenarioId = req.body.id;
@@ -218,6 +325,69 @@ router.post('/:sessionId/reports', (req, res) => {
   res.send({ scenario: { scenarioId }, success: true });
 });
 
+/**
+ * @api {get} /sessions/:sessionId/runtime/:scenarioId Get Scenario Runtime Report
+ *
+ * @apiDescription  Get scenario runtime report
+ *
+ * @apiName Get Scenario Runtime Report
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId  session ID
+ * @apiParam {string} scenarioId scenario ID
+ *
+ * @apiSuccess (Success-Response) {object}  report scenario report
+ */
+router.get('/:sessionId/runtime/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+  const scenario = currentSession.inProgressScenarios[req.params.scenarioId];
+
+  if (scenario) {
+    return res.send({ report: scenario.report });
+  }
+
+  res.send({
+    session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
+  });
+});
+
+/**
+ * @api {post} /sessions/:sessionId/runtime/:scenarioId Update Scenario Runtime Report
+ *
+ * @apiDescription  Update scenario runtime report
+ *
+ * @apiName Update Scenario Runtime Report
+ * @apiGroup sessions
+ *
+ * @apiParamExample {json} Request-Example:
+ * TODO: add request example
+ *
+ * @apiSuccess (Success-Response) {object}  report scenario report
+ */
+router.post('/:sessionId/runtime/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+
+  const scenario = currentSession.inProgressScenarios[req.params.scenarioId];
+
+  if (scenario) {
+    currentSession.updateScenarioRuntimeReport(req.params.scenarioId, req.body);
+
+    return res.send({ report: scenario.runtime });
+  }
+
+  res.send({
+    session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
+  });
+});
+
 router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 
@@ -236,6 +406,19 @@ router.get('/:sessionId/reports/:scenarioId', (req, res) => {
   });
 });
 
+/**
+ * @api {post} /sessions/:sessionId/skip/:scenarioId Skip Scenario
+ *
+ * @apiDescription  Skip session scenario
+ *
+ * @apiName Skip Scenario
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId  session ID
+ * @apiParam {string} scenarioId scenario ID
+ *
+ * @apiSuccess (Success-Response) {bool}  success true
+ */
 router.post('/:sessionId/skip/:scenarioId', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 
@@ -260,6 +443,18 @@ router.get('/:sessionId', (req, res) => {
   }
 });
 
+/**
+ * @api {post} /sessions/:sessionId/finish Finish Session
+ *
+ * @apiDescription  Remove all in progress or not started scenarios and save executed scenarios history
+ *
+ * @apiName Finish Session
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {bool}  success true
+ */
 router.post('/:sessionId/finish', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 
@@ -270,6 +465,18 @@ router.post('/:sessionId/finish', (req, res) => {
   res.send({ success: true });
 });
 
+/**
+ * @api {delete} /sessions/:sessionId Delete Session
+ *
+ * @apiDescription  Delete session without saving it's results
+ *
+ * @apiName Delete Session
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {bool}  success true
+ */
 router.delete('/:sessionId', (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 

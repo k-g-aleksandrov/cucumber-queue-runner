@@ -8,7 +8,8 @@ import Col from 'react-bootstrap/lib/Col';
 import ReportStep from './ReportStep';
 
 const propTypes = {
-  report: PropTypes.any
+  report: PropTypes.any,
+  sessionId: PropTypes.any
 };
 
 function Report(props) {
@@ -16,7 +17,7 @@ function Report(props) {
     return null;
   }
 
-  const report = props.report;
+  const { report, sessionId } = props;
 
   return (
     <Row>
@@ -36,18 +37,34 @@ function Report(props) {
             >
               {rep.elements[scenarioElementsIndex].before
                 && rep.elements[scenarioElementsIndex].before.map((before, j) => {
-                  return <ReportStep key={j} type='before' step={before} />;
+                  return (
+                    <ReportStep key={j} type='before' step={before}
+                      sessionId={sessionId}
+                    />
+                  );
                 })
               }
               {haveBackground && rep.elements[0].steps.map((step, j) => {
-                return <ReportStep key={j} type='step' step={step} />;
+                return (
+                  <ReportStep key={j} type='step' step={step}
+                    sessionId={sessionId}
+                  />
+                );
               })}
               {rep.elements[scenarioElementsIndex].steps.map((step, j) => {
-                return <ReportStep key={j} type='step' step={step} />;
+                return (
+                  <ReportStep key={j} type='step' step={step}
+                    sessionId={sessionId}
+                  />
+                );
               })}
               {rep.elements[scenarioElementsIndex].after
                 && rep.elements[scenarioElementsIndex].after.map((after, j) => {
-                  return <ReportStep key={j} type='after' step={after} />;
+                  return (
+                    <ReportStep key={j} type='after' step={after}
+                      sessionId={sessionId}
+                    />
+                  );
                 })
               }
             </Grid>

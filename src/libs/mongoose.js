@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import config from 'config';
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
 
@@ -6,10 +7,10 @@ mongoose.Promise = Promise;
 
 const dockerAddr = (process.env.MONGO_PORT_27017_TCP_ADDR)
   ? process.env.MONGO_PORT_27017_TCP_ADDR
-  : '192.168.99.100';
+  : config.get('db:server');
 const dockerPort = (process.env.MONGO_PORT_27017_TCP_PORT)
   ? process.env.MONGO_PORT_27017_TCP_PORT
-  : '27017';
+  : config.get('db:port');
 
 function connectWithRetry() {
   const mongoUrl = `mongodb://${dockerAddr}:${dockerPort}/cucumber-queue-db`;
@@ -77,14 +78,13 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
 };
 
 const SessionHistorySchema = new Schema({
+  sessionId: String,
   details: Schema.Types.Mixed,
   briefStatus: Schema.Types.Mixed,
-  scenarios: Schema.Types.Mixed,
-  historyScenarios: { type: Schema.Types.ObjectId, ref: 'HistoryScenarios' }
-});
-
-const HistoryScenariosSchema = new Schema({
-  scenarios: Schema.Types.Mixed
+  features: [ { type: Schema.Types.ObjectId, ref: 'HistoryFeature' } ],
+  tags: [ { type: Schema.Types.ObjectId, ref: 'HistoryTag' } ],
+  failures: [ { type: Schema.Types.ObjectId, ref: 'HistoryScenario' } ],
+  scenarios: [ { type: Schema.Types.ObjectId, ref: 'HistoryScenario' } ]
 });
 
 const TestRailMapSchema = new Schema({
@@ -109,11 +109,41 @@ DashboardCoverageSchema.index({
   project: 1
 }, { unique: true });
 
+// New History
+
+const HistoryFeatureSchema = new Schema({
+  sessionId: String,
+  name: String,
+  passedScenarios: Number,
+  failedScenarios: Number,
+  skippedScenarios: Number,
+  unstableScenarios: Number,
+  passedSteps: Number,
+  failedSteps: Number,
+  skippedSteps: Number,
+  pendingSteps: Number,
+  undefinedSteps: Number,
+  scenarios: [ { type: Schema.Types.ObjectId, ref: 'HistoryScenario' } ]
+});
+
+const HistoryTagSchema = new Schema({
+  sessionId: String,
+  name: String,
+  scenarios: [ { type: Schema.Types.ObjectId, ref: 'HistoryScenario' } ]
+});
+
+const HistoryScenarioSchema = new Schema({
+  scenario: Schema.Types.Mixed
+});
+
+
 const Scenario = mongoose.model('Scenario', ScenarioSchema);
 const Project = mongoose.model('Project', ProjectSchema);
 const Execution = mongoose.model('Execution', ExecutionSchema);
 const SessionHistory = mongoose.model('SessionHistory', SessionHistorySchema);
-const HistoryScenarios = mongoose.model('HistoryScenarios', HistoryScenariosSchema);
+const HistoryFeature = mongoose.model('HistoryFeature', HistoryFeatureSchema);
+const HistoryTag = mongoose.model('HistoryTag', HistoryTagSchema);
+const HistoryScenario = mongoose.model('HistoryScenario', HistoryScenarioSchema);
 const TestRailMap = mongoose.model('TestRailMap', TestRailMapSchema);
 const DashboardCoverage = mongoose.model('DashboardCoverage', DashboardCoverageSchema);
 
@@ -121,6 +151,8 @@ module.exports.Scenario = Scenario;
 module.exports.Project = Project;
 module.exports.Execution = Execution;
 module.exports.SessionHistory = SessionHistory;
-module.exports.HistoryScenarios = HistoryScenarios;
+module.exports.HistoryFeature = HistoryFeature;
+module.exports.HistoryTag = HistoryTag;
+module.exports.HistoryScenario = HistoryScenario;
 module.exports.TestRailMap = TestRailMap;
 module.exports.DashboardCoverage = DashboardCoverage;

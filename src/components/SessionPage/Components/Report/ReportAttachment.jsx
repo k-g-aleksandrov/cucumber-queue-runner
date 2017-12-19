@@ -5,7 +5,8 @@ import base64 from 'base-64';
 
 const propTypes = {
   embedding: PropTypes.any,
-  index: PropTypes.any
+  index: PropTypes.any,
+  sessionId: PropTypes.any
 };
 
 class ReportAttachment extends Component {
@@ -25,18 +26,36 @@ class ReportAttachment extends Component {
   }
 
   render() {
-    const { embedding, index } = this.props;
+    const { embedding, index, sessionId } = this.props;
+
+    console.log(`ReportAttachment ${sessionId}`);
 
     if (this.state.extend) {
       return (
         <pre onClick={this.handleShowAttachment} style={{ backgroundColor: '#eee', border: '1px solid #ccc' }}>
           {base64.decode(embedding.data)}
+          {embedding.mime_type === 'image/url' &&
+            <center>
+              <a
+                onClick={(e) => e.stopPropagation()}
+                href={`/results/${sessionId}/${base64.decode(embedding.data)}`}
+                target='_blank'
+              >
+                <img
+                  style={{ margin: '8px' }}
+                  width='600'
+                  src={`/results/${sessionId}/${base64.decode(embedding.data)}`}
+                  target='_blank'
+                />
+              </a>
+            </center>
+          }
         </pre>
       );
     }
     return (
       <pre style={{ backgroundColor: '#eee', border: '1px solid #ccc' }}>
-        <a onClick={this.handleShowAttachment}>Attachment {index + 1} ({embedding.mime_type})</a>
+        <a style={{ cursor: 'pointer' }} onClick={this.handleShowAttachment}>Attachment {index + 1} ({embedding.mime_type})</a>
       </pre>
     );
   }

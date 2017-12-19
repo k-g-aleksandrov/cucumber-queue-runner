@@ -5,7 +5,8 @@ import DoneScenariosTable from 'components/SessionPage/Components/Scenarios/Done
 import FailedScenariosTable from 'components/SessionPage/Components/Scenarios/FailedScenariosTable';
 
 const propTypes = {
-  sessionScenarios: PropTypes.any
+  sessionScenarios: PropTypes.any,
+  sessionId: PropTypes.any
 };
 
 class ScenariosHistoryTable extends Component {
@@ -40,7 +41,7 @@ class ScenariosHistoryTable extends Component {
   }
 
   render() {
-    const { sessionScenarios } = this.props;
+    const { sessionScenarios, sessionId } = this.props;
 
     return (
       <div className='info-panel'>
@@ -53,9 +54,19 @@ class ScenariosHistoryTable extends Component {
         </div>
         <hr/>
         {this.state.onlyFailed
-          && <FailedScenariosTable sessionScenarios={this.filterFailedScenarios(sessionScenarios)} history />}
+          && (
+            <FailedScenariosTable sessionId={sessionId}
+              sessionScenarios={this.filterFailedScenarios(sessionScenarios)} history
+            />
+          )
+        }
         {!this.state.onlyFailed
-          && <DoneScenariosTable sessionScenarios={sessionScenarios} history />}
+          && (
+            <DoneScenariosTable sessionId={sessionId}
+              sessionScenarios={sessionScenarios} history
+            />
+          )
+        }
       </div>
     );
   }

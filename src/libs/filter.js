@@ -141,6 +141,12 @@ function checkProjectTag(scenario, projectTag) {
   return scenario.tags && scenario.tags.indexOf(projectTag) >= 0;
 }
 
+module.exports.hasFilter = function hasFilter(filter) {
+  return [
+    'full', 'dev', 'failed', 'muted', 'daily', 'disabled', 'custom'
+  ].includes(filter);
+};
+
 module.exports.getFilterByName = function getFilterByName(filter) {
   if (filter === 'full') {
     return this.full;

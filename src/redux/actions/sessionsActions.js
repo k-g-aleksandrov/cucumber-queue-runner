@@ -77,3 +77,17 @@ export function fetchSessionHistory(sessionId) {
     }
   };
 }
+
+export function fetchSessionFeatureHistory(sessionId, featureId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/sessions/history/${sessionId}/features/${featureId}`,
+      method: 'GET',
+      types: [
+        { type: 'session/history/features/REQUEST', meta: { sessionId, featureId } },
+        { type: 'session/history/features/SUCCESS', meta: { sessionId, featureId  } },
+        { type: 'session/history/features/FAILURE', meta: { sessionId, featureId  } }
+      ]
+    }
+  };
+}
