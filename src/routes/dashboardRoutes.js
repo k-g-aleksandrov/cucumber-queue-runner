@@ -9,10 +9,16 @@ router.get('/', (req, res) => {
 });
 
 router.get('/coverage', (req, res) => {
-  DashboardDataCollector.instance.getExecutionStatus();
   DashboardDataCollector.instance.getCoverage()
     .then((coverage) => {
       res.send({ coverage });
+    });
+});
+
+router.get('/environment', (req, res) => {
+  DashboardDataCollector.instance.getEnvironment()
+    .then((environment) => {
+      res.send({ environment });
     });
 });
 

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Carousel } from 'react-responsive-carousel';
+
+import CoveragePage from './CoveragePage';
+import EnvironmentPage from './EnvironmentPage';
 
 import './DashboardPage.css';
-
-import CoveragePage from './Coverage/CoveragePage';
 
 const propTypes = {
 };
@@ -16,11 +16,10 @@ class DashboardPage extends Component {
 // interval={5000} infiniteLoop autoPlay
   render() {
     return (
-      <Carousel showThumbs={false} showStatus={false}>
+      <div>
         <CoveragePage />
-        <div><div style={{ width: '100vw', height: '100vh', backgroundColor: 'black' }}>Test 2</div></div>
-        <div><div style={{ width: '100vw', height: '100vh', backgroundColor: 'black' }}>Test 3</div></div>
-      </Carousel>
+        <EnvironmentPage />
+      </div>
     );
   }
 }

@@ -9,5 +9,6 @@
     "login": "<LOGIN>",
     "password": "<PASSWORD>",
     "projectId": 1
-  }
+  },
+  "seleniumHubUrl": "<URL>"
 }

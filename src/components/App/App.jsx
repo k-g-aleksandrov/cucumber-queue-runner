@@ -15,13 +15,13 @@ const propTypes = {
 
 class App extends Component {
   render() {
-    if (this.props.children.type.name === 'DashboardPage') {
+/*    if (this.props.children.type.name === 'DashboardPage') {
       return (
         <div style={{ padding: 0, overflow: 'hidden' }}>
           {this.props.children}
         </div>
       );
-    }
+    }*/
     return (
       <div style={{ padding: 0 }}>
         <Navbar inverse>

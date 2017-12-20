@@ -20,9 +20,9 @@ const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('public'));
-}
+// if (process.env.NODE_ENV === 'production') {
+app.use(express.static('public'));
+// }
 
 app.use(favicon(path.join('public', 'favicon.ico')));
 
@@ -74,7 +74,7 @@ function renderHTML(componentHTML, initialState) {
       </head>
       <body>
         <div id="react-view">${componentHTML}</div>
-        <div id="dev-tools"></div>
+        <!--<div id="dev-tools"></div>-->
         <script type="application/javascript" src="${assetUrl}/assets/bundle${clientSuffix}.js"></script>
       </body>
     </html>
