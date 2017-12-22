@@ -109,6 +109,17 @@ DashboardCoverageSchema.index({
   project: 1
 }, { unique: true });
 
+const DashboardSeleniumNodeSchema = new Schema({
+  url: Schema.Types.Mixed,
+  version: String,
+  platform: String,
+  browsers: Schema.Types.Mixed,
+  system: {
+    space: Schema.Types.Mixed,
+    outdatedPackages: Schema.Types.Mixed
+  }
+});
+
 // New History
 
 const HistoryFeatureSchema = new Schema({
@@ -146,6 +157,7 @@ const HistoryTag = mongoose.model('HistoryTag', HistoryTagSchema);
 const HistoryScenario = mongoose.model('HistoryScenario', HistoryScenarioSchema);
 const TestRailMap = mongoose.model('TestRailMap', TestRailMapSchema);
 const DashboardCoverage = mongoose.model('DashboardCoverage', DashboardCoverageSchema);
+const DashboardSeleniumNode = mongoose.model('DashboardSeleniumNode', DashboardSeleniumNodeSchema);
 
 module.exports.Scenario = Scenario;
 module.exports.Project = Project;
@@ -156,3 +168,4 @@ module.exports.HistoryTag = HistoryTag;
 module.exports.HistoryScenario = HistoryScenario;
 module.exports.TestRailMap = TestRailMap;
 module.exports.DashboardCoverage = DashboardCoverage;
+module.exports.DashboardSeleniumNode = DashboardSeleniumNode;
