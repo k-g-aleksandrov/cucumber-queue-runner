@@ -1,6 +1,6 @@
 const initialState = {
   coverage: [],
-  environment: {},
+  environment: [],
   error: null
 };
 
@@ -29,7 +29,7 @@ export default function (state = initialState, action) {
     case 'dashboard/environment/SUCCESS':
       return {
         ...state,
-        environment: action.payload
+        environment: action.payload.environment
       };
     case 'dashboard/environment/FAILURE':
       return {
