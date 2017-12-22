@@ -9,3 +9,13 @@ export function fetchCoverage() {
     }
   };
 }
+
+export function fetchEnvironment() {
+  return {
+    [CALL_API]: {
+      endpoint: '/api/dashboard/environment',
+      method: 'GET',
+      types: ['dashboard/environment/REQUEST', 'dashboard/environment/SUCCESS', 'dashboard/environment/FAILURE']
+    }
+  };
+}

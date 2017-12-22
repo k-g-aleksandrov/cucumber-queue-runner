@@ -1,5 +1,6 @@
 const initialState = {
   coverage: [],
+  environment: {},
   error: null
 };
 
@@ -16,6 +17,21 @@ export default function (state = initialState, action) {
         coverage: action.payload.coverage
       };
     case 'dashboard/coverage/FAILURE':
+      return {
+        ...state,
+        error: action.payload.error
+      };
+    case 'dashboard/environment/REQUEST':
+      return {
+        ...state,
+        error: null
+      };
+    case 'dashboard/environment/SUCCESS':
+      return {
+        ...state,
+        environment: action.payload
+      };
+    case 'dashboard/environment/FAILURE':
       return {
         ...state,
         error: action.payload.error

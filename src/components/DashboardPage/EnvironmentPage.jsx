@@ -16,15 +16,7 @@ class EnvironmentPage extends Component {
   }
 
   componentDidMount() {
-    this.fetchCoverage();
-  }
-
-  getEnvironmentData(coverage) {
-    const total = coverage.blocked + coverage.failed + coverage.passed + coverage.retest + coverage.untested;
-    let percent = ((total - coverage.untested) / total) * 100;
-
-    percent = Math.round(percent * 10) / 10;
-    return { percent, covered: total - coverage.untested, total };
+    this.fetchEnvironment();
   }
 
   fetchEnvironment() {
@@ -33,8 +25,6 @@ class EnvironmentPage extends Component {
 
   render() {
     const { environment } = this.props;
-
-    console.log(environment);
 
     if (!environment) {
       return (
@@ -45,29 +35,9 @@ class EnvironmentPage extends Component {
       );
     }
 
-    const coverageData = {};
-
-    for (const projectKey of Object.keys(environment)) {
-      const project = environment[projectKey];
-
-      for (const projectEntry of project) {
-        if (!coverageData[projectKey]) {
-          coverageData[projectKey] = [];
-        }
-        coverageData[projectKey].push(this.getCoverageData(projectEntry));
-      }
-    }
-
     return (
       <div>
         <h1>Environment</h1>
-        {Object.keys(coverageData).map((key, index) => {
-          return (
-            <span key={index}>
-              {key}: {coverageData[key][0].percent}% ({coverageData[key][0].covered} of {coverageData[key][0].total})
-            </span>
-          );
-        })}
       </div>
     );
   }
