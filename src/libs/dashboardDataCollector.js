@@ -27,6 +27,7 @@ class DashboardDataCollector {
 
   trackEnvironment() {
     this.fetchSeleniumNodes();
+//    this.fetchJenkinsSlaves();
   }
 
   fetchSeleniumNodes() {
@@ -40,6 +41,80 @@ class DashboardDataCollector {
       })
       .then((nodes) => {
         nodes.forEach((node) => {
+          const resultNode = Object.assign({}, node, { system: {} });
+
+          let nodeCredentials;
+
+          this.fetchSeleniumNodeCredentials(node)
+            .then((credentials) => {
+              nodeCredentials = credentials;
+              resultNode.platform = credentials.PLATFORM;
+            })
+            .then(() => {
+              return this.fetchDiskSpace(node, nodeCredentials);
+            })
+            .then((space) => {
+              resultNode.system.space = space;
+            })
+            .then(() => {
+              return this.fetchChromeVersion(node, nodeCredentials);
+            })
+            .then((chrome) => {
+              if (resultNode.browsers.chrome) {
+                resultNode.browsers.chrome.browserVersion = chrome;
+              }
+            })
+            .then(() => {
+              return this.fetchChromeDriverVersion(node, nodeCredentials);
+            })
+            .then((chromeDriver) => {
+              if (resultNode.browsers.chrome) {
+                resultNode.browsers.chrome.driverVersion = chromeDriver;
+              }
+            })
+            .then(() => {
+              return this.fetchFirefoxVersion(node, nodeCredentials);
+            })
+            .then((firefox) => {
+              if (resultNode.browsers.firefox) {
+                resultNode.browsers.firefox.browserVersion = firefox;
+              }
+            })
+            .then(() => {
+              return this.fetchOutdatedPackages(node, nodeCredentials);
+            })
+            .then((packages) => {
+              resultNode.system.outdatedPackages = packages;
+              const nodeDbObject = new DashboardSeleniumNode(resultNode);
+
+              console.log(nodeDbObject.url.ip);
+              nodeDbObject.save();
+            })
+            .then(() => {
+              console.log('saved');
+            });
+        });
+      });
+  }
+
+  fetchJenkinsSlaves() {
+    DashboardSeleniumNode.remove({}).exec();
+    fetch(`${DashboardDataCollector.JENKINS_URL}/computer/api/json?depth=1`, {
+      method: 'get',
+      headers: {
+        'Authorization': `Basic ${DashboardDataCollector.JENKINS_AUTH}`
+      }
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        console.log(JSON.stringify(json));
+        return json.computer;
+      })
+      .then((nodes) => {
+        nodes.forEach((node) => {
+          console.log(JSON.stringify(node));
           const resultNode = Object.assign({}, node, { system: {} });
 
           let nodeCredentials;
@@ -354,5 +429,9 @@ DashboardDataCollector.AUTHORIZATION_STRING =
 DashboardDataCollector.PROJECT_ID = config.get('testrail:projectId');
 
 DashboardDataCollector.SELENIUM_HUB_URL = config.get('seleniumHubUrl');
+
+DashboardDataCollector.JENKINS_URL = config.get('jenkins:url');
+DashboardDataCollector.JENKINS_AUTH =
+        new Buffer(`${config.get('jenkins:login')}:${config.get('jenkins:token')}`).toString('base64');
 
 export default DashboardDataCollector;

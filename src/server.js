@@ -74,7 +74,7 @@ function renderHTML(componentHTML, initialState) {
       </head>
       <body>
         <div id="react-view">${componentHTML}</div>
-        <!--<div id="dev-tools"></div>-->
+        <div id="dev-tools"></div>
         <script type="application/javascript" src="${assetUrl}/assets/bundle${clientSuffix}.js"></script>
       </body>
     </html>

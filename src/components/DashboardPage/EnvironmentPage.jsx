@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
+import MachineDetailsPage from './Environment/MachineDetailsPage';
+
 import { fetchEnvironment } from 'redux/actions/dashboardActions';
 
 const propTypes = {
@@ -36,9 +38,11 @@ class EnvironmentPage extends Component {
     }
 
     return (
-      <div>
+      <div className='info-panel'>
         <h1>Environment</h1>
-        <div>{JSON.stringify(environment)}</div>
+        {environment.map((machine, i) => {
+          return <MachineDetailsPage key={i} machine={machine}/>;
+        })}
       </div>
     );
   }

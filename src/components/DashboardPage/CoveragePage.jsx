@@ -59,7 +59,7 @@ class CoveragePage extends Component {
     }
 
     return (
-      <div>
+      <div className='info-panel'>
         <h1>Tests Coverage</h1>
         {Object.keys(coverageData).map((key, index) => {
           return (
