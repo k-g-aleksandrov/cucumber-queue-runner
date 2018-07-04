@@ -59,9 +59,9 @@ class SessionStatusChart extends Component {
       return null;
     }
     return (
-      <div className='info-panel' style={{ height: '250px' }}>
+      <div className='info-panel'>
         <span style={{ width: '100%', textAlign: 'center' }}><h2>Execution Status</h2></span>
-        <Doughnut data={chartData} height={80}/>
+        <Doughnut data={chartData} height={100}/>
       </div>
     );
   }

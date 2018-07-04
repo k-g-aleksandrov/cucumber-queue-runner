@@ -20,7 +20,7 @@ class QueueScenariosTable extends Component {
       <div>
         {scenarios.map((scenario, i) => {
           return (
-            <div key={i} className='queue-scenario-line'>
+            <div key={i} className='queue-scenario-line' style={{ cursor: 'pointer' }}>
               <div style={{ width: '100%', overflow: 'hidden' }}>
                 <span style={{ fontWeight: 'bold' }}>{scenario.featureName}:&nbsp;</span>
                 {scenario.scenarioName}&nbsp;

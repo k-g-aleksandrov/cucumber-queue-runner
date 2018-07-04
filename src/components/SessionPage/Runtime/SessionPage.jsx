@@ -104,7 +104,7 @@ class SessionPage extends Component {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col sm={12}>
             <div className='info-panel'>
               <h2>Scenarios</h2>
               <Tabs

@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import Row from 'react-bootstrap/lib/Row';
+import Col from 'react-bootstrap/lib/Col';
+
 import moment from 'moment';
 
 const propTypes = {
@@ -21,60 +24,62 @@ class SessionDetails extends Component {
 
     if (this.props.history) {
       timeAndDuration.push(
-        <div className='details-row' key='finished'>
-          <span className='details-row-title'>Finished</span>
-          <div className='details-row-value'>
+        <Row className='details-row' key='finished'>
+          <Col md={3} className='details-row-title'>Finished</Col>
+          <Col md={9} className='details-row-value'>
             {moment(new Date()).to(moment(sessionDetails.endDate))}
             <br/>
             <span style={{ fontSize: '90%', fontStyle: 'italic' }}>
               {moment(sessionDetails.startDate).format('DD.MM.YYYY HH:mm:ss')}
             </span>
-          </div>
-        </div>
+          </Col>
+        </Row>
       );
       timeAndDuration.push(
-        <div className='details-row' key='duration'>
-          <span className='details-row-title'>Duration</span>
-          <div className='details-row-value'>
+        <Row className='details-row' key='duration'>
+          <Col md={3} className='details-row-title'>Duration</Col>
+          <Col md={9} className='details-row-value'>
             {moment(sessionDetails.endDate).to(moment(sessionDetails.startDate), true)}
-          </div>
-        </div>
+          </Col>
+        </Row>
       );
     } else {
       timeAndDuration.push(
-        <div className='details-row' key='started'>
-          <span className='details-row-title'>Started</span>
-          <div className='details-row-value'>
+        <Row className='details-row' key='started'>
+          <Col md={3} className='details-row-title'>Started</Col>
+          <Col md={9} className='details-row-value'>
             {moment(new Date()).to(moment(sessionDetails.startDate))}
             <br/>
             <span style={{ fontSize: '90%', fontStyle: 'italic' }}>
               {moment(sessionDetails.startDate).format('DD.MM.YYYY HH:mm:ss')}
             </span>
-          </div>
-        </div>
+          </Col>
+        </Row>
       );
     }
 
     return (
-      <div className='info-panel' style={{ height: '250px' }}>
-        <h2>Session Details</h2>
-        <div className='details-row'>
-          <span className='details-row-title'>Project</span>
-          <span className='details-row-value'>{sessionDetails.project}</span>
-        </div>
+      <div className='info-panel'>
+        <Row><Col md={12}><h3>Session Details</h3></Col></Row>
+        <Row className='details-row'>
+          <Col md={3} className='details-row-title'>Project</Col>
+          <Col md={9} className='details-row-value'>{sessionDetails.project}</Col>
+        </Row>
         {timeAndDuration}
-        <div className='details-row'>
-          <span className='details-row-title'>Session ID</span>
-          <span className='details-row-value'>{sessionDetails.sessionId}</span>
-        </div>
-        <div className='details-row'>
-          <span className='details-row-title'>Scope</span>
-          <div className='details-row-value'>
-            {sessionDetails.scenariosFilter.scope === 'custom'
-              ? `custom - ${sessionDetails.scenariosFilter.tags.join(', ')}`
-              : sessionDetails.scenariosFilter.scope}
-          </div>
-        </div>
+        <Row className='details-row'>
+          <Col md={3} className='details-row-title'>Session ID</Col>
+          <Col md={9} className='details-row-value'>{sessionDetails.sessionId}</Col>
+        </Row>
+        <Row className='details-row'>
+          <Col md={3} className='details-row-title'>Scope</Col>
+          <Col md={9} className='details-row-value'>
+            {sessionDetails.scenariosFilter.scope}
+            {sessionDetails.scenariosFilter.scope === 'custom' && <br/>}
+            {sessionDetails.scenariosFilter.scope === 'custom' &&
+              <i>{sessionDetails.scenariosFilter.tags.join(', ')}</i>
+            }
+          </Col>
+        </Row>
       </div>
     );
   }

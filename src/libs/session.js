@@ -32,6 +32,15 @@ class Session {
           }
           filter.applyCustomFilterToProject(project, scenariosFilter.tags, (err, prj, scenarios) => {
             this.finalizeSessionInit(err, scenarios, iterations);
+            return new SessionHistory({
+              sessionId, details: {}, briefStatus: {}, features: [], tags: [], failures: [], scenarios: []
+            }).save()
+            .then(() => {
+              log.debug(`successfully prepared session history object for session ${sessionId}`);
+            })
+            .catch((saveErr) => {
+              log.error(saveErr);
+            });
           });
         } else {
           Scenario.find({
@@ -68,6 +77,7 @@ class Session {
       });
     });
   }
+
   finalizeSessionInit(err, scenarios, iterations) {
     if (err) {
       this.sessionState = Session.STATE_ERROR;
