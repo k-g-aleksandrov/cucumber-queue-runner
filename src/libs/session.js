@@ -259,7 +259,6 @@ class Session {
 
   stopSession() {
     this.scenarios = [];
-    this.inProgressScenarios = {};
   }
 
   storeExecutionResult(scenario) {
