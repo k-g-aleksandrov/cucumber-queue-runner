@@ -23,6 +23,8 @@ class Session {
 
     this.timeout = timeout;
 
+    this.stopping = false;
+
     this.makeSessionDirectory()
       .then(() => {
         if (!filter.hasFilter(scenariosFilter.scope)) {
@@ -260,10 +262,20 @@ class Session {
   }
 
   stopSession() {
-    for (let i = 0; i < this.scenarios.length; i++) {
-      this.scenarios[i].result = 'skipped';
-      this.pushScenarioToDone(this.scenarios[i]);
-      this.scenarios.splice(i, 1);
+    if (!this.stopping) {
+      var next = this.scenarios.shift();
+
+      while (next) {
+        next.result = 'skipped';
+        this.pushScenarioToDone(next);
+
+        next = this.scenarios.shift();
+      }
+
+      this.stopping = true;
+    } else {
+//      this.scenarios = [];
+//      this.inProgressScenarios = {};
     }
   }
 
@@ -610,11 +622,20 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
     const requestDate = inProgressScenario.startTimestamp;
 
     if ((Date.now() - requestDate) / 1000 > session.timeout) {
-      log.error(
-        `${session.sessionId}: scenario execution were not finished in ${session.timeout} seconds.
-         Moving it back to scenarios queue`);
-      session.scenarios.push(inProgressScenario);
-      delete session.inProgressScenarios[scenarioId];
+      if (!session.stopping) {
+        log.error(
+          `${session.sessionId}: scenario execution were not finished in ${session.timeout} seconds.
+          Moving it back to scenarios queue`);
+          session.scenarios.push(inProgressScenario);
+          delete session.inProgressScenarios[scenarioId];
+      } else {
+        log.error(
+          `${session.sessionId}: scenario execution were not finished in ${session.timeout} seconds.
+          Session is stopped, skip scenario`);
+          inProgressScenario.result = 'skipped';
+          session.pushScenarioToDone(inProgressScenario);
+          delete session.inProgressScenarios[scenarioId];
+      }
     }
   }
 };
