@@ -8,7 +8,7 @@ import { Execution, SessionHistory, Scenario, HistoryScenario, HistoryTag, Histo
 import filter from 'libs/filter';
 
 class Session {
-  constructor(sessionId, project, scenariosFilter, iterations) {
+  constructor(sessionId, project, scenariosFilter, iterations, timeout) {
     this.sessionId = sessionId;
     this.project = project;
     this.scenariosFilter = scenariosFilter;
@@ -20,6 +20,8 @@ class Session {
     this.sessionPath = `public/results/${this.sessionId}`;
 
     this.iterations = iterations;
+
+    this.timeout = timeout;
 
     this.makeSessionDirectory()
       .then(() => {
@@ -258,8 +260,11 @@ class Session {
   }
 
   stopSession() {
-    this.scenarios = [];
-    this.inProgressScenarios = {};
+    for (let i = 0; i < this.scenarios.length; i++) {
+      this.scenarios[i].result = 'skipped';
+      this.pushScenarioToDone(this.scenarios[i]);
+      this.scenarios.splice(i, 1);
+    }
   }
 
   storeExecutionResult(scenario) {
@@ -604,9 +609,9 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
     const inProgressScenario = session.inProgressScenarios[scenarioId];
     const requestDate = inProgressScenario.startTimestamp;
 
-    if ((Date.now() - requestDate) / 1000 > Session.SCENARIO_TIMEOUT_SEC) {
+    if ((Date.now() - requestDate) / 1000 > session.timeout) {
       log.error(
-        `${session.sessionId}: scenario execution were not finished in ${Session.SCENARIO_TIMEOUT_SEC} seconds.
+        `${session.sessionId}: scenario execution were not finished in ${session.timeout} seconds.
          Moving it back to scenarios queue`);
       session.scenarios.push(inProgressScenario);
       delete session.inProgressScenarios[scenarioId];
@@ -615,8 +620,6 @@ Session.trackInProgressTimeoutFunc = function trackInProgressTimeoutFunc(session
 };
 
 Session.sessions = {};
-
-Session.SCENARIO_TIMEOUT_SEC = 1800;
 
 Session.STATE_QUEUE = 'queue';
 Session.STATE_IN_PROGRESS = 'in progress';

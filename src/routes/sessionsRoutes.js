@@ -216,7 +216,10 @@ router.get('/start', (req, res) => {
   const project = req.query.project;
 
   const iterations = req.query.iterations ? req.query.iterations : 1;
-  const newSession = new Session(util.generateGUID(), project, filter, iterations);
+
+  const timeout = req.query.timeout ? req.query.timeout : 1800;
+
+  const newSession = new Session(util.generateGUID(), project, filter, iterations, timeout);
 
   if (req.query.link) {
     newSession.jenkinsLink = req.query.link;
