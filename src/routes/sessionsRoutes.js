@@ -6,7 +6,9 @@ import fs from 'fs';
 import Session from 'libs/session';
 import util from 'libs/util';
 
-import { SessionHistory, HistoryFeature } from 'libs/mongoose';
+import mongoose from 'mongoose';
+
+import { SessionHistory, HistoryFeature, HistoryScenario } from 'libs/mongoose';
 
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
@@ -391,19 +393,22 @@ router.post('/:sessionId/runtime/:scenarioId', (req, res) => {
   });
 });
 
-router.get('/:sessionId/reports/:scenarioId', (req, res) => {
+router.get('/:sessionId/reports/:scenarioId', async (req, res) => {
   const currentSession = Session.sessions[req.params.sessionId];
 
   if (!currentSession) {
     return res.send(getSessionLostObject(req.params.sessionId));
   }
-  for (const feature of Object.keys(currentSession.doneScenarios)) {
-    for (const scenario of currentSession.doneScenarios[feature]) {
-      if (req.params.scenarioId === scenario._id.toString()) {
-        return res.send({ report: scenario.report });
-      }
+  try {
+    const scenario = await HistoryScenario.findOne({'scenario.scenarioId': mongoose.Types.ObjectId(req.params.scenarioId)}).exec();
+
+    if (scenario && scenario.scenario) {
+      return res.send({report: scenario.scenario.report});
     }
+  } catch (err) {
+    return res.status(400).send({err: err});
   }
+
   res.send({
     session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
   });
