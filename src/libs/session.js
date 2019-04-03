@@ -356,6 +356,7 @@ class Session {
     }
     this.doneScenarios[featureName].push(this.inProgressScenarios[scenarioId]);
     const historyScenario = new HistoryScenario({
+      sessionId: this.sessionId,
       scenario: {
         scenarioId: sc._id,
         classpath: sc.classpath,
@@ -391,10 +392,10 @@ class Session {
       };
 
       await this.pushHistoryFeature(sc.featureName, savedScenario._id, increment);
+      await this.pushHistoryTags(scenarioReport, savedScenario._id);
 
       delete this.inProgressScenarios[scenarioId];
       return cb();
-      this.pushHistoryTags(scenarioReport, savedScenario._id);
     } catch(saveHistoryScenarioErr) {
       log.error(saveHistoryScenarioErr);
     }
@@ -405,7 +406,7 @@ class Session {
       const historyTag = await HistoryFeature.findOneAndUpdate(
         { sessionId: this.sessionId, name: featureName },
         { sessionId: this.sessionId, name: featureName, $push: { scenarios: savedScenarioId }, $inc: increment },
-        { upsert: true, new: true }
+        { setDefaultsOnInsert: true, upsert: true, new: true }
       ).exec();
 
       const result = await SessionHistory.findOneAndUpdate(
@@ -437,7 +438,7 @@ class Session {
       HistoryTag.findOneAndUpdate(
         { sessionId: this.sessionId, name: tag.name },
         { sessionId: this.sessionId, name: tag.name, $push: { scenarios: savedScenarioId } },
-        { upsert: true, new: true }
+        { setDefaultsOnInsert: true, upsert: true, new: true }
       ).exec().then((historyTag) => {
         return SessionHistory.findOneAndUpdate(
           { sessionId: this.sessionId },
@@ -571,12 +572,12 @@ Session.trackSessionStateFunc = async function trackSessionStateFunc(session) {
       if (!haveReports) {
         fs.writeFileSync(`${session.sessionPath}/dummy.txt`, '', {});
       }
-      util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
-
-      clearInterval(session.trackSessionState);
-      session.sessionState = Session.NOT_FOUND;
-      log.debug(`${session.sessionId}: Session stopped`);
     }
+    util.zipDirectory(session.sessionPath, `${session.sessionPath}/reports.zip`);
+
+    clearInterval(session.trackSessionState);
+    session.sessionState = Session.NOT_FOUND;
+    log.debug(`${session.sessionId}: Session stopped`);
   }
 };
 

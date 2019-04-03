@@ -8,7 +8,7 @@ import util from 'libs/util';
 
 import mongoose from 'mongoose';
 
-import { SessionHistory, HistoryFeature, HistoryScenario } from 'libs/mongoose';
+import { SessionHistory, HistoryFeature, HistoryScenario, HistoryTag } from 'libs/mongoose';
 
 import logTemplate from 'libs/log';
 const log = logTemplate(module);
@@ -59,6 +59,69 @@ router.get('/history', (req, res) => {
       log.error(err);
     });
 });
+
+router.delete('/history', async (req, res) => {
+  var result
+  try {
+    result = await HistoryScenario.deleteMany({ 'timestamp' : null }).exec()
+    var deletedScenariosCount = result.deletedCount
+    result = await HistoryScenario.deleteMany({ 'timestamp' : {
+      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+    }})
+    deletedScenariosCount += result.deletedCount
+  } catch (err) {
+    return res.status(400).send({err: err})
+  }
+
+  try {
+    result = await HistoryFeature.deleteMany({ 'timestamp' : null }).exec()
+    var deletedFeaturesCount = result.deletedCount
+    result = await HistoryFeature.deleteMany({ 'timestamp' : {
+      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+    }})
+    deletedFeaturesCount = result.deletedCount
+  } catch (err) {
+    return res.status(400).send({err: err})
+  }
+
+  try {
+    result = await HistoryTag.deleteMany({ 'timestamp' : null }).exec()
+    var deletedTagsCount = result.deletedCount
+    result = await HistoryTag.deleteMany({ 'timestamp' : {
+      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+    }})
+    deletedTagsCount += result.deletedCount
+  } catch (err) {
+    return res.status(400).send({err: err})
+  }
+
+  try {
+    result = await SessionHistory.deleteMany({ 'timestamp' : null }).exec()
+    var deletedSessionsCount = result.deletedCount
+    result = await SessionHistory.deleteMany({ 'timestamp' : {
+      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+    }})
+    deletedSessionsCount += result.deletedCount
+  } catch (err) {
+    return res.status(400).send({err: err})
+  }
+
+  var scenariosCount = await HistoryScenario.count().exec()
+  var tagsCount = await HistoryTag.count().exec()
+  var featuresCount = await HistoryFeature.count().exec()
+  var sessionsCount = await SessionHistory.count().exec()
+
+  return res.send({
+    deletedScenariosCount,
+    deletedFeaturesCount,
+    deletedTagsCount,
+    deletedSessionsCount,
+    scenariosCount,
+    tagsCount,
+    featuresCount,
+    sessionsCount
+  })
+})
 
 router.get('/history/:sessionId', (req, res) => {
   const sessionId = req.params.sessionId;

@@ -79,6 +79,7 @@ ScenarioSchema.methods.getScenarioId = function getScenarioId() {
 
 const SessionHistorySchema = new Schema({
   sessionId: String,
+  timestamp: { type: Date, default: Date.now },
   details: Schema.Types.Mixed,
   briefStatus: Schema.Types.Mixed,
   features: [ { type: Schema.Types.ObjectId, ref: 'HistoryFeature' } ],
@@ -98,6 +99,7 @@ const TestRailMapSchema = new Schema({
 
 const HistoryFeatureSchema = new Schema({
   sessionId: String,
+  timestamp: { type: Date, default: Date.now },
   name: String,
   passedScenarios: Number,
   failedScenarios: Number,
@@ -113,11 +115,14 @@ const HistoryFeatureSchema = new Schema({
 
 const HistoryTagSchema = new Schema({
   sessionId: String,
+  timestamp: { type: Date, default: Date.now },
   name: String,
   scenarios: [ { type: Schema.Types.ObjectId, ref: 'HistoryScenario' } ]
 });
 
 const HistoryScenarioSchema = new Schema({
+  sessionId: String,
+  timestamp: { type: Date, default: Date.now },
   scenario: Schema.Types.Mixed
 });
 
