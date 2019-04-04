@@ -588,13 +588,18 @@ Session.dumpSessionHistoryToFile = async function dumpSessionHistoryToFile(sessi
 
   await features.forEach(async (featureObject) => {
     if (featureObject) {
-      let reports = featureObject.scenarios.flatMap((scenario) => {
-        return scenario.scenario.report;
+      var combinedReport;
+      featureObject.scenarios.forEach((scenario) => {
+        if (!combinedReport) {
+          combinedReport = scenario.scenario.report;
+        } else {
+          combinedReport[0].elements.push(scenario.scenario.report[0].elements[0]);
+        }
       });
-      const filename = featureObject.name.replace(/\W/g, '');
+      if (combinedReport) {
+        const filename = featureObject.name.replace(/\W/g, '');
 
-      if (reports) {
-        fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(reports, null, 4));
+        fs.writeFileSync(`${session.sessionPath}/${filename}.json`, JSON.stringify(combinedReport, null, 4));
         haveReports = true;
       }
     }
