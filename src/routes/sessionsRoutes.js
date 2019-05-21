@@ -66,7 +66,7 @@ router.delete('/history', async (req, res) => {
     result = await HistoryScenario.deleteMany({ 'timestamp' : null }).exec()
     var deletedScenariosCount = result.deletedCount
     result = await HistoryScenario.deleteMany({ 'timestamp' : {
-      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+      $lt: new Date(new Date().getTime() - 10 * 24 * 60 * 60 * 1000)
     }})
     deletedScenariosCount += result.deletedCount
   } catch (err) {
@@ -77,7 +77,7 @@ router.delete('/history', async (req, res) => {
     result = await HistoryFeature.deleteMany({ 'timestamp' : null }).exec()
     var deletedFeaturesCount = result.deletedCount
     result = await HistoryFeature.deleteMany({ 'timestamp' : {
-      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+      $lt: new Date(new Date().getTime() - 10 * 24 * 60 * 60 * 1000)
     }})
     deletedFeaturesCount = result.deletedCount
   } catch (err) {
@@ -88,7 +88,7 @@ router.delete('/history', async (req, res) => {
     result = await HistoryTag.deleteMany({ 'timestamp' : null }).exec()
     var deletedTagsCount = result.deletedCount
     result = await HistoryTag.deleteMany({ 'timestamp' : {
-      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+      $lt: new Date(new Date().getTime() - 10 * 24 * 60 * 60 * 1000)
     }})
     deletedTagsCount += result.deletedCount
   } catch (err) {
@@ -99,7 +99,7 @@ router.delete('/history', async (req, res) => {
     result = await SessionHistory.deleteMany({ 'timestamp' : null }).exec()
     var deletedSessionsCount = result.deletedCount
     result = await SessionHistory.deleteMany({ 'timestamp' : {
-      $lt: new Date(new Date().getTime() - 30 * 24 * 60 * 60 * 1000)
+      $lt: new Date(new Date().getTime() - 10 * 24 * 60 * 60 * 1000)
     }})
     deletedSessionsCount += result.deletedCount
   } catch (err) {
