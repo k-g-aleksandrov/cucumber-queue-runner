@@ -345,7 +345,7 @@ router.get('/:project/scenarios', (req, res) => {
     const scenariosFilter = filter.getFilterByName(filterParam);
 
     scenariosScopes[scenariosFilter.id] = { filter: scenariosFilter, scenarios: [] };
-    /* let */const query = Scenario.find({
+    const query = Scenario.find({
       project: req.params.project,
       filters: {
         $in: [

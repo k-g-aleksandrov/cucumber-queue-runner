@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 
 import './ScenarioRow.css';
 
+import Button from 'react-bootstrap-button-loader';
+
 const propTypes = {
   index: PropTypes.any,
   scenario: PropTypes.any.isRequired
@@ -14,8 +16,51 @@ class ScenarioRow extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      open: true
+      open: true,
+      newNoteButtonOpacity: 0.1
     };
+
+    this.renderNote = this.renderNote.bind(this);
+    this.handleShowNewNoteButton = this.handleShowNewNoteButton.bind(this);
+    this.handleHideNewNoteButton = this.handleHideNewNoteButton.bind(this);
+  }
+
+  handleShowNewNoteButton() {
+    this.setState({
+      newNoteButtonOpacity: 1
+    });
+  }
+  handleHideNewNoteButton() {
+    this.setState({
+      newNoteButtonOpacity: 0.1
+    });
+  }
+
+  renderNote(scenario) {
+    if (scenario.note) {
+      return (<td style={{ textAlign: 'right', verticalAlign: 'center', whitespace: 'nowrap' }}>
+        <span>
+          <Button bsStyle='info' style={{ marginRight: '8px' }}><span className='glyphicon glyphicon-plus'/></Button>
+        </span>
+      </td>);
+    }
+    if (!scenario.note) {
+      return (
+        <td
+          style={{ textAlign: 'right', verticalAlign: 'center', whitespace: 'nowrap' }}
+          onMouseEnter={this.handleShowNewNoteButton}
+          onMouseLeave={this.handleHideNewNoteButton}
+        >
+          <Button
+            bsStyle='info'
+            disabled={!scenario.note}
+            style={{ opacity: this.state.newNoteButtonOpacity }}
+          >
+            <span className='glyphicon glyphicon-tasks'/>
+          </Button>
+        </td>
+      );
+    }
   }
 
   render() {
@@ -44,6 +89,7 @@ class ScenarioRow extends Component {
             })
             : null}
         </td>
+        {this.renderNote(scenario)}
       </tr>
     );
   }

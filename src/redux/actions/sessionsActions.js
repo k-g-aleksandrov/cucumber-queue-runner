@@ -34,6 +34,16 @@ export function finishSession(sessionId) {
   };
 }
 
+export function forceFinishSession(sessionId) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/sessions/${sessionId}/forceFinish`,
+      method: 'POST',
+      types: ['session/forceFinish/REQUEST', 'session/forceFinish/SUCCESS', 'session/forceFinish/FAILURE']
+    }
+  };
+}
+
 export function deleteSession(sessionId) {
   return {
     [CALL_API]: {

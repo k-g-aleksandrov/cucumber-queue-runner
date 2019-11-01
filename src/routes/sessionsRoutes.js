@@ -537,6 +537,28 @@ router.post('/:sessionId/finish', (req, res) => {
 });
 
 /**
+ * @api {post} /sessions/:sessionId/forceFinish Force Finish Session (Skip In Progress scenarios)
+ *
+ * @apiDescription  Remove all in progress or not started scenarios and save executed scenarios history
+ *
+ * @apiName Finish Session
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId session ID
+ *
+ * @apiSuccess (Success-Response) {bool}  success true
+ */
+router.post('/:sessionId/forceFinish', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+  currentSession.stopSession(true);
+  res.send({ success: true });
+});
+
+/**
  * @api {delete} /sessions/:sessionId Delete Session
  *
  * @apiDescription  Delete session without saving it's results

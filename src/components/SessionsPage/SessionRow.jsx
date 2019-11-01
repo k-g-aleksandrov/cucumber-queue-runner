@@ -8,7 +8,7 @@ import { Link } from 'react-router';
 
 import Button from 'react-bootstrap-button-loader';
 
-import { finishSession, deleteSession } from 'redux/actions/sessionsActions';
+import { finishSession, forceFinishSession, deleteSession } from 'redux/actions/sessionsActions';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -21,7 +21,9 @@ class SessionRow extends Component {
     super(props);
 
     this.state = {
-      isFinishing: false
+      isFinishing: false,
+      finishButtonLabel: 'Finish',
+      finishButtonEnabled: true
     };
 
     this.handleFinishSessionClick = this.handleFinishSessionClick.bind(this);
@@ -29,13 +31,29 @@ class SessionRow extends Component {
   }
 
   handleFinishSessionClick() {
-    this.setState({ isFinishing: true });
-    this.props.dispatch(finishSession(this.props.session.details.sessionId));
+    if (!this.state.isFinishing
+      && window.confirm('Are you sure you wish to finish session (skip progress scenarios if required)?')) {
+      this.setState({
+        isFinishing: true,
+        finishButtonLabel: 'Skip In Progress',
+        finishButtonEnabled: true
+      });
+      this.props.dispatch(finishSession(this.props.session.details.sessionId));
+    } else if (window.confirm('Are you sure you wish to remove in progress scenarios?')) {
+      this.setState({
+        isFinishing: true,
+        finishButtonLabel: 'Finished',
+        finishButtonEnabled: false
+      });
+      this.props.dispatch(forceFinishSession(this.props.session.details.sessionId));
+    }
   }
 
   handleDeleteSessionClick() {
-    this.setState({ isFinishing: true });
-    this.props.dispatch(deleteSession(this.props.session.details.sessionId));
+    if (window.confirm('Are you sure you wish to delete session (Jenkins job should be manually stopped)?')) {
+      this.setState({ isFinishing: true });
+      this.props.dispatch(deleteSession(this.props.session.details.sessionId));
+    }
   }
 
   render() {
@@ -84,7 +102,11 @@ class SessionRow extends Component {
                   :<font color='gray'>{briefStatus.skippedCount}</font>)</span>
         </td>
         <td style={{ textAlign: 'center', verticalAlign: 'center' }} rowSpan='2'>
-          <Button bsStyle='primary' onClick={this.handleFinishSessionClick}>Finish</Button>
+          <Button
+            bsStyle='primary'
+            disabled={!this.state.finishButtonEnabled}
+            onClick={this.handleFinishSessionClick}
+          >{this.state.finishButtonLabel}</Button>
           <span>&nbsp;</span>
           <Button bsStyle='danger' onClick={this.handleDeleteSessionClick}>Remove</Button>
         </td>

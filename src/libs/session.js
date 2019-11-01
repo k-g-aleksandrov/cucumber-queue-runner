@@ -261,8 +261,8 @@ class Session {
     }
   }
 
-  stopSession() {
-    if (!this.stopping) {
+  stopSession(force) {
+    if (!force) {
       var next = this.scenarios.shift();
 
       while (next) {
@@ -274,8 +274,8 @@ class Session {
 
       this.stopping = true;
     } else {
-//      this.scenarios = [];
-//      this.inProgressScenarios = {};
+      this.scenarios = [];
+      this.inProgressScenarios = {};
     }
   }
 

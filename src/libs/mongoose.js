@@ -63,7 +63,8 @@ const ScenarioSchema = new Schema({
   scenarioLine: Number,
   tags: Array,
   executions: Array,
-  filters: Array
+  filters: Array,
+  note: Schema.Types.Mixed
 });
 
 ScenarioSchema.index({
