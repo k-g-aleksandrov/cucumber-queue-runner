@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import { Modal } from 'react-bootstrap';
+
 import './ScenarioRow.css';
 
 import Button from 'react-bootstrap-button-loader';
@@ -16,24 +18,32 @@ class ScenarioRow extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      open: true,
-      newNoteButtonOpacity: 0.1
+      newNoteButtonEnabled: false,
+      newNoteButtonOpacity: 0.1,
+      showNewNoteModal: false
     };
 
     this.renderNote = this.renderNote.bind(this);
     this.handleShowNewNoteButton = this.handleShowNewNoteButton.bind(this);
     this.handleHideNewNoteButton = this.handleHideNewNoteButton.bind(this);
+    this.handleShowNoteModal = this.handleShowNoteModal.bind(this);
   }
 
   handleShowNewNoteButton() {
     this.setState({
+      newNoteButtonEnabled: true,
       newNoteButtonOpacity: 1
     });
   }
   handleHideNewNoteButton() {
     this.setState({
+      newNoteButtonEnabled: false,
       newNoteButtonOpacity: 0.1
     });
+  }
+
+  handleShowNoteModal() {
+    this.setState({ showNewNoteModal: true });
   }
 
   renderNote(scenario) {
@@ -53,8 +63,9 @@ class ScenarioRow extends Component {
         >
           <Button
             bsStyle='info'
-            disabled={!scenario.note}
+            disabled={!this.state.newNoteButtonEnabled}
             style={{ opacity: this.state.newNoteButtonOpacity }}
+            onClick={this.handleShowNoteModal}
           >
             <span className='glyphicon glyphicon-tasks'/>
           </Button>
@@ -90,6 +101,7 @@ class ScenarioRow extends Component {
             : null}
         </td>
         {this.renderNote(scenario)}
+        {this.state.showNewNoteModal && <Modal open>test</Modal>}
       </tr>
     );
   }
