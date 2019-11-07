@@ -40,7 +40,7 @@ class ScopeDetails extends Component {
     const title = (
       <thead style={{ backgroundColor: '#d9edf7', borderColor: '#bce8f1' }}>
         <tr>
-          <th colSpan='4'>
+          <th colSpan='3'>
             <span
               style={{ fontSize: 'small', fontWeight: 'normal', fontStyle: 'italic' }}
             >{filter.description}</span>
