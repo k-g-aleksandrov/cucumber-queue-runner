@@ -353,7 +353,6 @@ router.get('/:project/scenarios', (req, res) => {
         ]
       }
     }, {
-      _id: 0,
       __v: 0,
       classpath: 0,
       exampleParams: 0,
@@ -364,9 +363,6 @@ router.get('/:project/scenarios', (req, res) => {
       'executions.executor': 0
     });
 
-//    if (offset) {
-//      query = query.limit(100).skip(Number(offset));
-//    }
     query.exec()
       .then((scenarios) => {
         scenariosScopes[filterParam].scenarios = scenarios;
@@ -376,6 +372,21 @@ router.get('/:project/scenarios', (req, res) => {
         console.log(err);
       });
   }
+});
+
+router.post('/scenarios/:scenarioId/note', (req, res) => {
+  const scenarioId = req.params.scenarioId;
+  const note = req.body.note;
+
+  Scenario.update(
+    { _id: scenarioId },
+    { note },
+    { safe: true, upsert: true },
+    (err) => {
+      if (err) throw err;
+    }
+  );
+  res.status(200).send({"success": true});
 });
 
 /**

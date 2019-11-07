@@ -44,6 +44,18 @@ export function fetchProjectScenarios(projectId, scope, offset) {
   };
 }
 
+export function updateScenarioNote(scenarioId, note) {
+  return {
+    [CALL_API]: {
+      endpoint: `/api/projects/scenarios/${scenarioId}/note`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note }),
+      types: ['project/scenario/note/REQUEST', 'project/scenario/note/SUCCESS', 'project/scenario/note/FAILURE']
+    }
+  };
+}
+
 export function scanProject(projectId) {
   return {
     [CALL_API]: {
