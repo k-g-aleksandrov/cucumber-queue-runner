@@ -334,6 +334,37 @@ router.get('/:sessionId/next', (req, res) => {
 });
 
 /**
+ * @api {post} /sessions/:sessionId/return/:scenarioId Return Scenario to queue
+ *
+ * @apiDescription  Return session scenario to queue
+ *
+ * @apiName Return Scenario
+ * @apiGroup sessions
+ *
+ * @apiParam {string} sessionId  session ID
+ * @apiParam {string} scenarioId scenario ID
+ *
+ * @apiSuccess (Success-Response) {bool}  success true
+ */
+router.get('/:sessionId/return/:scenarioId', (req, res) => {
+  const currentSession = Session.sessions[req.params.sessionId];
+
+  if (!currentSession) {
+    return res.send(getSessionLostObject(req.params.sessionId));
+  }
+  const scenario = currentSession.inProgressScenarios[req.params.scenarioId];
+
+  if (!scenario) {
+    res.send({
+      session: { sessionId: req.params.sessionId, scenario: req.params.scenarioId }, error: 'no_scenario'
+    });
+  }
+
+  currentSession.pushScenarioToQueue(scenario);
+  res.send({ success: true });
+});
+
+/**
  * @api {get} /sessions/:sessionId/state Get Session State
  *
  * @apiDescription  Get session state
