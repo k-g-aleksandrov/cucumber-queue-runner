@@ -26,7 +26,8 @@ class ReportAttachment extends Component {
   }
 
   render() {
-    const { embedding, sessionId } = this.props;
+    const { embedding, index, sessionId } = this.props;
+    const attachmentTitle = (embedding.name) ? embedding.name : `Attachment ${index + 1} (${embedding.mime_type})`;
 
     console.log(`ReportAttachment ${sessionId}`);
 
@@ -55,7 +56,7 @@ class ReportAttachment extends Component {
     }
     return (
       <pre style={{ backgroundColor: '#eee', border: '1px solid #ccc' }}>
-        <a style={{ cursor: 'pointer' }} onClick={this.handleShowAttachment}>{embedding.name}</a>
+        <a style={{ cursor: 'pointer' }} onClick={this.handleShowAttachment}>{attachmentTitle}</a>
       </pre>
     );
   }
