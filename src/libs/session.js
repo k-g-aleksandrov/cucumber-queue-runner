@@ -251,6 +251,17 @@ class Session {
     this.doneScenarios[scenario.featureName].push(scenario);
   }
 
+  pushScenarioToQueue(scenario) {
+    const isScenarioExists = this.scenarios.some(el => scenario._id === el._id);
+
+    if (isScenarioExists) {
+      log.info(`Scenario '${scenario._id}' already exists in queue`);
+    } else {
+      this.scenarios.push(scenario);
+      delete this.inProgressScenarios[scenario._id];
+    }
+  }
+
   skipScenario(scenarioId) {
     for (let i = 0; i < this.scenarios.length; i++) {
       if (this.scenarios[i]._id.toString() === scenarioId) {
